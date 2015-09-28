@@ -3,4 +3,9 @@
 
     <string name="hello_world">Hello Whirpool Maps!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_calendar">CalendarActivity</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_account_picker">AccountPickerActivity</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
