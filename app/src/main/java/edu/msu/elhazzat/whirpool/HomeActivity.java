@@ -1,7 +1,7 @@
 package edu.msu.elhazzat.whirpool;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.HttpTransport;
@@ -35,6 +35,8 @@ public class HomeActivity extends AccountServiceActivity implements AsyncCalenda
             chooseAccount();
         }
         new AsyncCalendarEventReader(this, mService, new DateTime(System.currentTimeMillis()), 10).execute();
+        Intent i = new Intent(this, MapsActivity.class);
+        startActivity(i);
     }
 
     private void buildCalendarService() {
@@ -45,8 +47,6 @@ public class HomeActivity extends AccountServiceActivity implements AsyncCalenda
     }
 
     public void onAsyncFinished(List<Event> events) {
-        for(Event event: events) {
-            Toast.makeText(this, event.getSummary(), Toast.LENGTH_LONG).show();
-        }
+
     }
 }

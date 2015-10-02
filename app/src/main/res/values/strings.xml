@@ -8,4 +8,6 @@
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_activity_account_picker">AccountPickerActivity</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_google_api_client">GoogleApiClientActivity</string>
+    <string name="title_activity_location_fragment">LocationFragmentActivity</string>
 </resources>

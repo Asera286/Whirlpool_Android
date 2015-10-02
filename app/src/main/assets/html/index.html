@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta  name="viewport"  content="initial-scale=1.0,  user-scalable=no"  />
+    <script  type="text/javascript"  src="http://maps.micello.com/webmap/v0/micellomap.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+    <script  type="text/javascript">
+
+        function getBuildGeoVec() {
+
+        }
+
+        var key = "fbb1dbd1-771e-48d4-a651-d0542c4d5c28"; // this is YOUR api key!
+
+        var mapControl;
+
+        function  mapInit() {
+            mapControl = new micello.maps.MapControl('mapElement');
+            var mapDataObject = mapControl.getMapData();
+
+            mapControl.onMapClick = onMapClick;
+            mapDataObject.mapChanged = buildDirectory;
+            mapDataObject.loadCommunity(32);
+        }
+
+        function onMapClick (mx, my, clicked) {
+            if (clicked) {
+                mapControl.defaultSelectAction(clicked);
+            }
+        }
+
+
+    function main() {
+        micello.maps.init (key, mapInit);
+    }
+
+</script>
+    <style type ="text/css"> #mapElement {width:400px; height:400px;} </style>
+</head>
+<body>
+
+<div id="mapElement"></div>
+
+</body>
+</html>
