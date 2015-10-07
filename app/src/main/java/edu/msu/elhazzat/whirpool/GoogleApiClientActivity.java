@@ -21,12 +21,12 @@ abstract class GoogleApiClientActivity extends FragmentActivity implements
     protected boolean mIsResolving = false;
     protected boolean mShouldResolve = false;
 
+    public abstract void buildGoogleApiClient();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
-
-    public abstract void buildGoogleApiClient();
 
     @Override
     protected void onStart() {

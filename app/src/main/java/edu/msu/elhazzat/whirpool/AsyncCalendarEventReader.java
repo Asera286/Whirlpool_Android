@@ -12,6 +12,12 @@ import java.io.IOException;
 import java.util.List;
 
 public class AsyncCalendarEventReader extends AsyncTask<Void, Void, List<Event>> {
+
+    public interface AsyncCalendarReaderDelegate {
+        public void onAsyncFinished(List<com.google.api.services.calendar.model.Event> events);
+        public void handleUserRecoverableAuthIOException(UserRecoverableAuthIOException e);
+    }
+
     private AsyncCalendarReaderDelegate mDelegate;
     private com.google.api.services.calendar.Calendar mCalendarService;
     private DateTime mTime;
@@ -32,20 +38,26 @@ public class AsyncCalendarEventReader extends AsyncTask<Void, Void, List<Event>>
             List<Event> events = getCalendarEvents();
             return events;
         } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
-        } catch (UserRecoverableAuthIOException userRecoverableException) {
-        } catch (Exception e) {
+        }
+        catch(IOException e) {
         }
         return null;
     }
 
     private List<Event> getCalendarEvents() throws IOException {
-        Events events = mCalendarService.events().list("primary")
-                .setMaxResults(mMaxResults)
-                .setTimeMin(mTime)
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .execute();
-        return events.getItems();
+        try {
+            Events events = mCalendarService.events().list("primary")
+                    .setMaxResults(mMaxResults)
+                    .setTimeMin(mTime)
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .execute();
+            return events.getItems();
+        }catch(UserRecoverableAuthIOException e) {
+           mDelegate.handleUserRecoverableAuthIOException(e);
+        }
+
+        return null;
     }
 
     @Override

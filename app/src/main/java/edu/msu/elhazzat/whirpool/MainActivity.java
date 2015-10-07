@@ -59,6 +59,7 @@ public class MainActivity extends GoogleApiClientActivity {
     public void onConnected(Bundle bundle) {
         super.onConnected(bundle);
         Intent homeIntent = new Intent(this, HomeActivity.class);
+        homeIntent.putExtra("accountName", Plus.AccountApi.getAccountName(mGoogleApiClient));
         startActivity(homeIntent);
     }
 
