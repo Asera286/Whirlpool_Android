@@ -25,7 +25,7 @@ public class MainActivity extends GoogleApiClientActivity {
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(v.getId() == R.id.sign_in_button) {
+                if (v.getId() == R.id.sign_in_button) {
                     onSignInClicked();
                 }
             }
@@ -58,9 +58,11 @@ public class MainActivity extends GoogleApiClientActivity {
     @Override
     public void onConnected(Bundle bundle) {
         super.onConnected(bundle);
-        Intent homeIntent = new Intent(this, HomeActivity.class);
+      /*  Intent homeIntent = new Intent(this, HomeActivity.class);
         homeIntent.putExtra("accountName", Plus.AccountApi.getAccountName(mGoogleApiClient));
-        startActivity(homeIntent);
+        startActivity(homeIntent);*/
+        Intent mapsIntent = new Intent(this, MapsActivity.class);
+        startActivity(mapsIntent);
     }
 
     @Override
