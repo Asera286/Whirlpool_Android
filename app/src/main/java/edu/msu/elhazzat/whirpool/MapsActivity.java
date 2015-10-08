@@ -68,7 +68,7 @@ public class MapsActivity extends FragmentActivity {
             }
         }
     }
-    
+
     public class MapLocationUpdater implements CurrentLocationManager.LocationCallback {
         public void handleLocationUpdate(Location location) {
             mMap.clear();
