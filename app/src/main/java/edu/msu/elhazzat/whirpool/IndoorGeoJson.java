@@ -9,14 +9,14 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WpGeoJson {
+public class IndoorGeoJson {
     @SerializedName("name")
     private String mGeoJsonName;
 
     @SerializedName("type")
     private String mGeoJsonType;
 
-    private List<WpGeoJsonFeature> features = new ArrayList<WpGeoJsonFeature>();
+    private List<IndoorGeoJsonFeature> features = new ArrayList<IndoorGeoJsonFeature>();
 
     public String getName() {
         return mGeoJsonName;
@@ -26,7 +26,7 @@ public class WpGeoJson {
         return mGeoJsonType;
     }
 
-    public List<WpGeoJsonFeature> getFeatures() {
+    public List<IndoorGeoJsonFeature> getFeatures() {
         return features;
     }
 }

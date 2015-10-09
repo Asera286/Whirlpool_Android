@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
@@ -11,7 +12,12 @@ import com.google.api.services.calendar.model.Events;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Created by christianwhite on 9/20/15.
+ */
 public class AsyncCalendarEventReader extends AsyncTask<Void, Void, List<Event>> {
+
+    private static final String LOG_TAG = AsyncCalendarEventWriter.class.getSimpleName();
 
     public interface AsyncCalendarReaderDelegate {
         public void onAsyncFinished(List<com.google.api.services.calendar.model.Event> events);
@@ -38,8 +44,10 @@ public class AsyncCalendarEventReader extends AsyncTask<Void, Void, List<Event>>
             List<Event> events = getCalendarEvents();
             return events;
         } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
+            Log.e(LOG_TAG, "Error: ", availabilityException);
         }
         catch(IOException e) {
+            Log.e(LOG_TAG, "Error: ", e);
         }
         return null;
     }
@@ -56,7 +64,6 @@ public class AsyncCalendarEventReader extends AsyncTask<Void, Void, List<Event>>
         }catch(UserRecoverableAuthIOException e) {
            mDelegate.handleUserRecoverableAuthIOException(e);
         }
-
         return null;
     }
 

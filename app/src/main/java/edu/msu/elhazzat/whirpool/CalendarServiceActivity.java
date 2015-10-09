@@ -15,9 +15,11 @@ import com.google.api.services.calendar.CalendarScopes;
 import java.util.Arrays;
 
 /**
- * Created by christianwhite on 10/6/15.
+ * Created by christianwhite on 10/1/15.
  */
 public abstract class CalendarServiceActivity extends Activity {
+
+    private static final String LOG_TAG = CalendarServiceActivity.class.getSimpleName();
 
     public static final int COMPLETE_AUTHORIZATION_REQUEST_CODE = 1001;
     public static final String APPLICATION_NAME = "Whirlpool Indoor Maps";

@@ -1,134 +1,72 @@
 package edu.msu.elhazzat.whirpool;
+
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/********* Adapter class extends with BaseAdapter and implements with OnClickListener ************/
-public class RoomAdapter extends BaseAdapter implements View.OnClickListener {
 
-    private Activity activity;
-    private ArrayList data;
-    private static LayoutInflater inflater=null;
-    public Resources res;
-    ListModel tempValues=null;
-    int i=0;
+public class RoomAdapter extends BaseListAdapter {
 
-    public RoomAdapter(Activity a, ArrayList d, Resources resLocal) {
+    private ListRoomModel mTempValue;
 
-        activity = a;
-        data=d;
-        res = resLocal;
-
-        /***********  Layout inflator to call external xml layout () ***********/
-        inflater = ( LayoutInflater )activity.
-                getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
+    public RoomAdapter(Activity activity, ArrayList data, Resources resLocal) {
+        super(activity, data, resLocal);
     }
 
-    public int getCount() {
-
-        if(data.size()<=0)
-            return 1;
-        return data.size();
-    }
-
-    public Object getItem(int position) {
-        return position;
-    }
-
-    public long getItemId(int position) {
-        return position;
-    }
-
-    public static class ViewHolder{
+    public static class ViewHolder {
         public TextView text;
         public TextView text1;
-        public TextView textWide;
         public ImageView image;
     }
 
-    /****** Depends upon data size called for each row , Create each ListView row *****/
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        View vi = convertView;
+        View listItemView = convertView;
         ViewHolder holder;
 
-        if(convertView==null){
-
-            /****** Inflate tabitem.xml file for each row ( Defined below ) *******/
-            vi = inflater.inflate(R.layout.tabitem, null);
-
-            /****** View Holder Object to contain tabitem.xml file elements ******/
+        if(convertView == null) {
+            listItemView = mInflater.inflate(R.layout.tabitem, null);
 
             holder = new ViewHolder();
-            holder.text = (TextView) vi.findViewById(R.id.text);
-            holder.text1=(TextView)vi.findViewById(R.id.text1);
-            holder.image=(ImageView)vi.findViewById(R.id.img1);
+            holder.text = (TextView)listItemView.findViewById(R.id.text);
+            holder.text1 = (TextView)listItemView.findViewById(R.id.text1);
+            holder.image = (ImageView)listItemView.findViewById(R.id.img1);
 
-            /************  Set holder with LayoutInflater ************/
-            vi.setTag( holder );
+            listItemView.setTag(holder);
         }
-        else
-            holder=(ViewHolder)vi.getTag();
+        else {
+            holder = (ViewHolder) listItemView.getTag();
+        }
 
-        if(data.size()<=0)
-        {
+        if(mData.size() <= 0) {
             holder.text.setText("No Data");
-
         }
-        else
-        {
-            /***** Get each Model object from Arraylist ********/
-            tempValues=null;
-            tempValues = ( ListModel ) data.get( position );
+        else {
+            //mTempValue = null;
+            //mTempValue = (ListEventModel) mData.get(position);
 
-            /************  Set Model values in Holder elements ***********/
+           // holder.text.setText(mTempValues.getStartTime());
+           // holder.text1.setText(mTempValues.getSummary());
+          //  holder.image.setImageResource(mResources.getIdentifier("com.example.testui:drawable/marker",null,null));
 
-         //   holder.text.setText( tempValues.getTime() );
-         //   holder.text1.setText( tempValues.getMainText() );
-         //   holder.image.setImageResource(res.getIdentifier("com.example.testui:drawable/marker",null,null));
-
-            /******** Set Item Click Listener for LayoutInflater for each row *******/
-
-            vi.setOnClickListener(new OnItemClickListener( position ));
+            setListItemOnClickListener(listItemView, position);
         }
-        return vi;
+
+        return listItemView;
     }
 
-
-    @Override
-    public void onClick(View v) {
-        Log.v("RoomAdapter", "=====Row button clicked=====");
-    }
-
-    /********* Called when Item click in ListView ************/
-    private class OnItemClickListener  implements View.OnClickListener {
-        private int mPosition;
-
-        OnItemClickListener(int position ){
-            mPosition = position;
-        }
-
-        @Override
-        public void onClick(View arg0) {
-
-
-            HomeActivity sct = (HomeActivity) activity;
-
-            /****  Call  onItemClick Method inside MainActivity2 Class ****/
-
-            sct.onRoomClick(mPosition);
-
-
-        }
+    public void setListItemOnClickListener(View view, final int position) {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               /* Intent roomIntent = new Intent(mActivity, RoomActivity.class);
+                roomIntent.putExtra("ROOM_ID", mData.get(position).getMainText());
+                mActivity.startActivity(roomIntent);*/
+            }
+        });
     }
 }

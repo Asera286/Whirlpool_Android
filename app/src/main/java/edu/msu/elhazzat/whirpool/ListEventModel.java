@@ -3,7 +3,7 @@ package edu.msu.elhazzat.whirpool;
 /**
  * Created by Stephanie on 9/29/2015.
  */
-public class ListModel {
+public class ListEventModel {
 
     private String mStartTime;
     private String mEndTime;

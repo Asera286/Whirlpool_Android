@@ -1,5 +1,6 @@
 package edu.msu.elhazzat.whirpool;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.widget.ListView;
@@ -16,13 +17,16 @@ import java.util.List;
  */
 public class HomeActivity extends CalendarServiceActivity {
 
+    private static final String LOG_TAG = HomeActivity.class.getSimpleName();
+
     private ListView mCalendarList;
     private EventAdapter mCalendarAdapter;
-    private ArrayList<ListModel> mCalendarListValues = new ArrayList<>();
+    private ArrayList<ListEventModel> mCalendarListValues = new ArrayList<>();
 
     private ListView mRoomList;
     private RoomAdapter mRoomAdapter;
-    private ArrayList<ListModel> mRoomListValues = new ArrayList<>();
+    private ArrayList<ListRoomModel> mRoomListValues = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +41,8 @@ public class HomeActivity extends CalendarServiceActivity {
         Resources res = getResources();
         mCalendarList = (ListView)findViewById(R.id.timeList);
 
-        new AsyncCalendarEventReader(new HandleAsyncCalendarReader(), mService, new DateTime(System.currentTimeMillis()), 10).execute();
+        new AsyncCalendarEventReader(new HandleAsyncCalendarReader(), mService,
+                new DateTime(System.currentTimeMillis()), 10).execute();
 
         setRoomData();
 
@@ -45,35 +50,33 @@ public class HomeActivity extends CalendarServiceActivity {
 
         mRoomAdapter = new RoomAdapter(this, mRoomListValues, res);
         mRoomList.setAdapter(mRoomAdapter);
+
+        Intent i = new Intent(this, MapsActivity.class);
+        startActivity(i);
     }
 
     public void onCalendarPermissionAuthorized() {
-        new AsyncCalendarEventReader(new HandleAsyncCalendarReader(), mService, new DateTime(System.currentTimeMillis()), 10).execute();
+        new AsyncCalendarEventReader(new HandleAsyncCalendarReader(), mService,
+                new DateTime(System.currentTimeMillis()), 10).execute();
     }
 
     public void onCalendarPermissionDenied() {
-
+        //TODO Allow user to continue without this functionality
     }
 
     public void setRoomData()
     {
         for(int i = 0; i < 7; i++){
 
-            final ListModel sched2 = new ListModel();
+            final ListEventModel sched2 = new ListEventModel();
 
 /*            sched2.setTime("10:00 AM\n11:00 AM");
             sched2.setImage("marker");
             sched2.setMainText("Room" + i);
 */
-            mRoomListValues.add(sched2);
+            //mRoomListValues.add(sched2);
         }
 
-    }
-
-    public void onRoomClick(int mPosition) {
-       /* Intent roomIntent = new Intent(HomeActivity.this, RoomActivity.class);
-        roomIntent.putExtra("ROOM_ID", mRoomListValues.get(mPosition).getMainText());
-        startActivity(roomIntent);*/
     }
 
     public class HandleAsyncCalendarReader implements AsyncCalendarEventReader.AsyncCalendarReaderDelegate {
@@ -84,12 +87,9 @@ public class HomeActivity extends CalendarServiceActivity {
                 mCalendarAdapter = new EventAdapter(HomeActivity.this, mCalendarListValues, res);
                 mCalendarList.setAdapter(mCalendarAdapter);
                 for (Event event : events) {
-                    final ListModel sched = new ListModel();
-
-                  /*  sched.setTime(event.getStart().getDateTime().toString());
-                    sched.setImage("marker");
-                    sched.setMainText(event.getSummary());*/
-                    mCalendarListValues.add( sched );
+                    final ListEventModel sched = new ListEventModel();
+                    //add properties to sched
+                    mCalendarListValues.add(sched);
                 }
             }
         }

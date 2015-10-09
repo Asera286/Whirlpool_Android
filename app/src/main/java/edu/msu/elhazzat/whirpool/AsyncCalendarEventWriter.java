@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -11,6 +12,8 @@ import java.io.IOException;
  * Created by christianwhite on 10/6/15.
  */
 public class AsyncCalendarEventWriter extends AsyncTask<Void, Void, Boolean> {
+
+    private static final String LOG_TAG = AsyncCalendarEventWriter.class.getSimpleName();
 
     public interface AsyncCalendarEventWriterDelegate {
         public void handleEventWrite(Boolean success);
@@ -34,7 +37,7 @@ public class AsyncCalendarEventWriter extends AsyncTask<Void, Void, Boolean> {
             return true;
         }
         catch(IOException e) {
-            //TODO: LOG
+            Log.e(LOG_TAG, "Error :", e);
         }
 
         return false;

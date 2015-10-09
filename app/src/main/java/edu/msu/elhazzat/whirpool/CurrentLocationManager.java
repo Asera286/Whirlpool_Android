@@ -12,7 +12,9 @@ import android.os.Bundle;
  */
 public class CurrentLocationManager {
 
-    interface LocationCallback {
+    private static final String LOG_TAG = CurrentLocationManager.class.getSimpleName();
+
+    public interface LocationCallback {
         public void handleLocationUpdate(Location location);
     }
 
@@ -37,18 +39,9 @@ public class CurrentLocationManager {
             public void onLocationChanged(Location location) {
                 mDelegate.handleLocationUpdate(location);
             }
-
-            public void onStatusChanged(String str, int val, Bundle state) {
-                //
-            }
-
-            public void onProviderEnabled(String str) {
-                //
-            }
-
-            public void onProviderDisabled(String str) {
-                //
-            }
+            public void onStatusChanged(String str, int val, Bundle state) {}
+            public void onProviderEnabled(String str) {}
+            public void onProviderDisabled(String str) {}
         };
 
         if(mLastLocation!=null){

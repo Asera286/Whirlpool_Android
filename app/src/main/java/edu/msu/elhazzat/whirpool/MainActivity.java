@@ -1,37 +1,53 @@
 package edu.msu.elhazzat.whirpool;
 
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
-public class MainActivity extends GoogleApiClientActivity {
+/**
+ * Created by christianwhite on 9/20/15.
+ */
+public class MainActivity extends FragmentActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
-    private SignInButton mSignInButton;
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    private static final int REQUEST_CODE_SIGN_IN = 0;
+    private static final String DIALOG_ERROR = "dialog_error";
+
+    protected GoogleApiClient mGoogleApiClient;
+    protected boolean mIsResolving = false;
+    protected boolean mShouldResolve = false;
+    protected SignInButton mSignInButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        mSignInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (v.getId() == R.id.sign_in_button) {
-                    onSignInClicked();
-                }
-            }
-        });
-
         buildGoogleApiClient();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
     }
 
     public void buildGoogleApiClient() {
@@ -43,12 +59,13 @@ public class MainActivity extends GoogleApiClientActivity {
                 .build();
     }
 
-    private void onSignInClicked() {
+
+    public void onSignInClicked() {
         mShouldResolve = true;
         mGoogleApiClient.connect();
     }
 
-    private void onSignOutClicked() {
+    public void onSignOutClicked() {
         if (mGoogleApiClient.isConnected()) {
             Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             mGoogleApiClient.disconnect();
@@ -57,12 +74,57 @@ public class MainActivity extends GoogleApiClientActivity {
 
     @Override
     public void onConnected(Bundle bundle) {
-        super.onConnected(bundle);
-      /*  Intent homeIntent = new Intent(this, HomeActivity.class);
+        Intent homeIntent = new Intent(this, HomeActivity.class);
         homeIntent.putExtra("accountName", Plus.AccountApi.getAccountName(mGoogleApiClient));
-        startActivity(homeIntent);*/
-        Intent mapsIntent = new Intent(this, MapsActivity.class);
-        startActivity(mapsIntent);
+        startActivity(homeIntent);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_SIGN_IN) {
+            if (resultCode != RESULT_OK) {
+                mShouldResolve = false;
+            }
+            mIsResolving = false;
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int code) {}
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        if (!mIsResolving && mShouldResolve) {
+            if (connectionResult.hasResolution()) {
+                if(!mGoogleApiClient.isConnected()) {
+                    setContentView(R.layout.activity_main);
+                    mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
+                    mSignInButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (v.getId() == R.id.sign_in_button) {
+                                onSignInClicked();
+                            }
+                        }
+                    });
+                }
+                try {
+                    connectionResult.startResolutionForResult(this, REQUEST_CODE_SIGN_IN);
+                    mIsResolving = true;
+                }
+                catch (IntentSender.SendIntentException e) {
+                    mIsResolving = false;
+                    mGoogleApiClient.connect();
+                }
+            }
+            else {
+
+            }
+        }
+        else {
+        }
     }
 
     @Override
@@ -74,5 +136,4 @@ public class MainActivity extends GoogleApiClientActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
     }
-
 }

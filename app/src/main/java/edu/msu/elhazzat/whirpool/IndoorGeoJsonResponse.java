@@ -9,19 +9,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-
-public class WpGeoJsonResponse {
+/**
+ * Created by christianwhite on 10/8/15.
+ */
+public class IndoorGeoJsonResponse {
     private Context mContext;
 
-    WpGeoJsonResponse(Context context) {
+    IndoorGeoJsonResponse(Context context) {
         mContext = context;
     }
 
-    public WpGeoJson getWpGeoJsonFromAsset(int resourceId) {
+    public IndoorGeoJson getIndoorGeoJsonFromAsset(int resourceId) {
         Gson gson = new Gson();
         InputStream stream = mContext.getResources().openRawResource(resourceId);
         Reader reader = new BufferedReader(new InputStreamReader(stream));
-        return gson.fromJson(reader, WpGeoJson.class);
+        return gson.fromJson(reader, IndoorGeoJson.class);
+    }
+
+    public IndoorGeoJson getIndoorGeoJsonFromDrive() {
+        return null;
     }
 }
 
