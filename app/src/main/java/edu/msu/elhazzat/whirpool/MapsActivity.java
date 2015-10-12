@@ -5,7 +5,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -14,6 +13,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
 
 /**
  * Created by christianwhite on 9/30/15.
@@ -51,23 +51,19 @@ public class MapsActivity extends FragmentActivity {
                 GeoJson json = new GeoJsonParser(this).getGeoJsonFromResource(R.raw.geojsonrooms);
                 layer.setFeatures(json.getFeatures());
                 jsonMap.addLayer(0, layer);
-                jsonMap.drawLayer(0, 1, Color.BLACK);
-    /*            WpGeoJsonResponse gsonResponse = new WpGeoJsonResponse(this);
+                jsonMap.drawLayer(0, 2, Color.BLACK);
 
-                final GeoJson json = gsonResponse.getIndoorGeoJsonFromAsset(R.raw.geojsonrooms);
-                final List<GeoJsonFeature> features = json.getFeatures();*/
-
-                mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                 mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
                     public void onMapClick(LatLng latLng) {
                         for (GeoJsonFeature feature : jsonMap.getCurrentLayer().getFeatures()) {
                             GeoJsonGeometry geometry = feature.getGeometry();
                             if (geometry.getType().equals("Polygon")) {
-                                PolygonCoordinates coordinates = (PolygonCoordinates)geometry.getCoordinates();
-                                GeometryPolygon polygon = new GeometryPolygon(coordinates);
+                                GeoJsonPolygon polygon = (GeoJsonPolygon)geometry.getCoordinates();
                                 if (polygon.contains(latLng)) {
+                                    Polygon gmsPoly = polygon.getGMSPolygon();
+                                    gmsPoly.setFillColor(Color.RED);
                                     String room = feature.getProperty("room");
-                                    Toast.makeText(getApplicationContext(), room, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }

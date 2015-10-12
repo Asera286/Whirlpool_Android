@@ -38,10 +38,12 @@ public class GeoJsonMapLayer {
                     continue;
                 }
                 if (geometry.getType().equals("Polygon")) {
-                    new AsyncPolygonDrawer(map, geometry, color, strokeWidth).execute();
+                    GeoJsonPolygon polygon = (GeoJsonPolygon) geometry.getCoordinates();
+                    new AsyncPolygonDrawer(map, polygon, color, strokeWidth).execute();
                 }
                 else if (geometry.getType().equals("LineString")) {
-                    new AsyncPolylineDrawer(map, geometry, color, strokeWidth).execute();
+                    GeoJsonPolyline polyline = (GeoJsonPolyline) geometry.getCoordinates();
+                    new AsyncPolylineDrawer(map, polyline, color, strokeWidth).execute();
                 }
                 else if (geometry.getType().equals("Point")) {
 
@@ -75,23 +77,22 @@ public class GeoJsonMapLayer {
 
     public class AsyncPolygonDrawer extends AsyncTask<Void, Void, PolygonOptions> {
         private GoogleMap mMap;
-        private GeoJsonGeometry mGeometry;
+        private GeoJsonPolygon mPolygon;
         private int mColor;
         private int mStrokeWidth;
 
-        AsyncPolygonDrawer(GoogleMap map, GeoJsonGeometry geometry, int color, int strokeWidth) {
+        AsyncPolygonDrawer(GoogleMap map, GeoJsonPolygon polygon, int color, int strokeWidth) {
             mMap = map;
-            mGeometry = geometry;
+            mPolygon = polygon;
             mColor = color;
             mStrokeWidth = strokeWidth;
         }
 
         @Override
         public PolygonOptions doInBackground(Void... params) {
-            PolygonCoordinates coordinates = (PolygonCoordinates) mGeometry.getCoordinates();
-            GeometryPolygon polygon = new GeometryPolygon(coordinates);
+            mPolygon.setLatLngFromCoordinates();
             PolygonOptions options = new PolygonOptions()
-                    .addAll(polygon.getPolygonCoordinates())
+                    .addAll(mPolygon.getPolygonLatLng())
                     .strokeColor(mColor)
                     .strokeWidth(mStrokeWidth);
             return options;
@@ -100,35 +101,36 @@ public class GeoJsonMapLayer {
         @Override
         public void onPostExecute(PolygonOptions options) {
             Polygon polygon = mMap.addPolygon(options);
+            mPolygon.setGMSPolygon(polygon);
             mPolygons.add(polygon);
         }
     }
 
     public class AsyncPolylineDrawer extends AsyncTask<Void, Void, PolylineOptions> {
         private GoogleMap mMap;
-        private GeoJsonGeometry mGeometry;
+        private GeoJsonPolyline mPolyline;
         private int mColor;
         private int mStrokeWidth;
 
-        AsyncPolylineDrawer(GoogleMap map, GeoJsonGeometry geometry, int color, int strokeWidth) {
+        AsyncPolylineDrawer(GoogleMap map, GeoJsonPolyline polyline, int color, int strokeWidth) {
             mMap = map;
-            mGeometry = geometry;
+            mPolyline = polyline;
             mColor = color;
             mStrokeWidth = strokeWidth;
         }
 
         @Override
         public PolylineOptions doInBackground(Void... params) {
-            PolylineCoordinates coordinates = (PolylineCoordinates) mGeometry.getCoordinates();
-            GeometryPolyline polyline = new GeometryPolyline(coordinates);
+            mPolyline.setLatLngFromCoordinates();
             PolylineOptions options = new PolylineOptions()
-                    .addAll(polyline.getPolylineCoordinates()).width(mStrokeWidth).color(mColor);
+                    .addAll(mPolyline.getPolylineLatLng()).width(mStrokeWidth).color(mColor);
             return options;
         }
 
         @Override
         public void onPostExecute(PolylineOptions options) {
             Polyline polyline = mMap.addPolyline(options);
+            mPolyline.setGMSPolyline(polyline);
             mPolylines.add(polyline);
         }
     }

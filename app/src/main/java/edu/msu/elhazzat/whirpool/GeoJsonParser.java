@@ -22,7 +22,7 @@ public class GeoJsonParser {
 
     public GeoJson getGeoJsonFromResource(int resourceId) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(BaseCoordinates.class,
+        gsonBuilder.registerTypeAdapter(BaseGeoJsonShape.class,
                 new GeoJsonCoordinatesDeserializer());
         Gson gson = gsonBuilder.create();
 

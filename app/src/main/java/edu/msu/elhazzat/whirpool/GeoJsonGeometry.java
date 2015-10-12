@@ -10,9 +10,9 @@ public class GeoJsonGeometry {
     private String mGeometryType;
 
     @SerializedName("coordinates")
-    private BaseCoordinates mCoordinates;
+    private BaseGeoJsonShape mCoordinates;
 
-    public BaseCoordinates getCoordinates() {
+    public BaseGeoJsonShape getCoordinates() {
         return mCoordinates;
     }
 

@@ -34,7 +34,7 @@ public class AsyncParseGeoJsonFromResource extends AsyncTask<Void, Void, GeoJson
     @Override
     public GeoJson doInBackground(Void... params) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(BaseCoordinates.class,
+        gsonBuilder.registerTypeAdapter(BaseGeoJsonShape.class,
                 new GeoJsonCoordinatesDeserializer());
         Gson gson = gsonBuilder.create();
 

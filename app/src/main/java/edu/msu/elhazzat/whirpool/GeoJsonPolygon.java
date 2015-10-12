@@ -9,27 +9,25 @@ import java.util.List;
 /**
  * Created by christianwhite on 10/8/15.
  */
-public class GeometryPolygon {
+public class GeoJsonPolygon extends BaseGeoJsonShape {
+    private List<List<List<Double>>> mPolygonCoordinates = new ArrayList<>();
+    private List<LatLng> mPolygonLatLng = new ArrayList<>();
     private Polygon mPolygon;
-    private List<LatLng> mPolygonCoordinates = new ArrayList<LatLng>();
 
-    GeometryPolygon(List<LatLng> coordinates) {
+    public void setPolygonCoordinates(List<List<List<Double>>> coordinates) {
         mPolygonCoordinates = coordinates;
     }
 
-    GeometryPolygon(PolygonCoordinates coordinates) {
-        if(coordinates != null) {
-            List<List<List<Double>>> polygon = coordinates.getPolygon();
-            if(polygon.size() > 0) {
-                List<List<Double>> polygonCoordinates = polygon.get(0);
-                if(polygonCoordinates.size() > 0) {
-                    for(List<Double> coordinate : polygonCoordinates) {
-                        mPolygonCoordinates.add(new LatLng(coordinate.get(1), coordinate.get(0)));
-                    }
-                }
-            }
+    public List<List<List<Double>>> getPolygonCoordinates() {
+        return mPolygonCoordinates;
+    }
 
-        }
+    public void setPolygonLatLng(List<LatLng> coordinates) {
+        mPolygonLatLng = coordinates;
+    }
+
+    public List<LatLng> getPolygonLatLng() {
+        return mPolygonLatLng;
     }
 
     public Polygon getGMSPolygon() {
@@ -40,19 +38,27 @@ public class GeometryPolygon {
         mPolygon = polygon;
     }
 
-    public List<LatLng> getPolygonCoordinates() {
-        return mPolygonCoordinates;
+    public void setLatLngFromCoordinates() {
+        if(mPolygonCoordinates != null && mPolygonCoordinates.size() > 0) {
+            for (List<Double> coordinate : mPolygonCoordinates.get(0)) {
+                mPolygonLatLng.add(new LatLng(coordinate.get(1), coordinate.get(0)));
+            }
+        }
     }
 
     public boolean contains(LatLng point) {
+        if(mPolygonLatLng == null) {
+            setLatLngFromCoordinates();
+        }
+
         int crossings = 0;
-        for (int i=0; i < mPolygonCoordinates.size(); i++) {
-            LatLng a = mPolygonCoordinates.get(i);
+        for (int i=0; i < mPolygonLatLng.size(); i++) {
+            LatLng a = mPolygonLatLng.get(i);
             int j = i + 1;
-            if (j >= mPolygonCoordinates.size()) {
+            if (j >= mPolygonLatLng.size()) {
                 j = 0;
             }
-            LatLng b = mPolygonCoordinates.get(j);
+            LatLng b = mPolygonLatLng.get(j);
             if (rayCrossesSegment(point, a, b)) {
                 ++crossings;
             }
