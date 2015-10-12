@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polygon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,32 +9,50 @@ import java.util.List;
 /**
  * Created by christianwhite on 10/8/15.
  */
-public class WpPolygon {
+public class GeometryPolygon {
+    private Polygon mPolygon;
+    private List<LatLng> mPolygonCoordinates = new ArrayList<LatLng>();
 
-    private List<LatLng> mListLatLng = new ArrayList<LatLng>();
+    GeometryPolygon(List<LatLng> coordinates) {
+        mPolygonCoordinates = coordinates;
+    }
 
-    WpPolygon(List<List<Double>> coordinatesList) {
-        for(List<Double> coordinates : coordinatesList) {
-            mListLatLng.add(new LatLng(coordinates.get(1), coordinates.get(0)));
+    GeometryPolygon(PolygonCoordinates coordinates) {
+        if(coordinates != null) {
+            List<List<List<Double>>> polygon = coordinates.getPolygon();
+            if(polygon.size() > 0) {
+                List<List<Double>> polygonCoordinates = polygon.get(0);
+                if(polygonCoordinates.size() > 0) {
+                    for(List<Double> coordinate : polygonCoordinates) {
+                        mPolygonCoordinates.add(new LatLng(coordinate.get(1), coordinate.get(0)));
+                    }
+                }
+            }
+
         }
     }
 
-    public List<LatLng> getLatLngList() {
-        return mListLatLng;
+    public Polygon getGMSPolygon() {
+        return mPolygon;
+    }
+
+    public void setGMSPolygon(Polygon polygon) {
+        mPolygon = polygon;
+    }
+
+    public List<LatLng> getPolygonCoordinates() {
+        return mPolygonCoordinates;
     }
 
     public boolean contains(LatLng point) {
-        // ray casting alogrithm http://rosettacode.org/wiki/Ray-casting_algorithm
         int crossings = 0;
-
-        // for each edge
-        for (int i=0; i < mListLatLng.size(); i++) {
-            LatLng a = mListLatLng.get(i);
+        for (int i=0; i < mPolygonCoordinates.size(); i++) {
+            LatLng a = mPolygonCoordinates.get(i);
             int j = i + 1;
-            if (j >= mListLatLng.size()) {
+            if (j >= mPolygonCoordinates.size()) {
                 j = 0;
             }
-            LatLng b = mListLatLng.get(j);
+            LatLng b = mPolygonCoordinates.get(j);
             if (rayCrossesSegment(point, a, b)) {
                 ++crossings;
             }
@@ -58,8 +77,8 @@ public class WpPolygon {
 
         if (px < 0 || ax <0 || bx <0) {
             px += 360;
-            ax+=360;
-            bx+=360;
+            ax += 360;
+            bx += 360;
         }
 
         if (py == ay || py == by) {

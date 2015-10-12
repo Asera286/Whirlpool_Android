@@ -27,7 +27,6 @@ public class HomeActivity extends CalendarServiceActivity {
     private RoomAdapter mRoomAdapter;
     private ArrayList<ListRoomModel> mRoomListValues = new ArrayList<>();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +49,6 @@ public class HomeActivity extends CalendarServiceActivity {
 
         mRoomAdapter = new RoomAdapter(this, mRoomListValues, res);
         mRoomList.setAdapter(mRoomAdapter);
-
         Intent i = new Intent(this, MapsActivity.class);
         startActivity(i);
     }

@@ -7,12 +7,12 @@ import java.util.HashMap;
 /**
  * Created by christianwhite on 10/8/15.
  */
-public class IndoorGeoJsonFeature {
+public class GeoJsonFeature {
     @SerializedName("type")
     private String mFeatureType;
 
     @SerializedName("geometry")
-    private IndoorGeoJsonGeometry mGeometry;
+    private GeoJsonGeometry mGeometry;
 
     @SerializedName("properties")
     private HashMap<String, String> mProperties;
@@ -21,7 +21,7 @@ public class IndoorGeoJsonFeature {
         return mFeatureType;
     }
 
-    public IndoorGeoJsonGeometry getGeometry() {
+    public GeoJsonGeometry getGeometry() {
         return mGeometry;
     }
 

@@ -24,7 +24,8 @@ public abstract class CalendarServiceActivity extends Activity {
     public static final int COMPLETE_AUTHORIZATION_REQUEST_CODE = 1001;
     public static final String APPLICATION_NAME = "Whirlpool Indoor Maps";
 
-    private static final String[] SCOPES = { CalendarScopes.CALENDAR };
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR ,
+            "https://apps-apis.google.com/a/feeds/calendar/resource/"};
 
     private final HttpTransport mTransport = AndroidHttp.newCompatibleTransport();
     private final JsonFactory mJsonFactory = JacksonFactory.getDefaultInstance();

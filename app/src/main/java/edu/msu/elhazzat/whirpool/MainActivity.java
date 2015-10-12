@@ -36,6 +36,18 @@ public class MainActivity extends FragmentActivity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         buildGoogleApiClient();
+        if(!mGoogleApiClient.isConnected()) {
+            setContentView(R.layout.activity_main);
+            mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
+            mSignInButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (v.getId() == R.id.sign_in_button) {
+                        onSignInClicked();
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -98,18 +110,6 @@ public class MainActivity extends FragmentActivity implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
         if (!mIsResolving && mShouldResolve) {
             if (connectionResult.hasResolution()) {
-                if(!mGoogleApiClient.isConnected()) {
-                    setContentView(R.layout.activity_main);
-                    mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
-                    mSignInButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (v.getId() == R.id.sign_in_button) {
-                                onSignInClicked();
-                            }
-                        }
-                    });
-                }
                 try {
                     connectionResult.startResolutionForResult(this, REQUEST_CODE_SIGN_IN);
                     mIsResolving = true;
