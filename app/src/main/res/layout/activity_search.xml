@@ -1,0 +1,78 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="edu.msu.elhazzat.whirpool.SearchActivity"
+    android:id="@+id/searchActivityId">
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/filters" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="cancel"
+        android:id="@+id/cancel_button"
+        android:layout_alignTop="@+id/searchView"
+        android:layout_alignRight="@+id/list"
+        android:layout_alignEnd="@+id/list"
+        android:onClick="onClick" />
+
+    <SearchView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchView"
+        android:iconifiedByDefault="false"
+        android:queryHint="@string/search_hint"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/cancel_button"
+        android:layout_toStartOf="@+id/cancel_button"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View/Hide Filters"
+        android:id="@+id/filter_button"
+        android:layout_below="@+id/searchView"
+        android:layout_centerHorizontal="true"
+        android:onClick="onClick"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/filters"
+        android:layout_below="@+id/filter_button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/check1"
+            android:text="Option1" />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/check2"
+            android:text="Option2" />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/check3"
+            android:text="Option3" />
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spin1"
+            android:entries="@+id/building_array" />
+    </LinearLayout>
+
+</RelativeLayout>

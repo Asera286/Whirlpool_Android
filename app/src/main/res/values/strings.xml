@@ -10,4 +10,10 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_google_api_client">GoogleApiClientActivity</string>
     <string name="title_activity_location_fragment">LocationFragmentActivity</string>
+    <string name="search_hint">Search Rooms...</string>
+    <string name="title_activity_search">SearchActivity</string>
+    <string-array name="building_array">
+        <item>Riverview</item>
+        <item>Other</item>
+    </string-array>
 </resources>
