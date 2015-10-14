@@ -1,8 +1,7 @@
 package edu.msu.elhazzat.whirpool;
 
-import android.os.AsyncTask;
-
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -16,37 +15,56 @@ import java.util.List;
  * Created by christianwhite on 10/8/15.
  */
 public class GeoJsonMapLayer {
-    private List<GeoJsonFeature> mFeatures;
+    private GeoJson mGeoJson = null;
     private List<Polygon> mPolygons = new ArrayList<>();
     private List<Polyline> mPolylines = new ArrayList<>();
     private List<Point> mPoints = new ArrayList<>();
     private boolean mIsVisible = false;
     private boolean mIsDrawn = false;
 
-    public void setFeatures(List<GeoJsonFeature> features) {
-        mFeatures = features;
-    }
-    public List<GeoJsonFeature> getFeatures() {
-        return mFeatures;
+    public List<Polygon> getPolygons() {
+        return mPolygons;
     }
 
-    public void draw(final GoogleMap map, final int strokeWidth, final int color) {
-        if(!mIsDrawn) {
-            for (GeoJsonFeature feature : mFeatures) {
-                final GeoJsonGeometry geometry = feature.getGeometry();
-                if (geometry == null) {
+    public void setGeoJson(GeoJson json) {
+        mGeoJson = json;
+    }
+
+    public GeoJson getGeoJson() {
+        return mGeoJson;
+    }
+
+    public void draw(final GoogleMap map, final int fillColor,
+                     final int strokeColor, final int strokeWidth) {
+        if(!mIsDrawn && mGeoJson != null) {
+            for (GeoJsonFeature feature : mGeoJson.getGeoJsonFeatures()) {
+                final GeoJsonGeometry jsonGeometry = feature.getGeoJsonGeometry();
+                if (jsonGeometry == null) {
                     continue;
                 }
-                if (geometry.getType().equals("Polygon")) {
-                    GeoJsonPolygon polygon = (GeoJsonPolygon) geometry.getCoordinates();
-                    new AsyncPolygonDrawer(map, polygon, color, strokeWidth).execute();
-                }
-                else if (geometry.getType().equals("LineString")) {
-                    GeoJsonPolyline polyline = (GeoJsonPolyline) geometry.getCoordinates();
-                    new AsyncPolylineDrawer(map, polyline, color, strokeWidth).execute();
-                }
-                else if (geometry.getType().equals("Point")) {
-
+                switch(jsonGeometry.getType()) {
+                    case "Point":
+                        GeoJsonPoint point = (GeoJsonPoint) jsonGeometry.getGeometry();
+                        LatLng latLng = Geometry.geoJsonCoordinateToLatLng(point.getPoints(), false);
+                        Polygon polygon = map.addPolygon(new PolygonOptions()
+                                .add(latLng).fillColor(fillColor).strokeWidth(strokeWidth));
+                        mPolygons.add(polygon);
+                        break;
+                    case "LineString":
+                        GeoJsonPolyline lineString = (GeoJsonPolyline) jsonGeometry.getGeometry();
+                        List<LatLng> latLngList = Geometry.geoJsonCoordinateListToLatLng(lineString.getPoints(), false);
+                        Polyline polyline  = map.addPolyline(new PolylineOptions()
+                                .addAll(latLngList).color(strokeColor).width(strokeWidth));
+                        mPolylines.add(polyline);
+                        break;
+                    case "Polygon":
+                        GeoJsonPolygon poly1 = (GeoJsonPolygon) jsonGeometry.getGeometry();
+                        List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
+                        Polygon poly2  = map.addPolygon(new PolygonOptions()
+                                .addAll(latLngPoly).fillColor(fillColor).strokeWidth(strokeWidth));
+                        poly1.setGMSPolygon(poly2);
+                        mPolygons.add(poly2);
+                        break;
                 }
             }
             mIsDrawn = true;
@@ -73,65 +91,5 @@ public class GeoJsonMapLayer {
             polyline.setVisible(toShow);
         }
         mIsVisible = toShow;
-    }
-
-    public class AsyncPolygonDrawer extends AsyncTask<Void, Void, PolygonOptions> {
-        private GoogleMap mMap;
-        private GeoJsonPolygon mPolygon;
-        private int mColor;
-        private int mStrokeWidth;
-
-        AsyncPolygonDrawer(GoogleMap map, GeoJsonPolygon polygon, int color, int strokeWidth) {
-            mMap = map;
-            mPolygon = polygon;
-            mColor = color;
-            mStrokeWidth = strokeWidth;
-        }
-
-        @Override
-        public PolygonOptions doInBackground(Void... params) {
-            mPolygon.setLatLngFromCoordinates();
-            PolygonOptions options = new PolygonOptions()
-                    .addAll(mPolygon.getPolygonLatLng())
-                    .strokeColor(mColor)
-                    .strokeWidth(mStrokeWidth);
-            return options;
-        }
-
-        @Override
-        public void onPostExecute(PolygonOptions options) {
-            Polygon polygon = mMap.addPolygon(options);
-            mPolygon.setGMSPolygon(polygon);
-            mPolygons.add(polygon);
-        }
-    }
-
-    public class AsyncPolylineDrawer extends AsyncTask<Void, Void, PolylineOptions> {
-        private GoogleMap mMap;
-        private GeoJsonPolyline mPolyline;
-        private int mColor;
-        private int mStrokeWidth;
-
-        AsyncPolylineDrawer(GoogleMap map, GeoJsonPolyline polyline, int color, int strokeWidth) {
-            mMap = map;
-            mPolyline = polyline;
-            mColor = color;
-            mStrokeWidth = strokeWidth;
-        }
-
-        @Override
-        public PolylineOptions doInBackground(Void... params) {
-            mPolyline.setLatLngFromCoordinates();
-            PolylineOptions options = new PolylineOptions()
-                    .addAll(mPolyline.getPolylineLatLng()).width(mStrokeWidth).color(mColor);
-            return options;
-        }
-
-        @Override
-        public void onPostExecute(PolylineOptions options) {
-            Polyline polyline = mMap.addPolyline(options);
-            mPolyline.setGMSPolyline(polyline);
-            mPolylines.add(polyline);
-        }
     }
 }

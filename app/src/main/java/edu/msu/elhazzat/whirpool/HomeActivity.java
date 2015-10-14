@@ -2,20 +2,24 @@ package edu.msu.elhazzat.whirpool;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ListView;
 
+import com.google.android.gms.auth.GoogleAuthException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Christian on 9/27/2015.
  */
-public class HomeActivity extends CalendarServiceActivity {
+public class HomeActivity extends CalendarServiceActivity implements View.OnClickListener{
 
     private static final String LOG_TAG = HomeActivity.class.getSimpleName();
 
@@ -25,7 +29,7 @@ public class HomeActivity extends CalendarServiceActivity {
 
     private ListView mRoomList;
     private RoomAdapter mRoomAdapter;
-    private ArrayList<ListRoomModel> mRoomListValues = new ArrayList<>();
+    private ArrayList<Room> mRoomListValues = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +47,9 @@ public class HomeActivity extends CalendarServiceActivity {
         new AsyncCalendarEventReader(new HandleAsyncCalendarReader(), mService,
                 new DateTime(System.currentTimeMillis()), 10).execute();
 
-        setRoomData();
-
         mRoomList = (ListView)findViewById(R.id.roomList);
 
-        mRoomAdapter = new RoomAdapter(this, mRoomListValues, res);
-        mRoomList.setAdapter(mRoomAdapter);
-        Intent i = new Intent(this, MapsActivity.class);
-        startActivity(i);
+        new Test().execute();
     }
 
     public void onCalendarPermissionAuthorized() {
@@ -62,38 +61,75 @@ public class HomeActivity extends CalendarServiceActivity {
         //TODO Allow user to continue without this functionality
     }
 
-    public void setRoomData()
-    {
-        for(int i = 0; i < 7; i++){
-
-            final ListEventModel sched2 = new ListEventModel();
-
-/*            sched2.setTime("10:00 AM\n11:00 AM");
-            sched2.setImage("marker");
-            sched2.setMainText("Room" + i);
-*/
-            //mRoomListValues.add(sched2);
-        }
-
-    }
-
     public class HandleAsyncCalendarReader implements AsyncCalendarEventReader.AsyncCalendarReaderDelegate {
         public void onAsyncFinished(List<Event> events) {
-
             if(events != null) {
                 Resources res = getResources();
-                mCalendarAdapter = new EventAdapter(HomeActivity.this, mCalendarListValues, res);
-                mCalendarList.setAdapter(mCalendarAdapter);
                 for (Event event : events) {
                     final ListEventModel sched = new ListEventModel();
-                    //add properties to sched
+                    sched.setSummary(event.getSummary());
                     mCalendarListValues.add(sched);
                 }
+                mCalendarAdapter = new EventAdapter(HomeActivity.this, mCalendarListValues, res);
+                mCalendarList.setAdapter(mCalendarAdapter);
             }
         }
 
         public void handleUserRecoverableAuthIOException(UserRecoverableAuthIOException e) {
             startActivityForResult(e.getIntent(), COMPLETE_AUTHORIZATION_REQUEST_CODE);
+        }
+    }
+
+    public class HandleAsyncRoomReader implements AsyncRoomParseFromResource.AsyncRoomParseFromResourceDelegate {
+        public void handleRoomList(List<Room> rooms) {
+            if(rooms != null) {
+                Resources res = getResources();
+                for (Room room : rooms) {
+                    mRoomListValues.add(room);
+                }
+                mRoomAdapter = new RoomAdapter(HomeActivity.this, mRoomListValues, res);
+                mRoomList.setAdapter(mRoomAdapter);
+            }
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.search_button:
+                Intent intent = new Intent(this, SearchActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.imageButton:
+                Intent intent2 = new Intent(this, SearchActivity.class);
+                startActivity(intent2);
+                break;
+        }
+    }
+
+    public class Test extends AsyncTask<Void, Void, String> {
+        @Override
+        public String doInBackground(Void... params) {
+            try {
+                return mCredential.getToken();
+            }
+            catch(GoogleAuthException e) {
+
+            }
+            catch(IOException e) {
+
+            }
+            return null;
+        }
+
+        @Override
+        public void onPostExecute(String token) {
+            new AsyncCalendarResourceReader( "https://apps-apis.google.com/a/feeds/calendar/resource/2.0/whirlpool.com/", token) {
+                @Override
+                public void handleRooms(List<Room> rooms) {
+                    String test = "1";
+                }
+            }.execute();
         }
     }
 }

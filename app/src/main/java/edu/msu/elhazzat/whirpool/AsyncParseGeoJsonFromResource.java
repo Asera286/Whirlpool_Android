@@ -14,28 +14,22 @@ import java.io.Reader;
 /**
  * Created by christianwhite on 10/11/15.
  */
-public class AsyncParseGeoJsonFromResource extends AsyncTask<Void, Void, GeoJson> {
-
-    public interface AsyncParseGeoJsonFromResourceDelegate {
-        public void handleGeoJson(GeoJson geoJson);
-    }
+abstract class AsyncParseGeoJsonFromResource extends AsyncTask<Void, Void, GeoJson> {
+    public abstract void handleGeoJson(GeoJson json);
 
     private Context mContext;
-    private AsyncParseGeoJsonFromResourceDelegate mDelegate;
     private int mResourceId;
 
-    AsyncParseGeoJsonFromResource(Context context, AsyncParseGeoJsonFromResourceDelegate delegate,
-                                  int resourceId) {
+    AsyncParseGeoJsonFromResource(Context context, int resourceId) {
         mContext = context;
-        mDelegate = delegate;
         mResourceId = resourceId;
     }
 
     @Override
     public GeoJson doInBackground(Void... params) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(BaseGeoJsonShape.class,
-                new GeoJsonCoordinatesDeserializer());
+        gsonBuilder.registerTypeAdapter(GeoJsonGeometry.class,
+                new GeoJsonGeometryDeserializer());
         Gson gson = gsonBuilder.create();
 
         InputStream stream = mContext.getResources().openRawResource(mResourceId);
@@ -45,7 +39,6 @@ public class AsyncParseGeoJsonFromResource extends AsyncTask<Void, Void, GeoJson
 
     @Override
     public void onPostExecute(GeoJson json) {
-        mDelegate.handleGeoJson(json);
+        handleGeoJson(json);
     }
-
 }

@@ -1,22 +1,26 @@
 package edu.msu.elhazzat.whirpool;
 
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by christianwhite on 10/8/15.
  */
 public class GeoJsonGeometry {
-    @SerializedName("type")
     private String mGeometryType;
 
-    @SerializedName("coordinates")
-    private BaseGeoJsonShape mCoordinates;
+    private Geometry mGeometry;
 
-    public BaseGeoJsonShape getCoordinates() {
-        return mCoordinates;
+    public Geometry getGeometry() {
+        return mGeometry;
+    }
+
+    public void setGeometry(Geometry geometry) {
+        mGeometry = geometry;
     }
 
     public String getType() {
         return mGeometryType;
+    }
+
+    public void setType(String type) {
+        mGeometryType = type;
     }
 }

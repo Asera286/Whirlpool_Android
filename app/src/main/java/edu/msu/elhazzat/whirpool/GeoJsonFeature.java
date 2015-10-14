@@ -12,7 +12,7 @@ public class GeoJsonFeature {
     private String mFeatureType;
 
     @SerializedName("geometry")
-    private GeoJsonGeometry mGeometry;
+    private GeoJsonGeometry mGeoJsonGeometry;
 
     @SerializedName("properties")
     private HashMap<String, String> mProperties;
@@ -21,8 +21,8 @@ public class GeoJsonFeature {
         return mFeatureType;
     }
 
-    public GeoJsonGeometry getGeometry() {
-        return mGeometry;
+    public GeoJsonGeometry getGeoJsonGeometry() {
+        return mGeoJsonGeometry;
     }
 
     public String getProperty(String key) {

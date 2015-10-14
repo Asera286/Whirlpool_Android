@@ -1,33 +1,18 @@
 package edu.msu.elhazzat.whirpool;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polygon;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by christianwhite on 10/8/15.
  */
-public class GeoJsonPolygon extends BaseGeoJsonShape {
-    private List<List<List<Double>>> mPolygonCoordinates = new ArrayList<>();
-    private List<LatLng> mPolygonLatLng = new ArrayList<>();
+public class GeoJsonPolygon extends Geometry<List<List<List<Double>>>> {
     private Polygon mPolygon;
-
-    public void setPolygonCoordinates(List<List<List<Double>>> coordinates) {
-        mPolygonCoordinates = coordinates;
-    }
-
-    public List<List<List<Double>>> getPolygonCoordinates() {
-        return mPolygonCoordinates;
-    }
-
-    public void setPolygonLatLng(List<LatLng> coordinates) {
-        mPolygonLatLng = coordinates;
-    }
-
-    public List<LatLng> getPolygonLatLng() {
-        return mPolygonLatLng;
+    GeoJsonPolygon(List<List<List<Double>>> points) {
+        mPoints = points;
     }
 
     public Polygon getGMSPolygon() {
@@ -38,27 +23,36 @@ public class GeoJsonPolygon extends BaseGeoJsonShape {
         mPolygon = polygon;
     }
 
-    public void setLatLngFromCoordinates() {
-        if(mPolygonCoordinates != null && mPolygonCoordinates.size() > 0) {
-            for (List<Double> coordinate : mPolygonCoordinates.get(0)) {
-                mPolygonLatLng.add(new LatLng(coordinate.get(1), coordinate.get(0)));
-            }
+    public LatLngBounds getBoundingBox() {
+        if(mPoints == null) {
+            return null;
         }
+        List<LatLng> latLngPoints = Geometry.geoJsonCoordinateListToLatLng(mPoints.get(0), false);
+        LatLngBounds.Builder boundsBuilder = LatLngBounds.builder();
+        for(int i = 0; i < latLngPoints.size(); i++) {
+            boundsBuilder.include(latLngPoints.get(i));
+        }
+        return boundsBuilder.build();
     }
 
-    public boolean contains(LatLng point) {
-        if(mPolygonLatLng == null) {
-            setLatLngFromCoordinates();
+    public LatLng getCentroid() {
+        LatLngBounds bounds = getBoundingBox();
+        if(bounds != null) {
+            return bounds.getCenter();
         }
-
+        return null;
+    }
+    
+    public boolean contains(LatLng point) {
+        List<LatLng> latLngPoints = Geometry.geoJsonCoordinateListToLatLng(mPoints.get(0), true);
         int crossings = 0;
-        for (int i=0; i < mPolygonLatLng.size(); i++) {
-            LatLng a = mPolygonLatLng.get(i);
+        for (int i=0; i < latLngPoints.size(); i++) {
+            LatLng a = latLngPoints.get(i);
             int j = i + 1;
-            if (j >= mPolygonLatLng.size()) {
+            if (j >= latLngPoints.size()) {
                 j = 0;
             }
-            LatLng b = mPolygonLatLng.get(j);
+            LatLng b = latLngPoints.get(j);
             if (rayCrossesSegment(point, a, b)) {
                 ++crossings;
             }

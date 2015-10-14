@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +65,10 @@ public class EventAdapter extends BaseListAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ListEventModel model = (ListEventModel) mData.get(position);
+                Intent roomIntent = new Intent(mActivity, RoomActivity.class);
+                roomIntent.putExtra("ROOM_ID", "116");
+                mActivity.startActivity(roomIntent);
             }
         });
     }

@@ -8,13 +8,17 @@
     android:paddingTop="16dp"
     android:paddingBottom="16dp">
 
-
-    <ImageView
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0.45"
-        android:background="#ffffff"/>
+        android:layout_height="200dp"
+        android:id="@+id/map"
+        tools:context="edu.msu.elhazzat.whirpool.BaseGoogleMapsActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"></fragment>
 
     <LinearLayout
         android:layout_width="match_parent"

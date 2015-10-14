@@ -17,7 +17,7 @@ public class GeoJson {
     private String mGeoJsonType;
 
     @SerializedName("features")
-    private List<GeoJsonFeature> mFeatures = new ArrayList<GeoJsonFeature>();
+    private List<GeoJsonFeature> mGeoJsonFeatures = new ArrayList<GeoJsonFeature>();
 
     public String getName() {
         return mGeoJsonName;
@@ -27,7 +27,7 @@ public class GeoJson {
         return mGeoJsonType;
     }
 
-    public List<GeoJsonFeature> getFeatures() {
-        return mFeatures;
+    public List<GeoJsonFeature> getGeoJsonFeatures() {
+        return mGeoJsonFeatures;
     }
 }

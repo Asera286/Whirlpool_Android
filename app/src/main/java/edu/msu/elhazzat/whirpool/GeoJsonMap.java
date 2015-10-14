@@ -21,11 +21,9 @@ public class GeoJsonMap {
         mLayers.put(floor, layer);
     }
 
-    public void drawLayer(int floor, int strokeWidth, int color) {
-       // if(mCurrentLayer != floor) {
-            mLayers.get(floor).draw(mMap, strokeWidth, color);
-            mCurrentLayer = floor;
-      //  }
+    public void drawLayer(int floor, int fillColor, int strokeColor, int strokeWidth) {
+        mLayers.get(floor).draw(mMap, fillColor, strokeColor, strokeWidth);
+        mCurrentLayer = floor;
     }
 
     public GeoJsonMapLayer getCurrentLayer() {

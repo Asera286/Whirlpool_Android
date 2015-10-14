@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +12,7 @@ import java.util.ArrayList;
 
 
 public class RoomAdapter extends BaseListAdapter {
-
-    private ListRoomModel mTempValue;
+    private Room mTempValue;
 
     public RoomAdapter(Activity activity, ArrayList data, Resources resLocal) {
         super(activity, data, resLocal);
@@ -46,13 +46,12 @@ public class RoomAdapter extends BaseListAdapter {
             holder.text.setText("No Data");
         }
         else {
-            //mTempValue = null;
-            //mTempValue = (ListEventModel) mData.get(position);
+            mTempValue = null;
+            mTempValue = (Room) mData.get(position);
 
-           // holder.text.setText(mTempValues.getStartTime());
-           // holder.text1.setText(mTempValues.getSummary());
-          //  holder.image.setImageResource(mResources.getIdentifier("com.example.testui:drawable/marker",null,null));
-
+            holder.text.setText(Integer.toString(position));
+            holder.text1.setText(mTempValue.getName());
+         //   holder.image.setImageResource(mResources.getIdentifier("com.example.testui:drawable/marker",null,null));
             setListItemOnClickListener(listItemView, position);
         }
 
@@ -63,9 +62,12 @@ public class RoomAdapter extends BaseListAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               /* Intent roomIntent = new Intent(mActivity, RoomActivity.class);
-                roomIntent.putExtra("ROOM_ID", mData.get(position).getMainText());
-                mActivity.startActivity(roomIntent);*/
+                Intent roomIntent = new Intent(mActivity, RoomActivity.class);
+                Room room = (Room) mData.get(position);
+                roomIntent.putExtra("ROOM_ID", room.getName());
+                //roomIntent.putExtra("ROOM_ID", "109");
+                //roomIntent.putExtra("RESOURCE_EMAIL", room.getEmail());
+                mActivity.startActivity(roomIntent);
             }
         });
     }

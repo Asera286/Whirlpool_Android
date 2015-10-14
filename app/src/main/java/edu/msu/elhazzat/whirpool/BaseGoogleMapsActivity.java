@@ -1,37 +1,24 @@
 package edu.msu.elhazzat.whirpool;
 
-import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.widget.Switch;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
 
 /**
  * Created by christianwhite on 9/30/15.
  */
-public class MapsActivity extends FragmentActivity {
-
-    private static final String LOG_TAG = MapsActivity.class.getSimpleName();
-
-    private GoogleMap mMap;
-    private CurrentLocationManager mCurrentLocationManager;
-    private static final String MARKER_NAME = "ME";
-    private Switch mSwitch;
+abstract class BaseGoogleMapsActivity extends FragmentActivity {
+    protected GoogleMap mMap;
+    protected CurrentLocationManager mCurrentLocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        setUpMapIfNeeded();
+      //  setUpMap();
     }
 
     public void setUpMapCamera(LatLng latLng, int zoomLevel) {
@@ -39,8 +26,8 @@ public class MapsActivity extends FragmentActivity {
         mMap.animateCamera(cameraUpdate);
     }
 
-    private void setUpMapIfNeeded() {
-        if (mMap == null) {
+    public abstract void setUpMap();
+     /*   if (mMap == null) {
             SupportMapFragment mMapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
             mMap = mMapFragment.getMap();
             mMap.setMyLocationEnabled(true);
@@ -71,10 +58,10 @@ public class MapsActivity extends FragmentActivity {
                 });
 
             }
-        }
-    }
+        }*/
+    //}
 
-    public class MapLocationUpdater implements CurrentLocationManager.LocationCallback {
+ /*   public class MapLocationUpdater implements CurrentLocationManager.LocationCallback {
         public void handleLocationUpdate(Location location) {
             mMap.clear();
             LatLng currentPosition = new LatLng(location.getLatitude(),location.getLongitude());
@@ -83,5 +70,5 @@ public class MapsActivity extends FragmentActivity {
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                     .title(MARKER_NAME));
         }
-    }
+    }*/
 }
