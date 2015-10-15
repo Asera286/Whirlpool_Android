@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:id="@+id/map"
-        tools:context="edu.msu.elhazzat.whirpool.BaseGoogleMapsActivity"
+        tools:context="edu.msu.elhazzat.whirpool.activity.BaseGoogleMapsActivity"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"

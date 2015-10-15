@@ -20,8 +20,8 @@
         android:text="cancel"
         android:id="@+id/cancel_button"
         android:layout_alignTop="@+id/searchView"
-        android:layout_alignRight="@+id/list"
-        android:layout_alignEnd="@+id/list"
+        android:layout_alignRight="@android:id/list"
+        android:layout_alignEnd="@android:id/list"
         android:onClick="onClick" />
 
     <SearchView

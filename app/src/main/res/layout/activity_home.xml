@@ -13,14 +13,6 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="search"
-            android:id="@+id/search_button"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:onClick="onClick"/>
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -33,13 +25,6 @@
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
             android:onClick="onClick" />
-
-
-        <ImageButton
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginBottom="5dp"/>
 
 
         <TextView android:text="Calendar"

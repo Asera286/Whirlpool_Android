@@ -7,6 +7,7 @@ android {
 
     defaultConfig {
         applicationId "edu.msu.elhazzat.whirpool"
+        multiDexEnabled true
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
@@ -34,4 +35,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:7.+'
     compile 'com.google.maps.android:android-maps-utils:0.4+'
     compile 'com.android.support:design:23.0.1'
+  /*  compile 'com.google.apis:google-api-services-storage:v1-rev48-1.20.0'
+    compile 'com.google.appengine:appengine-endpoints:1.9.14'
+    compile 'com.google.appengine:appengine-endpoints-deps:1.9.14'
+    compile 'com.googlecode.objectify:objectify:5.0.3'*/
 }
