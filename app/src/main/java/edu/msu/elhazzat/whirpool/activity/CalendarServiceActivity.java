@@ -14,6 +14,8 @@ import com.google.api.services.calendar.CalendarScopes;
 
 import java.util.Arrays;
 
+import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
+
 /**
  * Created by christianwhite on 10/1/15.
  */
@@ -70,6 +72,7 @@ public abstract class CalendarServiceActivity extends Activity {
                 mTransport, mJsonFactory, mCredential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
+        CalendarServiceHolder.getInstance().setService(mService);
     }
 
     /**

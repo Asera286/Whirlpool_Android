@@ -15,12 +15,14 @@ import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.EventAdapter;
-import edu.msu.elhazzat.whirpool.adapter.RoomAdapter;
+import edu.msu.elhazzat.whirpool.adapter.RoomSearchAdapter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventReader;
-import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarResourceReader;
+import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.model.EventModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.utils.AsyncTokenFromGoogleAccountCredential;
+import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
+import edu.msu.elhazzat.whirpool.utils.TokenHolder;
 
 /**
  * Created by Christian on 9/27/2015.
@@ -35,22 +37,56 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
     private AsyncCalendarEventReader mEventReader = null;
 
     private ListView mRoomList;
-    private RoomAdapter mRoomAdapter;
-    private ArrayList<RoomModel> mRoomModelListValues = new ArrayList<>();
-    private AsyncCalendarResourceReader mResourceReader = null;
+    private RoomSearchAdapter mRoomSearchAdapter;
+    private List<RoomModel> mRoomModelListValues = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        String accountName = getIntent().getExtras().getString("accountName");
+        if(CalendarServiceHolder.getInstance().getService() == null) {
+            String accountName = getIntent().getExtras().getString("accountName");
 
-        //build calendar service and acquire oauth2 credential
-        super.buildCredential(accountName);
-        super.buildCalendarService();
+            //build calendar service and acquire oauth2 credential
+            super.buildCredential(accountName);
+            super.buildCalendarService();
+        }
+        else {
+            mService = CalendarServiceHolder.getInstance().getService();
+        }
+
+        if(TokenHolder.getInstance().getToken() == null) {
+            // The service class does not support the google calendar resource api
+            // Get token from service credential
+            new AsyncTokenFromGoogleAccountCredential(mCredential) {
+
+                // after the token has been fetched, use it to grab the resource feed
+                @Override
+                public void handleToken(String token) {
+                    TokenHolder.getInstance().setToken(token);
+
+                }
+            }.execute();
+        }
 
         mCalendarList = (ListView)findViewById(R.id.timeList);
+        mRoomList = (ListView)findViewById(R.id.roomList);
+
+        inflateEventAdapter();
+        inflateRoomAdapter();
+    }
+
+    private void inflateRoomAdapter() {
+        mRoomModelListValues.clear();
+        RelevantRoomDbHelper helper = new RelevantRoomDbHelper(this);
+        mRoomModelListValues = helper.getAllRelevantRooms();
+        mRoomSearchAdapter = new RoomSearchAdapter(this, android.R.layout.simple_list_item_1, mRoomModelListValues);
+        mRoomList.setAdapter(mRoomSearchAdapter);
+    }
+
+    private void inflateEventAdapter() {
+        mCalendarListValues.clear();
 
         //get user calendar events for the date starting now
         mEventReader = new AsyncCalendarEventReader(mService, new DateTime(System.currentTimeMillis()), 10) {
@@ -62,7 +98,9 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                     Resources res = getResources();
                     for (Event event : events) {
                         final EventModel sched = new EventModel();
+                        sched.setLocation(event.getLocation());
                         sched.setSummary(event.getSummary());
+                        sched.setStartTime(event.getStart().getDateTime().toString());
                         mCalendarListValues.add(sched);
                     }
                     mCalendarAdapter = new EventAdapter(HomeActivity.this, mCalendarListValues, res);
@@ -78,36 +116,15 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         };
 
         mEventReader.execute();
-
-        mRoomList = (ListView)findViewById(R.id.roomList);
-
-        // The service class does not support the google calendar resource api
-        // Get token from service credential
-        new AsyncTokenFromGoogleAccountCredential(mCredential) {
-
-            // after the token has been fetched, use it to grab the resource feed
-            @Override
-            public void handleToken(String token) {
-                mResourceReader = new AsyncCalendarResourceReader(
-                        "https://apps-apis.google.com/a/feeds/calendar/resource/2.0/whirlpool.com/",token) {
-
-                    // populate room list view
-                    @Override
-                    public void handleRooms(List<RoomModel> roomModels) {
-                        if(roomModels != null) {
-                            Resources res = getResources();
-                            for (RoomModel roomModel : roomModels) {
-                                mRoomModelListValues.add(roomModel);
-                            }
-                            mRoomAdapter = new RoomAdapter(HomeActivity.this, mRoomModelListValues, res);
-                            mRoomList.setAdapter(mRoomAdapter);
-                        }
-                    }
-                };
-                mResourceReader.execute();
-            }
-        }.execute();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+   //     inflateEventAdapter();
+        inflateRoomAdapter();
+    }
+
 
     public void onCalendarPermissionAuthorized() {
         mEventReader.execute();
@@ -130,4 +147,5 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                 break;
         }
     }
+
 }

@@ -17,6 +17,7 @@ abstract class BaseGoogleMapsActivity extends FragmentActivity {
     protected GoogleMap mMap;
     protected CurrentLocationManager mCurrentLocationManager;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

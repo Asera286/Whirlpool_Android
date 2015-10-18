@@ -71,7 +71,7 @@ public class EventAdapter extends BaseListAdapter {
             public void onClick(View view) {
                 EventModel model = (EventModel) mData.get(position);
                 Intent roomIntent = new Intent(mActivity, RoomActivity.class);
-                roomIntent.putExtra("ROOM_ID", "116");
+                roomIntent.putExtra("ROOM_ID", model.getLocation());
                 mActivity.startActivity(roomIntent);
             }
         });

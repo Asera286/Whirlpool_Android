@@ -37,4 +37,8 @@ public class RoomModel {
     }
 
     public void setOccupied(boolean occupied) { mOccupied = occupied; }
+
+    public String toString() {
+        return this.getName();
+    }
 }

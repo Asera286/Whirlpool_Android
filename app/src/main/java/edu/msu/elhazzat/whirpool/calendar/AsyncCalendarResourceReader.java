@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool.calendar;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -89,7 +90,7 @@ public abstract class AsyncCalendarResourceReader extends AsyncTask<Void, Void, 
         } catch (ProtocolException e) {
 
         } catch (IOException e) {
-
+            Log.e(LOG_TAG, "Error :", e);
         }
 
         return null;

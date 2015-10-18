@@ -7,5 +7,4 @@ public class GeoJsonConstants {
     public static final String POINT = "Point";
     public static final String LINESTRING = "LineString";
     public static final String POLYGON = "Polygon";
-
 }

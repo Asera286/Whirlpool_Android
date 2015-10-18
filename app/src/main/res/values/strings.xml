@@ -18,4 +18,6 @@
     </string-array>
     <string name="title_activity_directions">DirectionsActivity</string>
     <string name="title_activity_create_event">CreateEventActivity</string>
+    <string name="title_activity_create_event_date_picker">CreateEventDatePickerActivity</string>
+    <string name="title_activity_create_event_time_picker">CreateEventTimePickerActivity</string>
 </resources>

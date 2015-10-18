@@ -7,29 +7,46 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.RoomSearchAdapter;
+import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarResourceReader;
+import edu.msu.elhazzat.whirpool.model.RoomModel;
+import edu.msu.elhazzat.whirpool.utils.TokenHolder;
 
+/**
+ *
+ */
 public class SearchActivity extends Activity {
+
+    public static final String WHIRLPOOL_RESOURCE_URL =  "https://apps-apis.google.com/a/feeds/calendar/resource/2.0/whirlpool.com/";
     private RoomSearchAdapter mAdapter;
     private ListView mList;
+    private AsyncCalendarResourceReader mResourceReader;
+    private List<RoomModel> mRoomModelListValues = new ArrayList<>();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         handleIntent(getIntent());
         setContentView(R.layout.activity_search);
 
+        String token = TokenHolder.getInstance().getToken();
+
         mList = (ListView) findViewById(R.id.list);
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
-                String room = (String) mList.getItemAtPosition(position);
+                RoomModel room =  mAdapter.getRoomModel(position);
                 Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
-                roomIntent.putExtra("ROOM_D", room);
+                Bundle extras = new Bundle();
+                extras.putString("ROOM_ID", room.getName());
+                extras.putString("ROOM_EMAIL", room.getEmail());
+                roomIntent.putExtras(extras);
                 startActivity(roomIntent);
             }
         });
@@ -37,8 +54,6 @@ public class SearchActivity extends Activity {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final SearchView sV = (SearchView)findViewById(R.id.searchView);
         sV.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-      //  new AsyncRoomParseFromResource(this, new HandleAsyncRoomReader()).execute();
 
         SearchView.OnQueryTextListener searchQueryListener = new SearchView.OnQueryTextListener() {
             @Override
@@ -54,6 +69,22 @@ public class SearchActivity extends Activity {
             }
         };
         sV.setOnQueryTextListener(searchQueryListener);
+
+        mResourceReader = new AsyncCalendarResourceReader(WHIRLPOOL_RESOURCE_URL, token) {
+            @Override
+            public void handleRooms(List<RoomModel> roomModels) {
+                if(roomModels != null) {
+                    String[] vals = new String[roomModels.size()];
+                    for (RoomModel roomModel : roomModels) {
+                        mRoomModelListValues.add(roomModel);
+                    }
+                    mAdapter = new RoomSearchAdapter(getApplicationContext(),
+                            android.R.layout.simple_list_item_1, mRoomModelListValues);
+                    mList.setAdapter(mAdapter);
+                }
+            }
+        };
+        mResourceReader.execute();
     }
 
     @Override
@@ -77,10 +108,6 @@ public class SearchActivity extends Activity {
         switch (v.getId()) {
             case (R.id.cancel_button):
                 this.finish();
-                break;
-            case (R.id.filter_button):
-                LinearLayout lin = (LinearLayout)findViewById(R.id.filters);
-                lin.setVisibility(lin.isShown() ? LinearLayout.GONE : LinearLayout.VISIBLE);
                 break;
         }
     }

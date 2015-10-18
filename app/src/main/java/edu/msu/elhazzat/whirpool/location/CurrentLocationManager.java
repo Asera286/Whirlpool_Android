@@ -7,16 +7,17 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import com.google.android.gms.location.LocationCallback;
+
 /**
  * Created by Christian White on 9/30/15.
  */
-public class CurrentLocationManager {
+public abstract class CurrentLocationManager {
 
     private static final String LOG_TAG = CurrentLocationManager.class.getSimpleName();
 
-    public interface LocationCallback {
-        public void handleLocationUpdate(Location location);
-    }
+    public abstract void handleLocationUpdate(Location location);
+
 
     private Context mContext;
     private LocationManager mLocationManager;
@@ -25,9 +26,8 @@ public class CurrentLocationManager {
     private LocationListener mLocationListener;
     private LocationCallback mDelegate;
 
-    public CurrentLocationManager(Context context, LocationCallback delegate) {
+    public CurrentLocationManager(Context context) {
         mContext = context;
-        mDelegate = delegate;
         mLocationManager = (LocationManager) mContext.getSystemService(mContext.LOCATION_SERVICE);
         setProvider();
     }
@@ -37,7 +37,7 @@ public class CurrentLocationManager {
         mProvider = mLocationManager.getBestProvider(criteria, true);
         mLocationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
-                mDelegate.handleLocationUpdate(location);
+                handleLocationUpdate(location);
             }
             public void onStatusChanged(String str, int val, Bundle state) {}
             public void onProviderEnabled(String str) {}
@@ -45,12 +45,12 @@ public class CurrentLocationManager {
         };
 
         if(mLastLocation!=null){
-            mDelegate.handleLocationUpdate(mLastLocation);
+            handleLocationUpdate(mLastLocation);
         }
         mLocationManager.requestLocationUpdates(mProvider, 0, 0, mLocationListener);
     }
 
-    public Location getCurrentLocation() {
+   /* public Location getCurrentLocation() {
         return mLocationManager.getLastKnownLocation(mProvider);
-    }
+    }*/
 }

@@ -15,17 +15,12 @@ public abstract class AsyncCalendarEventWriter extends AsyncTask<Void, Void, Boo
 
     private static final String LOG_TAG = AsyncCalendarEventWriter.class.getSimpleName();
 
-    public interface AsyncCalendarEventWriterDelegate {
-        public void handleEventWrite(Boolean success);
-    }
-
     private com.google.api.services.calendar.Calendar mService;
-    private AsyncCalendarEventWriterDelegate mDelegate;
     private Event mEvent;
 
-    public AsyncCalendarEventWriter(AsyncCalendarEventWriterDelegate delegate,
-                             Calendar service, Event event) {
-        mDelegate = delegate;
+    public abstract void handleEventWrite(boolean success);
+
+    public AsyncCalendarEventWriter(Calendar service, Event event) {
         mService = service;
         mEvent = event;
     }
@@ -45,7 +40,7 @@ public abstract class AsyncCalendarEventWriter extends AsyncTask<Void, Void, Boo
 
     @Override
     public void onPostExecute(Boolean success) {
-        mDelegate.handleEventWrite(success);
+        handleEventWrite(success);
     }
 
 }
