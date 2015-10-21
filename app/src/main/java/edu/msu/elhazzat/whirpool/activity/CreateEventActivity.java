@@ -114,6 +114,8 @@ public class CreateEventActivity extends Activity {
 
                 Event event = new Event();
 
+                event.setLocation(mRoomId);
+
                 event.setSummary(mSummaryEditText.getText().toString());
 
                 event.setDescription(mDescriptionEditText.getText().toString());
@@ -126,19 +128,14 @@ public class CreateEventActivity extends Activity {
                 EventDateTime startEventDateTime = new EventDateTime()
                         .setDateTime(startDateTime);
 
-  //              startEventDateTime.setTimeZone(TimeZone.getDefault().getDisplayName());
-
                 EventDateTime endEventDateTime = new EventDateTime()
                         .setDateTime(endDateTime);
-
-//                endEventDateTime.setTimeZone(TimeZone.getDefault().getDisplayName());
 
                 event.setStart(startEventDateTime);
                 event.setEnd(endEventDateTime);
 
                 EventAttendee attendee = new EventAttendee();
                 attendee.setEmail(mRoomEmail);
-//                attendee.setDisplayName(mRoomId);
 
                 List<EventAttendee> attendees = new ArrayList<>();
                 attendees.add(attendee);

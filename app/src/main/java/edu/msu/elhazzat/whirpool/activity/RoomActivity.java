@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,7 +42,7 @@ import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 public class RoomActivity extends BaseGoogleMapsActivity {
     private String roomName;
     private String roomEmail;
-    private String[] roomsDummyInfo = {"Projector", "Fridge", "Blah", "More Blah", "Other Stuff", "More Stuff", "Just Stuff"};
+    private String[] roomsDummyInfo = {"Capacity 26", "Projector", "Whiteboard", "Television" };
     private ListView roomListView;
     private ArrayAdapter arrayAdapter;
     TextView roomTextView;
@@ -110,6 +111,7 @@ public class RoomActivity extends BaseGoogleMapsActivity {
             public void onClick(View v) {
                 RelevantRoomDbHelper helper = new RelevantRoomDbHelper(getApplicationContext());
                 helper.addRelevantRoom(new RoomModel(roomName, roomEmail, false));
+                Toast.makeText(getApplicationContext(), "Successfully favorited!", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -125,6 +127,7 @@ public class RoomActivity extends BaseGoogleMapsActivity {
 
     public void setUpMap() {
         if (mMap == null) {
+            //
             SupportMapFragment mMapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
             mMap = mMapFragment.getMap();
             mMap.setMyLocationEnabled(true);
@@ -132,37 +135,78 @@ public class RoomActivity extends BaseGoogleMapsActivity {
             if (mMap != null) {
                 final GeoJsonMap jsonMap = new GeoJsonMap(mMap);
                 final GeoJsonMapLayer layer = new GeoJsonMapLayer();
-                new AsyncParseGeoJsonFromResource(this, R.raw.geojsonbentonharbor) {
+                mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
                     @Override
-                    public void handleGeoJson(GeoJson json) {
-                        layer.setGeoJson(json);
-                        layer.draw(mMap, Color.GRAY, Color.CYAN, 3);
-                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                                new LatLng(42.1125056844883, -86.4693316822689), 15);
-                        mMap.animateCamera(cameraUpdate);
-                    }
-                }.execute();
-
-                mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng latLng) {
-                        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-                            if (feature.getGeoJsonGeometry().getType().equals("Polygon")) {
-                                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                                if (polygon.contains(latLng)) {
-                                    Polygon gmsPoly = polygon.getGMSPolygon();
-                                    for(Polygon polygon2 : layer.getPolygons()) {
-                                        polygon2.setFillColor(Color.GRAY);
+                    public void onMapLoaded() {
+                        new AsyncParseGeoJsonFromResource(getApplicationContext(), R.raw.riverviewfloor1) {
+                            @Override
+                            public void handleGeoJson(GeoJson json) {
+                                layer.setGeoJson(json);
+                                layer.draw(mMap, Color.rgb(255, 249, 236), Color.rgb(108, 122, 137), 3);
+                                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(42.11256185048872, -86.46901868283749), 20);
+                                for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+                                    if (feature.getGeoJsonGeometry().getType().equals("Polygon")) {
+                                        GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                                        if(polygon.contains(new LatLng(42.11256185048872, -86.46901868283749))) {
+                                            Polygon gmsPoly = polygon.getGMSPolygon();
+                                            int color1 = Color.rgb(137, 196, 244);
+                                            gmsPoly.setFillColor(color1);
+                                        }
                                     }
-                                    gmsPoly.setFillColor(Color.RED);
+                                }
+                                        mMap.animateCamera(cameraUpdate);
+                             //   Marker marker = mMap.addMarker(new MarkerOptions().
+                               //         position(new LatLng(42.11256185048872, -86.46901868283749)));
+                                    }
+                                }.execute();
+                            }
+                        });
+
+
+                        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                            @Override
+                            public void onMapClick(LatLng latLng) {
+                                for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+                                    if (feature.getGeoJsonGeometry().getType().equals("Polygon")) {
+                                        GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                                        if (polygon.contains(latLng)) {
+                                      //      Marker marker = mMap.addMarker(new MarkerOptions().position(latLng));
+                                            for (GeoJsonFeature feature2 : layer.getGeoJson().getGeoJsonFeatures()) {
+                                                int color2 = Color.rgb(255, 246, 236);
+                                                if (feature2.getProperty("room").equals("B250") || feature.getProperty("room").equals("B205") ||
+                                                        feature.getProperty("room").equals("B218") || feature.getProperty("room").equals("B217")) {
+                                                    color2 = Color.rgb(234, 230, 245);
+                                                } else if (feature2.getProperty("room").equals("B241") ||
+                                                        feature2.getProperty("room").equals("B234") ||
+                                                        feature2.getProperty("room").equals("B219") ||
+                                                        feature2.getProperty("room").equals("B251") ||
+                                                        feature2.getProperty("room").equals("B230")) {
+
+                                                    color2 = Color.WHITE;
+                                                } else if (feature2.getProperty("room").equals("B236") ||
+                                                        feature2.getProperty("room").equals("B232") ||
+                                                        feature2.getProperty("room").equals("B223") ||
+                                                        feature2.getProperty("room").equals("B247") ||
+                                                        feature2.getProperty("room").equals("B233-229") ||
+                                                        feature2.getProperty("room").equals("B235-238") ||
+                                                        feature2.getProperty("room").equals("B245-248") ||
+                                                        feature2.getProperty("room").equals("B222-220")) {
+                                                    color2 = Color.WHITE;
+                                                }
+                                                ((GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry()).getGMSPolygon().setFillColor(color2);
+                                            }
+                                            Polygon gmsPoly = polygon.getGMSPolygon();
+                                            int color1 = Color.rgb(137, 196, 244);
+                                            gmsPoly.setFillColor(color1);
+                                        }
+                                    }
                                 }
                             }
-                        }
+                        });
                     }
-                });
+                }
             }
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

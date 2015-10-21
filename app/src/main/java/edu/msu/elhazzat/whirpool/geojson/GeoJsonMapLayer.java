@@ -1,5 +1,7 @@
 package edu.msu.elhazzat.whirpool.geojson;
 
+import android.graphics.Color;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polygon;
@@ -67,8 +69,32 @@ public class GeoJsonMapLayer {
                     case GeoJsonConstants.POLYGON:
                         GeoJsonPolygon poly1 = (GeoJsonPolygon) jsonGeometry.getGeometry();
                         List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
+                        int color = fillColor;
+                        if(feature.getProperty("room").equals("B250") || feature.getProperty("room").equals("B205") ||
+                                feature.getProperty("room").equals("B218")|| feature.getProperty("room").equals("B217")){
+                         color = Color .rgb(234, 230, 245);
+                        }
+
+                        else if( feature.getProperty("room").equals("B241") ||
+                                feature.getProperty("room").equals("B234")||
+                                 feature.getProperty("room").equals("B219")||
+                                        feature.getProperty("room").equals("B251")||feature.getProperty("room").equals("B230")){
+
+                            color = Color .WHITE;
+                        }
+                        else if(feature.getProperty("room").equals("B236") ||
+                            feature.getProperty("room").equals("B232")||
+                                feature.getProperty("room").equals("B223") ||
+                                feature.getProperty("room").equals("B247") ||
+                                feature.getProperty("room").equals("B233-229") ||
+                                feature.getProperty("room").equals("B235-238") ||
+                                feature.getProperty("room").equals("B245-248")||
+                                feature.getProperty("room").equals("B222-220")){
+                            color = Color.WHITE;
+                        }
+
                         Polygon poly2  = map.addPolygon(new PolygonOptions()
-                                .addAll(latLngPoly).fillColor(fillColor).strokeWidth(strokeWidth));
+                                .addAll(latLngPoly).fillColor(color).strokeWidth(strokeWidth));
                         poly1.setGMSPolygon(poly2);
                         mPolygons.add(poly2);
                         break;

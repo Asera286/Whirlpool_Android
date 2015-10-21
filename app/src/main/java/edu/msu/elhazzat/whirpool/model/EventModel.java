@@ -11,6 +11,7 @@ public class EventModel {
     private String mDescription;
     private String mSummary;
     private String mImage;
+    private String mEmail;
 
     public void setStartTime(String start) {
         mStartTime = start;
@@ -36,6 +37,8 @@ public class EventModel {
         mImage = image;
     }
 
+    private void setEmail(String email) { mEmail = email; }
+
     public String getStartTime() {
         return mStartTime;
     }
@@ -59,4 +62,7 @@ public class EventModel {
     public String getImage() {
         return mImage;
     }
+
+    public String getEmail() { return mEmail; }
+
 }
