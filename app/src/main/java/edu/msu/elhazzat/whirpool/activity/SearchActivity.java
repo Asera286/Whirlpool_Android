@@ -17,14 +17,12 @@ import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.RoomSearchAdapter;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.utils.AsyncResourceReader;
-import edu.msu.elhazzat.whirpool.utils.TokenHolder;
 
 /**
  *
  */
 public class SearchActivity extends Activity {
 
-    public static final String WHIRLPOOL_RESOURCE_URL =  "https://apps-apis.google.com/a/feeds/calendar/resource/2.0/whirlpool.com/";
     private RoomSearchAdapter mAdapter;
     private ListView mList;
     private AsyncResourceReader mResourceReader;
@@ -34,8 +32,6 @@ public class SearchActivity extends Activity {
         super.onCreate(savedInstanceState);
         handleIntent(getIntent());
         setContentView(R.layout.activity_search);
-
-        String token = TokenHolder.getInstance().getToken();
 
         mList = (ListView) findViewById(R.id.list);
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -79,6 +75,7 @@ public class SearchActivity extends Activity {
                     }
                     mAdapter = new RoomSearchAdapter(getApplicationContext(),
                             android.R.layout.simple_list_item_1, mRoomModelListValues);
+                    mAdapter.sort();
                     mList.setAdapter(mAdapter);
                 }
             }

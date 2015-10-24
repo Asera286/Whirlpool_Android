@@ -40,8 +40,7 @@ public abstract class AsyncCalendarEventReader extends AsyncTask<Void, Void, Lis
     @Override
     protected List<Event> doInBackground(Void... params) {
         try {
-            List<Event> events = getCalendarEvents();
-            return events;
+            return getCalendarEvents();
         } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
             Log.e(LOG_TAG, "Error: ", availabilityException);
         }

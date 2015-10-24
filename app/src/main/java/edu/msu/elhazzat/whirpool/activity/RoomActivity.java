@@ -110,7 +110,10 @@ public class RoomActivity extends BaseGoogleMapsActivity {
             @Override
             public void onClick(View v) {
                 RelevantRoomDbHelper helper = new RelevantRoomDbHelper(getApplicationContext());
-                helper.addRelevantRoom(new RoomModel(roomName, roomEmail, false));
+                RoomModel model = new RoomModel();
+                model.setRoomName(roomName);
+                model.setEmail(roomEmail);
+                helper.addRelevantRoom(model);
                 Toast.makeText(getApplicationContext(), "Successfully favorited!", Toast.LENGTH_LONG).show();
             }
         });

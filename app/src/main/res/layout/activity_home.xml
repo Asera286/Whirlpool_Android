@@ -76,152 +76,23 @@
             android:id="@+id/profileBox"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:background="@color/material_blue_grey_800"
+            android:background = "#2c8dfc"
             android:padding="8dp" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:textSize="20dp"
+                android:layout_centerVertical="true"
+                android:text = "Relevant Rooms"/>
         </RelativeLayout>
+
+        <ListView
+            android:id="@+id/roomList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/profileBox"
+            android:background="#ffffff"/>
 
     </RelativeLayout>
 </android.support.v4.widget.DrawerLayout>
-
-    <!--   <TextView android:text="Calendar"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:enabled="true"
-           android:textStyle="bold"
-           android:textColor="#ffffff"
-           android:textSize="@dimen/abc_text_size_medium_material"
-           android:paddingTop="10dp"
-           android:paddingBottom="2dp"/>
-
-
-       <TextView
-           android:layout_height="wrap_content"
-           android:layout_width="wrap_content"
-           android:enabled="true"
-           android:text="Relevant"
-           android:textStyle="bold"
-           android:textColor="#ffffff"
-           android:textSize="@dimen/abc_text_size_medium_material"
-           android:paddingBottom="2dp"/>
-
-
-       <ListView
-           android:id="@+id/roomList"
-           android:layout_width="fill_parent"
-           android:layout_height="0dp"
-           android:layout_weight="0.5"
-           android:dividerHeight="0dp"
-           android:divider="@null">
-
-       </ListView> -->
-
-<!--
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-android:layout_height="match_parent" android:paddingLeft="16dp"
-android:paddingRight="16dp"
-android:paddingTop="16dp"
-android:paddingBottom="16dp" tools:context=".MainActivity"
-android:background="#ffffff"> -->
-
-
-<!-- <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_alignParentTop="true"
-    android:layout_centerHorizontal="true">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:id="@+id/hamburger"
-            android:src="@drawable/hamburger_menu26x19"
-            android:background = "#2c8dfc"
-            android:paddingLeft="5dp"
-            android:layout_weight="0"/>
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageButton"
-            android:src="@drawable/search_transparent"
-            android:padding="0dp"
-            android:background = "#2c8dfc"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="true"
-            android:onClick="onClick"
-            android:layout_weight="1"
-            android:paddingBottom="10dp" />
-
-    </LinearLayout>
-
-       <com.baoyz.swipemenulistview.SwipeMenuListView
-            android:id="@+id/swipeList"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:headerDividersEnabled="false"
-            android:layout_weight="0.5"
-            android:dividerHeight="0dp"
-            android:layout_marginBottom="10dp"
-
-                     <com.baoyz.swipemenulistview.SwipeMenuListView
-            android:id="@+id/swipeList"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:headerDividersEnabled="false"
-            android:layout_weight="0.5"
-            android:dividerHeight="0dp"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/search_button" />
-            />-->
-
-
-   <!-- <com.baoyz.swipemenulistview.SwipeMenuListView
-        android:id="@+id/swipeList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"/> -->
-
-
-
-    <!--   <TextView android:text="Calendar"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:enabled="true"
-           android:textStyle="bold"
-           android:textColor="#ffffff"
-           android:textSize="@dimen/abc_text_size_medium_material"
-           android:paddingTop="10dp"
-           android:paddingBottom="2dp"/>
-
-
-       <TextView
-           android:layout_height="wrap_content"
-           android:layout_width="wrap_content"
-           android:enabled="true"
-           android:text="Relevant"
-           android:textStyle="bold"
-           android:textColor="#ffffff"
-           android:textSize="@dimen/abc_text_size_medium_material"
-           android:paddingBottom="2dp"/>
-
-
-       <ListView
-           android:id="@+id/roomList"
-           android:layout_width="fill_parent"
-           android:layout_height="0dp"
-           android:layout_weight="0.5"
-           android:dividerHeight="0dp"
-           android:divider="@null">
-
-       </ListView> -->
-
-
-<!-- </LinearLayout>
-</RelativeLayout> -->

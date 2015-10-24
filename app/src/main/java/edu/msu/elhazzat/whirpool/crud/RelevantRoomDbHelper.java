@@ -65,7 +65,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(ROOM_ENTRY_ID, room.getName()); // Contact Name
+        values.put(ROOM_ENTRY_ID, room.getRoomName()); // Contact Name
         values.put(ROOM_RESOURCE_EMAIL, room.getEmail()); // Contact Phone
 
         // Inserting Row
@@ -103,7 +103,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 RoomModel room = new RoomModel();
-                room.setName(cursor.getString(0));
+                room.setRoomName(cursor.getString(0));
                 room.setEmail(cursor.getString(1));
                 // Adding contact to list
                 roomList.add(room);

@@ -63,7 +63,7 @@ public abstract class AsyncCalendarResourceReader extends AsyncTask<Void, Void, 
      * @param token
      * @return
      */
-    public Document getFeedPage(String urlStr, String token) {
+    private Document getFeedPage(String urlStr, String token) {
         try {
             URL url = new URL(urlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -77,8 +77,7 @@ public abstract class AsyncCalendarResourceReader extends AsyncTask<Void, Void, 
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 try {
                     DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document xmlResource = builder.parse(new InputSource(new StringReader(responseXml)));
-                    return xmlResource;
+                    return builder.parse(new InputSource(new StringReader(responseXml)));
                 } catch (SAXException e) {
 
                 } catch (ParserConfigurationException e) {
