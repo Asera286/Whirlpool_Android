@@ -7,6 +7,8 @@ package edu.msu.elhazzat.whirpool.model;
 public class RoomModel {
 
     private String mName = null;
+    private String mBuildingName = null;
+    private String mRoomName = null;
     private String mEmail = null;
     private Boolean mOccupied = false;
 
@@ -38,7 +40,23 @@ public class RoomModel {
 
     public void setOccupied(boolean occupied) { mOccupied = occupied; }
 
+    public String getRoomName() {
+        return mRoomName;
+    }
+
+    public void setRoomName(String roomName) {
+        mRoomName = roomName;
+    }
+
+    public String getBuildingName() {
+        return mBuildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        mBuildingName = buildingName;
+    }
+
     public String toString() {
-        return this.getName();
+        return this.getRoomName();
     }
 }

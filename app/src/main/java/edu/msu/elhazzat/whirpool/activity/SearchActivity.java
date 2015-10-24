@@ -15,8 +15,8 @@ import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.RoomSearchAdapter;
-import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarResourceReader;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
+import edu.msu.elhazzat.whirpool.utils.AsyncResourceReader;
 import edu.msu.elhazzat.whirpool.utils.TokenHolder;
 
 /**
@@ -27,7 +27,7 @@ public class SearchActivity extends Activity {
     public static final String WHIRLPOOL_RESOURCE_URL =  "https://apps-apis.google.com/a/feeds/calendar/resource/2.0/whirlpool.com/";
     private RoomSearchAdapter mAdapter;
     private ListView mList;
-    private AsyncCalendarResourceReader mResourceReader;
+    private AsyncResourceReader mResourceReader;
     private List<RoomModel> mRoomModelListValues = new ArrayList<>();
 
     public void onCreate(Bundle savedInstanceState) {
@@ -41,10 +41,10 @@ public class SearchActivity extends Activity {
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
-                RoomModel room =  mAdapter.getRoomModel(position);
+                RoomModel room = mAdapter.getRoomModel(position);
                 Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
                 Bundle extras = new Bundle();
-                extras.putString("ROOM_ID", room.getName());
+                extras.putString("ROOM_ID", room.getRoomName());
                 extras.putString("ROOM_EMAIL", room.getEmail());
                 roomIntent.putExtras(extras);
                 startActivity(roomIntent);
@@ -70,12 +70,11 @@ public class SearchActivity extends Activity {
         };
         sV.setOnQueryTextListener(searchQueryListener);
 
-        mResourceReader = new AsyncCalendarResourceReader(WHIRLPOOL_RESOURCE_URL, token) {
+        mResourceReader = new AsyncResourceReader() {
             @Override
-            public void handleRooms(List<RoomModel> roomModels) {
-                if(roomModels != null) {
-                    String[] vals = new String[roomModels.size()];
-                    for (RoomModel roomModel : roomModels) {
+            public void handleRooms(List<RoomModel> rooms) {
+                if(rooms != null) {
+                    for (RoomModel roomModel : rooms) {
                         mRoomModelListValues.add(roomModel);
                     }
                     mAdapter = new RoomSearchAdapter(getApplicationContext(),
@@ -84,6 +83,7 @@ public class SearchActivity extends Activity {
                 }
             }
         };
+
         mResourceReader.execute();
     }
 

@@ -40,7 +40,7 @@ public class EventAdapter extends BaseListAdapter {
             holder = new ViewHolder();
             holder.time = (TextView)listItemView.findViewById(R.id.text);
             holder.summary = (TextView)listItemView.findViewById(R.id.text1);
-            holder.image = (ImageView)listItemView.findViewById(R.id.img1);
+        //    holder.image = (ImageView)listItemView.findViewById(R.id.img1);
 
             listItemView.setTag(holder);
         }
@@ -49,7 +49,7 @@ public class EventAdapter extends BaseListAdapter {
         }
 
         if(mData.size() <= 0) {
-            holder.time.setText("No Data");
+           // holder.time.setText("No Data");
         }
         else {
             mTempValues = null;
@@ -57,9 +57,9 @@ public class EventAdapter extends BaseListAdapter {
 
             holder.time.setText(mTempValues.getStartTime());
             holder.summary.setText(mTempValues.getSummary());
-            holder.image.setImageResource(mResources.getIdentifier("com.example.testui:drawable/marker",null,null));
+//            holder.image.setImageResource(mResources.getIdentifier("com.example.testui:drawable/marker", null, null));
 
-            setListItemOnClickListener(listItemView, position);
+          //  setListItemOnClickListener(listItemView, position);
         }
 
         return listItemView;

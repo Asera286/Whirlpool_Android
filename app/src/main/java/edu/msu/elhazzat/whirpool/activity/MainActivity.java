@@ -16,7 +16,6 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
 import edu.msu.elhazzat.whirpool.R;
-import edu.msu.elhazzat.whirpool.utils.AsyncResourceReader;
 
 /**
  * Created by christianwhite on 9/20/15.
@@ -45,7 +44,6 @@ public class MainActivity extends FragmentActivity implements
         buildGoogleApiClient();
         if(!mGoogleApiClient.isConnected()) {
             setContentView(R.layout.activity_main);
-            new AsyncResourceReader().execute();
             mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
             mSignInButton.setOnClickListener(new View.OnClickListener() {
                 @Override

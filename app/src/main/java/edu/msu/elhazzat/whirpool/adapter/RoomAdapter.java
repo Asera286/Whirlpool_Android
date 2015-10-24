@@ -54,7 +54,7 @@ public class RoomAdapter extends BaseListAdapter {
             mTempValue = (RoomModel) mData.get(position);
 
             holder.text.setText(Integer.toString(position));
-            holder.text1.setText(mTempValue.getName());
+            holder.text1.setText(mTempValue.getRoomName());
          //   holder.image.setImageResource(mResources.getIdentifier("com.example.testui:drawable/marker",null,null));
             setListItemOnClickListener(listItemView, position);
         }
@@ -68,7 +68,7 @@ public class RoomAdapter extends BaseListAdapter {
             public void onClick(View view) {
                 Intent roomIntent = new Intent(mActivity, RoomActivity.class);
                 RoomModel roomModel = (RoomModel) mData.get(position);
-                roomIntent.putExtra("ROOM_ID", roomModel.getName());
+                roomIntent.putExtra("ROOM_ID", roomModel.getRoomName());
                 //roomIntent.putExtra("ROOM_ID", "109");
                 //roomIntent.putExtra("RESOURCE_EMAIL", roomModel.getEmail());
                 mActivity.startActivity(roomIntent);

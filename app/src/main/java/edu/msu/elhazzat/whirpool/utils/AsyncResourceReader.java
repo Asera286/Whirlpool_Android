@@ -3,24 +3,33 @@ package edu.msu.elhazzat.whirpool.utils;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import edu.msu.elhazzat.whirpool.model.RoomModel;
 
 /**
  * Created by christianwhite on 10/18/15.
  */
-public class AsyncResourceReader extends AsyncTask<Void, Void, Void> {
+public abstract class AsyncResourceReader extends AsyncTask<Void, Void, List<RoomModel>> {
+    public static final String LOG_TAG = AsyncResourceReader.class.getSimpleName();
     public static final String mUrl = "https://webdev.cse.msu.edu/~elhazzat/wim/room-load.php";
 
+    public abstract void handleRooms(List<RoomModel> rooms);
 
     @Override
-    public Void doInBackground(Void... params) {
+    public List<RoomModel> doInBackground(Void... params) {
         try {
 
             URL url = new URL(mUrl);
@@ -35,15 +44,35 @@ public class AsyncResourceReader extends AsyncTask<Void, Void, Void> {
                 while((line = reader.readLine()) != null) {
                     responseBuilder.append(line);
                 }
+
+                List<RoomModel> roomModels = new ArrayList<>();
+                JSONArray jArray = new JSONArray(responseBuilder.toString());
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONArray row = jArray.getJSONArray(i);
+                    RoomModel room = new RoomModel();
+                    room.setBuildingName(row.getString(0));
+                    room.setRoomName(row.getString(1));
+                    room.setEmail(row.getString(row.length() - 1));
+                    roomModels.add(room);
+                }
+                return roomModels;
             }
         }
         catch(ProtocolException e) {
-            Log.e("TAG", "Error :", e);
+            Log.e(LOG_TAG, "Error :", e);
+        }
+        catch(JSONException e) {
+            Log.e(LOG_TAG, "Error :", e);
         }
         catch(IOException e) {
-            Log.e("TAG", "Error :", e);
+            Log.e(LOG_TAG, "Error :", e);
         }
 
         return null;
+    }
+
+    @Override
+    public void onPostExecute(List<RoomModel> rooms) {
+        handleRooms(rooms);
     }
 }
