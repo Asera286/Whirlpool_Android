@@ -58,6 +58,8 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
     private ImageView mHamburgerImage;
 
+    private ImageView mAddEventButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,13 +98,22 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         mRoomList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RoomModel model = (RoomModel) mRoomModelListValues.get(position);
+                RoomModel model = mRoomModelListValues.get(position);
                 Bundle bundle = new Bundle();
                 bundle.putString("ROOM_ID", model.getRoomName());
                 bundle.putString("ROOM_EMAIL", model.getEmail());
                 Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
                 roomIntent.putExtras(bundle);
                 startActivity(roomIntent);
+            }
+        });
+
+        mAddEventButton = (ImageView) findViewById(R.id.eventButton);
+        mAddEventButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent createEventIntent = new Intent(getApplicationContext(), CreateEventActivity.class);
+                startActivity(createEventIntent);
             }
         });
 
@@ -117,6 +128,8 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
     }
 
     private void buildDrawerLayout() {
+
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         mHamburgerImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -292,7 +305,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.search_button:
+            case R.id.imageButton:
                 Intent searchIntent = new Intent(this, SearchActivity.class);
                 startActivity(searchIntent);
                 break;

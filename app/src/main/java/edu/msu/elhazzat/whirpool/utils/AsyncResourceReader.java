@@ -52,6 +52,9 @@ public abstract class AsyncResourceReader extends AsyncTask<Void, Void, List<Roo
                     RoomModel room = new RoomModel();
                     room.setBuildingName(row.getString(0));
                     room.setRoomName(row.getString(1));
+                    room.addAttribute("Capacity: " + row.getString(2));
+                    room.addAttribute(row.getString(4));
+                    room.addAttribute(row.getString(5));
                     room.setEmail(row.getString(row.length() - 1));
                     roomModels.add(room);
                 }

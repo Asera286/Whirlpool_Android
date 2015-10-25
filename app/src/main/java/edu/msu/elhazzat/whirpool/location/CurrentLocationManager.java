@@ -28,7 +28,7 @@ public abstract class CurrentLocationManager {
 
     public CurrentLocationManager(Context context) {
         mContext = context;
-        mLocationManager = (LocationManager) mContext.getSystemService(mContext.LOCATION_SERVICE);
+        mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         setProvider();
     }
 

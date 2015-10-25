@@ -30,7 +30,7 @@ public class AsyncPolylineDirectionsRouter extends AsyncTask<Void, Integer, Arra
     private static final String LOG_TAG = AsyncPolylineDirectionsRouter.class.getSimpleName();
 
     public interface AsyncPolylineDirectionsRouterDelegate {
-        public void handleRouteCoordinates(ArrayList<LatLng> coordinates);
+        void handleRouteCoordinates(ArrayList<LatLng> coordinates);
     }
 
     private static final String GOOGLE_MAPS_URL_BASE =

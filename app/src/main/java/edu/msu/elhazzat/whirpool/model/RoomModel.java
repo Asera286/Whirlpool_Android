@@ -1,6 +1,9 @@
 package edu.msu.elhazzat.whirpool.model;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Asera on 10/9/2015.
  */
@@ -11,6 +14,7 @@ public class RoomModel {
     private String mRoomName = null;
     private String mEmail = null;
     private Boolean mOccupied = false;
+    private List<String> mAttributes = new ArrayList<>();
 
     public RoomModel(String name, String email, Boolean occupied) {
         mName = name;
@@ -58,5 +62,13 @@ public class RoomModel {
 
     public String toString() {
         return this.getRoomName();
+    }
+
+    public void addAttribute(String item) {
+        mAttributes.add(item);
+    }
+
+    public List<String> getAttributes() {
+        return mAttributes;
     }
 }

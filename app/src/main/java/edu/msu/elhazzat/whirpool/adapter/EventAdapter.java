@@ -120,6 +120,9 @@ public class EventAdapter extends BaseAdapter {
     private Integer getBuildingImageResource(EventModel item) {
 
         String location = item.getLocation();
+        if(location == null) {
+            return mBuildingMap.get(WHIRLPOOL_DEFAULT);
+        }
         String[] resourceSplit = location.split("-");
         Integer png = null;
         if(resourceSplit.length > 2) {

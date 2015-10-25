@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventWriter;
@@ -121,10 +120,12 @@ public class CreateEventActivity extends Activity {
                 event.setDescription(mDescriptionEditText.getText().toString());
 
                 Calendar cal = Calendar.getInstance();
-                TimeZone tz = cal.getTimeZone();
+             //   TimeZone tz = cal.getTimeZone();
 
                 DateTime startDateTime = new DateTime(mBeginTime.getTime());//, TimeZone.getDefault());
                 DateTime endDateTime = new DateTime(mEndTime.getTime());//, TimeZone.getDefault());
+
+
                 EventDateTime startEventDateTime = new EventDateTime()
                         .setDateTime(startDateTime);
 
@@ -203,8 +204,8 @@ public class CreateEventActivity extends Activity {
                 String time = formatDate.format(c.getTime());
                 mBeginTimeEditText.setText(time);
 
-                mEndTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                mEndTime.set(Calendar.MINUTE, minute);
+                mBeginTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                mBeginTime.set(Calendar.MINUTE, minute);
             }
         };
 

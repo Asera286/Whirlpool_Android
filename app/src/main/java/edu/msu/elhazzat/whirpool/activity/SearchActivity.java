@@ -11,6 +11,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
@@ -76,6 +77,7 @@ public class SearchActivity extends Activity {
                     mAdapter = new RoomSearchAdapter(getApplicationContext(),
                             android.R.layout.simple_list_item_1, mRoomModelListValues);
                     mAdapter.sort();
+                    Collections.sort(mRoomModelListValues, new RoomSearchAdapter.RoomComparator());
                     mList.setAdapter(mAdapter);
                 }
             }

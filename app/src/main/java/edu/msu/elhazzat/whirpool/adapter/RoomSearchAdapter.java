@@ -53,17 +53,18 @@ public class RoomSearchAdapter extends ArrayAdapter<RoomModel> {
     }
 
     public RoomModel getRoomModel(int position) {
-        if(position < mRoomModelArrayList.size()) {
+      /*  if(position < mRoomModelArrayList.size()) {
             return mRoomModelArrayList.get(position);
-        }
-        return null;
+        }*/
+        return getItem(position);
+      //  return null;
     }
 
     public void sort() {
         Collections.sort(mRoomModelArrayList, new RoomComparator());
     }
 
-    private class RoomComparator implements Comparator<RoomModel> {
+    public static class RoomComparator implements Comparator<RoomModel> {
         public int compare(RoomModel lhs, RoomModel rhs) {
             String lName = lhs.getRoomName();
             String rName = rhs.getRoomName();

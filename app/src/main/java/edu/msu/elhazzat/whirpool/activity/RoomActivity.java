@@ -17,12 +17,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.TimePeriod;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarFreeBusyReader;
@@ -34,6 +39,7 @@ import edu.msu.elhazzat.whirpool.geojson.GeoJsonMap;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMapLayer;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonPolygon;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
+import edu.msu.elhazzat.whirpool.utils.AsyncResourceReader;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 
 /**
@@ -42,14 +48,21 @@ import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 public class RoomActivity extends BaseGoogleMapsActivity {
     private String roomName;
     private String roomEmail;
-    private String[] roomsDummyInfo = {"Capacity 26", "Projector", "Whiteboard", "Television" };
     private ListView roomListView;
+    private HashMap<String, List<String>> mAttributes = new HashMap<>();
     private ArrayAdapter arrayAdapter;
     TextView roomTextView;
+    private String[] mCurrentRoomAttributes;
 
     private ImageView mDirectionsButton;
     private ImageView mBookRoomButton;
     private ImageView mFavoritesButton;
+
+    private GeoJsonMap mGeoJsonMap;
+    private String mCurrentRoomId;
+
+    private Marker mCurrentMarker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +74,8 @@ public class RoomActivity extends BaseGoogleMapsActivity {
             roomName = b.getString("ROOM_ID");
             roomEmail = b.getString("ROOM_EMAIL");
         }
+
+        mCurrentRoomId = roomName;
 
         Calendar c = Calendar.getInstance();
         c.set(Calendar.YEAR, 2015);
@@ -88,6 +103,10 @@ public class RoomActivity extends BaseGoogleMapsActivity {
             @Override
             public void onClick(View v) {
                 Intent directionsIntent = new Intent(getApplicationContext(), DirectionsActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("ROOM_ID", roomName);
+                bundle.putString("ROOM_EMAIL", roomEmail);
+                directionsIntent.putExtras(bundle);
                 startActivity(directionsIntent);
             }
         });
@@ -124,8 +143,24 @@ public class RoomActivity extends BaseGoogleMapsActivity {
         roomTextView.setText(roomName);
 
         roomListView = (ListView) findViewById(R.id.roomInfoList);
-        arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, roomsDummyInfo);
-        roomListView.setAdapter(arrayAdapter);
+        AsyncResourceReader reader = new AsyncResourceReader() {
+            @Override
+            public void handleRooms(List<RoomModel> rooms) {
+                if(rooms != null) {
+                    for (RoomModel roomModel : rooms) {
+                        Pattern pattern = Pattern.compile("(B\\d{3})");
+                        Matcher matcher = pattern.matcher(roomModel.getRoomName());
+                        String key = roomModel.getRoomName();
+                        if(matcher.find()) {
+                            key = matcher.group(1);
+                        }
+                        mAttributes.put(key, roomModel.getAttributes());
+                    }
+                }
+            }
+        };
+        reader.execute();
+      //  roomListView.setAdapter(arrayAdapter);
     }
 
     public void setUpMap() {
@@ -136,80 +171,150 @@ public class RoomActivity extends BaseGoogleMapsActivity {
             mMap.setMyLocationEnabled(true);
 
             if (mMap != null) {
-                final GeoJsonMap jsonMap = new GeoJsonMap(mMap);
-                final GeoJsonMapLayer layer = new GeoJsonMapLayer();
-                mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+
+                mGeoJsonMap = new GeoJsonMap(mMap);
+
+                // get map using building name...
+                // get map layers...
+
+                // add layers to map...
+
+                loadMap();
+                mapListen();
+
+            }
+        }
+    }
+
+    private void loadMap() {
+        final GeoJsonMapLayer layer = new GeoJsonMapLayer();
+        mGeoJsonMap.addLayer(0, layer);
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                new AsyncParseGeoJsonFromResource(getApplicationContext(), R.raw.riverviewfloor1) {
                     @Override
-                    public void onMapLoaded() {
-                        new AsyncParseGeoJsonFromResource(getApplicationContext(), R.raw.riverviewfloor1) {
-                            @Override
-                            public void handleGeoJson(GeoJson json) {
-                                layer.setGeoJson(json);
-                                layer.draw(mMap, Color.rgb(255, 249, 236), Color.rgb(108, 122, 137), 3);
-                                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(42.11256185048872, -86.46901868283749), 20);
-                                for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-                                    if (feature.getGeoJsonGeometry().getType().equals("Polygon")) {
-                                        GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                                        if(polygon.contains(new LatLng(42.11256185048872, -86.46901868283749))) {
-                                            Polygon gmsPoly = polygon.getGMSPolygon();
-                                            int color1 = Color.rgb(137, 196, 244);
-                                            gmsPoly.setFillColor(color1);
-                                        }
-                                    }
-                                }
-                                        mMap.animateCamera(cameraUpdate);
-                             //   Marker marker = mMap.addMarker(new MarkerOptions().
-                               //         position(new LatLng(42.11256185048872, -86.46901868283749)));
-                                    }
-                                }.execute();
-                            }
-                        });
+                    public void handleGeoJson(GeoJson json) {
+                        layer.setGeoJson(json);
+                        layer.draw(mMap, Color.rgb(255, 249, 236), Color.rgb(108, 122, 137), 3);
+                        LatLng center = getRoomCenter(layer, mCurrentRoomId);
+                        LatLng centerRev = new LatLng(center.longitude, center.latitude);
+                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerRev, 20);
 
-
-                        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                            @Override
-                            public void onMapClick(LatLng latLng) {
-                                for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-                                    if (feature.getGeoJsonGeometry().getType().equals("Polygon")) {
-                                        GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                                        if (polygon.contains(latLng)) {
-                                      //      Marker marker = mMap.addMarker(new MarkerOptions().position(latLng));
-                                            for (GeoJsonFeature feature2 : layer.getGeoJson().getGeoJsonFeatures()) {
-                                                int color2 = Color.rgb(255, 246, 236);
-                                                if (feature2.getProperty("room").equals("B250") || feature.getProperty("room").equals("B205") ||
-                                                        feature.getProperty("room").equals("B218") || feature.getProperty("room").equals("B217")) {
-                                                    color2 = Color.rgb(234, 230, 245);
-                                                } else if (feature2.getProperty("room").equals("B241") ||
-                                                        feature2.getProperty("room").equals("B234") ||
-                                                        feature2.getProperty("room").equals("B219") ||
-                                                        feature2.getProperty("room").equals("B251") ||
-                                                        feature2.getProperty("room").equals("B230")) {
-
-                                                    color2 = Color.WHITE;
-                                                } else if (feature2.getProperty("room").equals("B236") ||
-                                                        feature2.getProperty("room").equals("B232") ||
-                                                        feature2.getProperty("room").equals("B223") ||
-                                                        feature2.getProperty("room").equals("B247") ||
-                                                        feature2.getProperty("room").equals("B233-229") ||
-                                                        feature2.getProperty("room").equals("B235-238") ||
-                                                        feature2.getProperty("room").equals("B245-248") ||
-                                                        feature2.getProperty("room").equals("B222-220")) {
-                                                    color2 = Color.WHITE;
-                                                }
-                                                ((GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry()).getGMSPolygon().setFillColor(color2);
-                                            }
-                                            Polygon gmsPoly = polygon.getGMSPolygon();
-                                            int color1 = Color.rgb(137, 196, 244);
-                                            gmsPoly.setFillColor(color1);
-                                        }
-                                    }
+                        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+                            if (feature.getGeoJsonGeometry().getType().equals("Polygon")) {
+                                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                                if(polygon.contains(centerRev)) {
+                                    Polygon gmsPoly = polygon.getGMSPolygon();
+                                    int color1 = Color.rgb(137, 196, 244);
+                                    gmsPoly.setFillColor(color1);
                                 }
                             }
-                        });
+                        }
+                        mMap.moveCamera(cameraUpdate);
+                        mCurrentMarker = mMap.addMarker(new MarkerOptions().position(centerRev));
+                    }
+                }.execute();
+            }
+        });
+    }
+
+    private LatLng getRoomCenter(GeoJsonMapLayer layer, String roomId) {
+        Pattern pattern = Pattern.compile("(B\\d{3})");
+        Matcher matcher = pattern.matcher(roomId);
+        String match = null;
+        if(matcher.find()) {
+            match = matcher.group(1);
+        }
+        for(GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+
+            if(feature.getGeoJsonGeometry().getType().equals("Polygon") &&
+                    feature.getProperty("room").equals(match)) {
+
+                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                return polygon.getCentroid();
+            }
+        }
+        return null;
+    }
+
+    private String getRoomSuffix(String str) {
+        int index = 0;
+        String result = null;
+        for(Character ch : str.toCharArray()) {
+            if(Character.isDigit(ch)) {
+                result = str.substring(index);
+                break;
+            }
+            ++index;
+        }
+        return result;
+    }
+
+    private void mapListen() {
+        final GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                for(GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+                    if(feature.getGeoJsonGeometry().getType().equals("Polygon")) {
+                        GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                        if(polygon.contains(latLng)) {
+                            mCurrentMarker.remove();
+                            for(GeoJsonFeature feature2 : layer.getGeoJson().getGeoJsonFeatures()) {
+                                if(feature.getGeoJsonGeometry().getType().equals("Polygon")) {
+                                    GeoJsonPolygon polygon2 = (GeoJsonPolygon) feature2.getGeoJsonGeometry().getGeometry();
+                                    Polygon gmsPoly2 = polygon2.getGMSPolygon();
+                                    int color = Color.rgb(255, 246, 236);
+                                    if (feature2.getProperty("room").equals("B250") || feature.getProperty("room").equals("B205") ||
+                                            feature.getProperty("room").equals("B218") || feature.getProperty("room").equals("B217")) {
+                                        color = Color.rgb(234, 230, 245);
+                                    } else if (feature2.getProperty("room").equals("B241") ||
+                                            feature2.getProperty("room").equals("B234") ||
+                                            feature2.getProperty("room").equals("B219") ||
+                                            feature2.getProperty("room").equals("B251") ||
+                                            feature2.getProperty("room").equals("B230")) {
+
+                                        color = Color.WHITE;
+                                    } else if (feature2.getProperty("room").equals("B236") ||
+                                            feature2.getProperty("room").equals("B232") ||
+                                            feature2.getProperty("room").equals("B223") ||
+                                            feature2.getProperty("room").equals("B247") ||
+                                            feature2.getProperty("room").equals("B233-229") ||
+                                            feature2.getProperty("room").equals("B235-238") ||
+                                            feature2.getProperty("room").equals("B245-248") ||
+                                            feature2.getProperty("room").equals("B222-220")) {
+                                        color = Color.WHITE;
+                                    }
+                                    gmsPoly2.setFillColor(color);
+                                }
+                            }
+                            Polygon gmsPoly = polygon.getGMSPolygon();
+                            int color1 = Color.rgb(137, 196, 244);
+                            gmsPoly.setFillColor(color1);
+                            LatLng center1 = polygon.getCentroid();
+                            mCurrentMarker = mMap.addMarker(new MarkerOptions().position(
+                                    new LatLng(center1.longitude, center1.latitude)
+                            ));
+
+                            roomTextView.setText(feature.getProperty("room"));
+                            String key = feature.getProperty("room");
+                            if(key != null) {
+                                List<String> attributes = mAttributes.get(key);
+                                if(attributes != null && attributes.size() > 0) {
+                                    mCurrentRoomAttributes = attributes.toArray(new String[attributes.size() - 1]);
+                                    arrayAdapter = new ArrayAdapter(getApplicationContext(), R.layout.room_simple_text, mCurrentRoomAttributes);
+                                    roomListView.setAdapter(arrayAdapter);
+                                    arrayAdapter.notifyDataSetChanged();
+                                }
+                            }
+                        }
                     }
                 }
             }
+        });
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

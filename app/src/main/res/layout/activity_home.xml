@@ -61,6 +61,7 @@
                 android:layout_gravity="bottom|right"
                 android:layout_margin="16dp"
                 android:clickable="true"
+                android:id = "@+id/eventButton"
                 android:src="@drawable/add_event_button" />
         </LinearLayout>
     </RelativeLayout>
