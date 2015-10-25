@@ -28,6 +28,7 @@ import java.util.List;
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.EventAdapter;
 import edu.msu.elhazzat.whirpool.adapter.RoomSearchAdapter;
+import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventDeleter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventReader;
 import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.model.EventModel;
@@ -192,6 +193,9 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                         break;
                     case 2:
                         // delete
+                        EventModel deleteModel = mCalendarListValues.get(position);
+                        new AsyncCalendarEventDeleter(CalendarServiceHolder.getInstance().getService(),
+                                deleteModel.getId()).execute();
                         break;
                 }
                 // false : close the menu; true : not close the menu
@@ -267,6 +271,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                     Resources res = getResources();
                     for (Event event : events) {
                         final EventModel sched = new EventModel();
+                        sched.setId(event.getId());
                         sched.setLocation(event.getLocation());
                         sched.setSummary(event.getSummary());
                         sched.setStartTime(event.getStart().getDateTime().toString());

@@ -17,6 +17,7 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import edu.msu.elhazzat.whirpool.model.RoomAttributeModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 
 /**
@@ -52,9 +53,11 @@ public abstract class AsyncResourceReader extends AsyncTask<Void, Void, List<Roo
                     RoomModel room = new RoomModel();
                     room.setBuildingName(row.getString(0));
                     room.setRoomName(row.getString(1));
-                    room.addAttribute("Capacity: " + row.getString(2));
-                    room.addAttribute(row.getString(4));
-                    room.addAttribute(row.getString(5));
+
+                    room.addAttribute(new RoomAttributeModel("Capacity", row.getString(2)));
+                    room.addAttribute(new RoomAttributeModel(row.getString(4), "true"));
+                    room.addAttribute(new RoomAttributeModel(row.getString(5), "true"));
+
                     room.setEmail(row.getString(row.length() - 1));
                     roomModels.add(room);
                 }

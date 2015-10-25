@@ -14,7 +14,7 @@ public class RoomModel {
     private String mRoomName = null;
     private String mEmail = null;
     private Boolean mOccupied = false;
-    private List<String> mAttributes = new ArrayList<>();
+    private List<RoomAttributeModel> mAttributes = new ArrayList<>();
 
     public RoomModel(String name, String email, Boolean occupied) {
         mName = name;
@@ -64,11 +64,11 @@ public class RoomModel {
         return this.getRoomName();
     }
 
-    public void addAttribute(String item) {
+    public void addAttribute(RoomAttributeModel item) {
         mAttributes.add(item);
     }
 
-    public List<String> getAttributes() {
+    public List<RoomAttributeModel> getAttributes() {
         return mAttributes;
     }
 }

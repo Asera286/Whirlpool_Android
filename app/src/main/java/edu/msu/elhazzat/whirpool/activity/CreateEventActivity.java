@@ -135,13 +135,15 @@ public class CreateEventActivity extends Activity {
                 event.setStart(startEventDateTime);
                 event.setEnd(endEventDateTime);
 
-                EventAttendee attendee = new EventAttendee();
-                attendee.setEmail(mRoomEmail);
+                if(mRoomEmail != null) {
+                    EventAttendee attendee = new EventAttendee();
+                    attendee.setEmail(mRoomEmail);
+                    List<EventAttendee> attendees = new ArrayList<>();
+                    attendees.add(attendee);
 
-                List<EventAttendee> attendees = new ArrayList<>();
-                attendees.add(attendee);
+                    event.setAttendees(attendees);
+                }
 
-                event.setAttendees(attendees);
 
                 new AsyncCalendarEventWriter(service, event) {
                     @Override

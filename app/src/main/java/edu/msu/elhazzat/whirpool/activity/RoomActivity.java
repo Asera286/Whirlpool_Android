@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.msu.elhazzat.whirpool.R;
+import edu.msu.elhazzat.whirpool.adapter.RoomAttributeAdapter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarFreeBusyReader;
 import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.geojson.AsyncParseGeoJsonFromResource;
@@ -38,6 +38,7 @@ import edu.msu.elhazzat.whirpool.geojson.GeoJsonFeature;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMap;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMapLayer;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonPolygon;
+import edu.msu.elhazzat.whirpool.model.RoomAttributeModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.utils.AsyncResourceReader;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
@@ -49,10 +50,9 @@ public class RoomActivity extends BaseGoogleMapsActivity {
     private String roomName;
     private String roomEmail;
     private ListView roomListView;
-    private HashMap<String, List<String>> mAttributes = new HashMap<>();
-    private ArrayAdapter arrayAdapter;
+    private HashMap<String, List<RoomAttributeModel>> mAttributes = new HashMap<>();
+    private RoomAttributeAdapter arrayAdapter;
     TextView roomTextView;
-    private String[] mCurrentRoomAttributes;
 
     private ImageView mDirectionsButton;
     private ImageView mBookRoomButton;
@@ -62,7 +62,6 @@ public class RoomActivity extends BaseGoogleMapsActivity {
     private String mCurrentRoomId;
 
     private Marker mCurrentMarker;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +139,7 @@ public class RoomActivity extends BaseGoogleMapsActivity {
         setUpMap();
 
         roomTextView = (TextView) findViewById(R.id.roomNameText);
+        roomTextView.setTextColor(Color.BLUE);
         roomTextView.setText(roomName);
 
         roomListView = (ListView) findViewById(R.id.roomInfoList);
@@ -155,6 +155,19 @@ public class RoomActivity extends BaseGoogleMapsActivity {
                             key = matcher.group(1);
                         }
                         mAttributes.put(key, roomModel.getAttributes());
+                    }
+
+                    Pattern pattern = Pattern.compile("(B\\d{3})");
+                    Matcher matcher = pattern.matcher(mCurrentRoomId);
+                    String currentRoomKey = null;
+                    if(matcher.find()) {
+                        currentRoomKey = matcher.group(1);
+                        List<RoomAttributeModel> attributes = mAttributes.get(currentRoomKey);
+                        if(attributes != null && attributes.size() > 0) {
+                            arrayAdapter = new RoomAttributeAdapter(getApplicationContext(), attributes); //new ArrayAdapter(getApplicationContext(), R.layout.room_simple_text, mCurrentRoomAttributes);
+                            roomListView.setAdapter(arrayAdapter);
+                            arrayAdapter.notifyDataSetChanged();
+                        }
                     }
                 }
             }
@@ -300,10 +313,9 @@ public class RoomActivity extends BaseGoogleMapsActivity {
                             roomTextView.setText(feature.getProperty("room"));
                             String key = feature.getProperty("room");
                             if(key != null) {
-                                List<String> attributes = mAttributes.get(key);
+                                List<RoomAttributeModel> attributes = mAttributes.get(key);
                                 if(attributes != null && attributes.size() > 0) {
-                                    mCurrentRoomAttributes = attributes.toArray(new String[attributes.size() - 1]);
-                                    arrayAdapter = new ArrayAdapter(getApplicationContext(), R.layout.room_simple_text, mCurrentRoomAttributes);
+                                    arrayAdapter = new RoomAttributeAdapter(getApplicationContext(), attributes); //new ArrayAdapter(getApplicationContext(), R.layout.room_simple_text, mCurrentRoomAttributes);
                                     roomListView.setAdapter(arrayAdapter);
                                     arrayAdapter.notifyDataSetChanged();
                                 }

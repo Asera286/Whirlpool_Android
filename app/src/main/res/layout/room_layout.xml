@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
+    android:background = "#ffffff"
     android:layout_height="match_parent">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -64,6 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:id="@+id/roomInfoList"
+        android:dividerHeight="2dp"
         android:background="#ffffff">
 
     </ListView>
