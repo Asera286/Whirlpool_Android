@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
-import edu.msu.elhazzat.whirpool.model.RoomAttributeModel;
 
 /**
  * Created by christianwhite on 10/25/15.

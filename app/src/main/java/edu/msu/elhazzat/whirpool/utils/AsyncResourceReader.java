@@ -17,7 +17,6 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import edu.msu.elhazzat.whirpool.model.RoomAttributeModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 
 /**

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.model.EventModel;
+import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 
 /**
  * Created by Christian on 10/23/2015.
@@ -26,36 +27,23 @@ public class EventAdapter extends BaseAdapter {
     private List<EventModel> mCalendarListValues = new ArrayList<>();
     private Map<String, Integer> mBuildingMap = new HashMap<>();
 
-    public static final String WHIRLPOOL_DEFAULT = "whirlpoolDefault";
-    public static final String BENSON_ROAD = "Benson Road";
-    public static final String BHTC = "BHTC";
-    public static final String EDGEWATER = "Edgewater";
-    public static final String GHQ = "GHQ";
-    public static final String HARBORTOWN = "Harbortown";
-    public static final String HILLTOP_150 = "Hilltop 150";
-    public static final String HILLTOP_211 = "Hilltop 211";
-    public static final String MMC = "MMC";
-    public static final String R_AND_E = "R&E";
-    public static final String RIVERVIEW = "Riverview";
-    public static final String ST_JOE_TECH_CENTER = "St. Joe Tech Center";
-
     public EventAdapter(Context context, List<EventModel> eventModels) {
         super();
         mContext = context;
         mCalendarListValues = eventModels;
 
-        mBuildingMap.put(WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default3x);
-        mBuildingMap.put(BENSON_ROAD, R.drawable.benson_road3x);
-        mBuildingMap.put(BHTC, R.drawable.benton_harbor_tech_center3x);
-        mBuildingMap.put(EDGEWATER, R.drawable.edge_water_tech_center3x);
-        mBuildingMap.put(GHQ, R.drawable.ghq3x);
-        mBuildingMap.put(HARBORTOWN, R.drawable.harbor_town3x);
-        mBuildingMap.put(HILLTOP_150, R.drawable.hilltop_150_south3x);
-        mBuildingMap.put(HILLTOP_211, R.drawable.hilltop_211_north);
-        mBuildingMap.put(MMC, R.drawable.us_benton_harbor_mmc3x);
-        mBuildingMap.put(R_AND_E, R.drawable.rande3x);
-        mBuildingMap.put(RIVERVIEW, R.drawable.riverview3x);
-        mBuildingMap.put(ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter3x);
+        mBuildingMap.put(WIMAppConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default3x);
+        mBuildingMap.put(WIMAppConstants.BENSON_ROAD, R.drawable.benson_road3x);
+        mBuildingMap.put(WIMAppConstants.BHTC, R.drawable.benton_harbor_tech_center3x);
+        mBuildingMap.put(WIMAppConstants.EDGEWATER, R.drawable.edge_water_tech_center3x);
+        mBuildingMap.put(WIMAppConstants.GHQ, R.drawable.ghq3x);
+        mBuildingMap.put(WIMAppConstants.HARBORTOWN, R.drawable.harbor_town3x);
+        mBuildingMap.put(WIMAppConstants.HILLTOP_150, R.drawable.hilltop_150_south3x);
+        mBuildingMap.put(WIMAppConstants.HILLTOP_211, R.drawable.hilltop_211_north);
+        mBuildingMap.put(WIMAppConstants.MMC, R.drawable.us_benton_harbor_mmc3x);
+        mBuildingMap.put(WIMAppConstants.R_AND_E, R.drawable.rande3x);
+        mBuildingMap.put(WIMAppConstants.RIVERVIEW, R.drawable.riverview3x);
+        mBuildingMap.put(WIMAppConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter3x);
     }
 
     @Override
@@ -121,7 +109,7 @@ public class EventAdapter extends BaseAdapter {
 
         String location = item.getLocation();
         if(location == null) {
-            return mBuildingMap.get(WHIRLPOOL_DEFAULT);
+            return mBuildingMap.get(WIMAppConstants.WHIRLPOOL_DEFAULT);
         }
         String[] resourceSplit = location.split("-");
         Integer png = null;
@@ -131,7 +119,7 @@ public class EventAdapter extends BaseAdapter {
         }
 
         if(png == null) {
-            return mBuildingMap.get(WHIRLPOOL_DEFAULT);
+            return mBuildingMap.get(WIMAppConstants.WHIRLPOOL_DEFAULT);
         }
         else {
             return png;

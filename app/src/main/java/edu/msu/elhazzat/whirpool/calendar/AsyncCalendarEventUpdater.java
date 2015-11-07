@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Created by christianwhite on 10/25/15.
  */
-public class AsyncCalendarEventUpdater extends AsyncTask<Void, Void, Void> {
+public abstract class AsyncCalendarEventUpdater extends AsyncTask<Void, Void, Event> {
     public static final String LOG_TAG = AsyncCalendarEventDeleter.class.getSimpleName();
 
     private Calendar mService;
@@ -24,14 +24,22 @@ public class AsyncCalendarEventUpdater extends AsyncTask<Void, Void, Void> {
         mUpdatedEvent = update;
     }
 
+    public abstract void handleEventUpdate(Event event);
+
     @Override
-    public Void doInBackground(Void... params) {
+    public Event doInBackground(Void... params) {
         try {
-            mService.events().update("primary", mEventId, mUpdatedEvent);
+            Calendar.Events.Update updater = mService.events().update("primary", mEventId, mUpdatedEvent);
+            return updater.execute();
         }
         catch(IOException e) {
             Log.e(LOG_TAG, "Error :", e);
         }
         return null;
+    }
+
+    @Override
+    public void onPostExecute(Event event) {
+        handleEventUpdate(event);
     }
 }

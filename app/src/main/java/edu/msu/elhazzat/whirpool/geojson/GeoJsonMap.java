@@ -20,10 +20,17 @@ public class GeoJsonMap {
     public GeoJsonMap(GoogleMap map) {
         mMap = map;
     }
+    public GeoJsonMap() {
 
+    }
+
+    public void setMap(GoogleMap map) {
+        mMap = map;
+    }
     // store layer in a hash map
     public void addLayer(int floor, GeoJsonMapLayer layer) {
         mLayers.put(floor, layer);
+        mCurrentLayer = floor;
     }
 
     public void drawLayer(int floor, int fillColor, int strokeColor, int strokeWidth) {

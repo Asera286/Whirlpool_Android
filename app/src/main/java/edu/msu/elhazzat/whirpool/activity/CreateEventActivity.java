@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -19,9 +20,12 @@ import com.google.api.services.calendar.model.EventDateTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
+import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventGetter;
+import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventUpdater;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventWriter;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 
@@ -29,6 +33,8 @@ import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
  * Created by christianwhite on 10/15/15.
  */
 public class CreateEventActivity extends Activity {
+    private boolean mEdit = false;
+    private String mEditEventId = null;
 
     private String mRoomId;
     private String mRoomEmail;
@@ -65,6 +71,10 @@ public class CreateEventActivity extends Activity {
         if(content != null) {
             mRoomId = content.getString("ROOM_ID");
             mRoomEmail = content.getString("ROOM_EMAIL");
+            mEditEventId = content.getString("EVENT_ID");
+            if(mEditEventId != null) {
+                mEdit = true;
+            }
         }
 
         mSummaryEditText = (EditText) findViewById(R.id.event_summary_text);
@@ -97,6 +107,27 @@ public class CreateEventActivity extends Activity {
         mCancelButton = (Button) findViewById(R.id.btnCancel);
         mSubmitButton = (Button) findViewById(R.id.btnSubmit);
 
+        if(mEdit) {
+            new AsyncCalendarEventGetter(CalendarServiceHolder.getInstance().getService(), mEditEventId) {
+                public void handleEvent(Event event) {
+                    mSummaryEditText.setText(event.getSummary());
+                    mDescriptionEditText.setText(event.getDescription());
+                    long millisecondStart = event.getStart().getDateTime().getValue();
+                    String dateString= DateFormat.format("MM/dd/yyyy", new Date(millisecondStart)).toString();
+
+                    mDateEditText.setText(dateString);
+                    String timeStringStart = DateFormat.format("hh:ss", new Date(millisecondStart)).toString();
+                    mBeginTimeEditText.setText(timeStringStart);
+
+                    long millisecondEnd = event.getEnd().getDateTime().getValue();
+                    String timeStringEnd = DateFormat.format("hh:ss", new Date(millisecondEnd)).toString();
+
+                    mEndTimeEditText.setText(timeStringEnd);
+                }
+            }.execute();
+        }
+
+
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,11 +151,9 @@ public class CreateEventActivity extends Activity {
                 event.setDescription(mDescriptionEditText.getText().toString());
 
                 Calendar cal = Calendar.getInstance();
-             //   TimeZone tz = cal.getTimeZone();
 
                 DateTime startDateTime = new DateTime(mBeginTime.getTime());//, TimeZone.getDefault());
                 DateTime endDateTime = new DateTime(mEndTime.getTime());//, TimeZone.getDefault());
-
 
                 EventDateTime startEventDateTime = new EventDateTime()
                         .setDateTime(startDateTime);
@@ -144,14 +173,25 @@ public class CreateEventActivity extends Activity {
                     event.setAttendees(attendees);
                 }
 
+                if(mEdit) {
+                    new AsyncCalendarEventUpdater(CalendarServiceHolder.getInstance().getService(), mEditEventId
+                    , event) {
+                        public void handleEventUpdate(Event event) {
+                            Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+                            startActivity(homeIntent);
+                        }
+                    }.execute();
+                }
 
-                new AsyncCalendarEventWriter(service, event) {
-                    @Override
-                    public void handleEventWrite(boolean success) {
-                        Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
-                        startActivity(homeIntent);
-                    }
-                }.execute();
+                else {
+                    new AsyncCalendarEventWriter(service, event) {
+                        @Override
+                        public void handleEventWrite(boolean success) {
+                            Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+                            startActivity(homeIntent);
+                        }
+                    }.execute();
+                }
             }
         });
     }

@@ -2,14 +2,15 @@ package edu.msu.elhazzat.whirpool.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -94,7 +95,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         mCalendarList = (SwipeMenuListView) findViewById(R.id.swipeList);
 
         mDrawerPane = (RelativeLayout) findViewById(R.id.drawerPane);
-        mRoomList = (ListView)findViewById(R.id.roomList);
+    /*    mRoomList = (ListView)findViewById(R.id.roomList);
 
         mRoomList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -107,7 +108,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                 roomIntent.putExtras(bundle);
                 startActivity(roomIntent);
             }
-        });
+        });*/
 
         mAddEventButton = (ImageView) findViewById(R.id.eventButton);
         mAddEventButton.setOnClickListener(new View.OnClickListener() {
@@ -124,8 +125,8 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         buildSwipeView();
         inflateEventAdapter();
 
-        buildDrawerLayout();
-        inflateRoomAdapter();
+    //    buildDrawerLayout();
+    //    inflateRoomAdapter();
     }
 
     private void buildDrawerLayout() {
@@ -185,18 +186,25 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                         // navigation
                         EventModel model = mCalendarListValues.get(position);
                         Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
-                        roomIntent.putExtra("ROOM_ID", model.getLocation());
+                        roomIntent.putExtra("EVENT", model);
                         startActivity(roomIntent);
                         break;
                     case 1:
                         // edit
+                        EventModel editModel = mCalendarListValues.get(position);
+                        String eventId = editModel.getId();
+                        Intent editIntent = new Intent(getApplicationContext(), CreateEventActivity.class);
+                        editIntent.putExtra("EVENT_ID", eventId);
+                        startActivity(editIntent);
                         break;
                     case 2:
                         // delete
                         EventModel deleteModel = mCalendarListValues.get(position);
-                        new AsyncCalendarEventDeleter(CalendarServiceHolder.getInstance().getService(),
-                                deleteModel.getId()).execute();
-                        break;
+                        new AsyncCalendarEventDeleter(CalendarServiceHolder.getInstance().getService(), deleteModel.getId()) {
+                            public void handleDelete() {
+                                inflateEventAdapter();
+                            }
+                        }.execute();
                 }
                 // false : close the menu; true : not close the menu
                 return false;
@@ -268,13 +276,14 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             public void onAsyncFinished(List<Event> events) {
                 mCalendarListValues.clear();
                 if(events != null) {
-                    Resources res = getResources();
                     for (Event event : events) {
                         final EventModel sched = new EventModel();
                         sched.setId(event.getId());
                         sched.setLocation(event.getLocation());
                         sched.setSummary(event.getSummary());
                         sched.setStartTime(event.getStart().getDateTime().toString());
+                        sched.setEndTime(event.getEnd().getDateTime().toString());
+                        sched.setDescription(event.getDescription());
                         mCalendarListValues.add(sched);
                     }
                     mCalendarAdapter = new EventAdapter(getApplicationContext(), mCalendarListValues);
@@ -315,5 +324,22 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                 startActivity(searchIntent);
                 break;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_home, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+
+        }
+        return true;
     }
 }

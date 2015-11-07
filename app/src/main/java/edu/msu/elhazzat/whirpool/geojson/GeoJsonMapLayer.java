@@ -36,6 +36,14 @@ public class GeoJsonMapLayer {
         return mGeoJson;
     }
 
+    public GeoJsonMapLayer(GeoJson json) {
+        mGeoJson = json;
+    }
+
+    public GeoJsonMapLayer() {
+
+    }
+
     /**
      * Draws the map using uniform properties.
      * @param map
