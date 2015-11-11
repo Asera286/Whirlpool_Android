@@ -4,7 +4,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:paddingBottom="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -13,22 +13,20 @@
 
             <ImageView
                 android:id="@+id/room_icon"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:paddingRight="20dp"/>
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:paddingRight="40dp"
+                android:paddingLeft="10dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="74dp"
-                android:paddingTop="10dp"
-                android:orientation="vertical">
-
+            <RelativeLayout
+                android:id = "@+id/rel_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent">
                 <TextView
                     android:id="@+id/event_summary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_toRightOf="@+id/room_icon"
                     android:text="name"
                     android:textColor="@android:color/black"
                     android:textSize="20sp" />
@@ -37,15 +35,13 @@
                     android:id="@+id/event_start_end"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingTop="30dp"
                     android:text="name"
+                    android:layout_alignParentBottom="true"
                     android:textColor="@android:color/black"
-                    android:textSize="12sp"
-                    android:layout_below="@+id/event_summary"
-                    android:layout_alignLeft="@+id/event_summary"
-                    android:layout_alignStart="@+id/event_summary" />
+                    android:textSize="12sp" />
+            </RelativeLayout>
 
-            </LinearLayout>
         </LinearLayout>
-
 
     </RelativeLayout>

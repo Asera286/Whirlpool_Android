@@ -3,6 +3,7 @@ package edu.msu.elhazzat.whirpool.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -19,8 +20,7 @@ import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 /**
  * Created by christianwhite on 10/1/15.
  */
-public abstract class CalendarServiceActivity extends Activity {
-
+public abstract class CalendarServiceActivity extends AppCompatActivity {
     private static final String LOG_TAG = CalendarServiceActivity.class.getSimpleName();
 
     public static final int COMPLETE_AUTHORIZATION_REQUEST_CODE = 1001;

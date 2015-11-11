@@ -27,10 +27,10 @@ public class GeoJsonMap {
     public void setMap(GoogleMap map) {
         mMap = map;
     }
+
     // store layer in a hash map
     public void addLayer(int floor, GeoJsonMapLayer layer) {
         mLayers.put(floor, layer);
-        mCurrentLayer = floor;
     }
 
     public void drawLayer(int floor, int fillColor, int strokeColor, int strokeWidth) {
@@ -41,6 +41,7 @@ public class GeoJsonMap {
     public GeoJsonMapLayer getCurrentLayer() {
         return mLayers.get(mCurrentLayer);
     }
+    public void setCurrentLayer(int layer) { mCurrentLayer = layer; }
 
     public void removeLayer(int floor) {
         mLayers.get(floor).remove();

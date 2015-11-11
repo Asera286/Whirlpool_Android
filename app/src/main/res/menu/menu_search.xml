@@ -7,13 +7,15 @@
         android:orderInCategory="100"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_search"
-        android:title="Search"
-        android:icon="@android:drawable/ic_menu_search"
-        app:showAsAction="always" />
+    <item android:id="@+id/search"
+        android:title="search"
+        android:icon="@android:drawable/ic_search_category_default"
+        app:showAsAction="collapseActionView|always"
+        app:actionViewClass="android.support.v7.widget.SearchView" />
 
     <item android:id="@+id/action_favorites"
-        android:title="Go to Favorites"
+        android:title="Favorites"
         android:icon="@android:drawable/star_off"
         app:showAsAction="always"/>
+
 </menu>

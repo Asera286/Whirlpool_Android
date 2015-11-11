@@ -1,78 +1,71 @@
 package edu.msu.elhazzat.whirpool.adapter;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.res.Resources;
+import android.content.Context;
+import android.graphics.Color;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
-import edu.msu.elhazzat.whirpool.activity.RoomActivity;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 
+public class RoomAdapter extends ArrayAdapter<RoomModel> {
+    private List<RoomModel> mRoomModelArrayList = new ArrayList<>();
 
-public class RoomAdapter extends BaseListAdapter {
-    private RoomModel mTempValue;
-
-    public RoomAdapter(Activity activity, ArrayList data, Resources resLocal) {
-        super(activity, data, resLocal);
+    public RoomAdapter(Context context, int resource, List<RoomModel> roomModels) {//String[] values) {
+        super(context, resource, roomModels);
+        mRoomModelArrayList = roomModels;
     }
 
-    public static class ViewHolder {
-        public TextView text;
-        public TextView text1;
-        public ImageView image;
+    private static class ViewHolder {
+        private TextView itemView;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        View listItemView = convertView;
-        ViewHolder holder;
 
-        if(convertView == null) {
-            listItemView = mInflater.inflate(R.layout.tabitem, null);
+        ViewHolder viewHolder = new ViewHolder();
+        if (convertView == null) {
+            convertView = LayoutInflater.from(this.getContext())
+                    .inflate(R.layout.room_simple_list_item, parent, false);
 
-            holder = new ViewHolder();
-            holder.text = (TextView)listItemView.findViewById(R.id.text);
-            holder.text1 = (TextView)listItemView.findViewById(R.id.text1);
-            holder.image = (ImageView)listItemView.findViewById(R.id.img1);
+            viewHolder.itemView = (TextView) convertView.findViewById(R.id.attribute_key);
+            viewHolder.itemView.setTextColor(Color.BLACK);
 
-            listItemView.setTag(holder);
-        }
-        else {
-            holder = (ViewHolder) listItemView.getTag();
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        if(mData.size() <= 0) {
-            holder.text.setText("No Data");
-        }
-        else {
-            mTempValue = null;
-            mTempValue = (RoomModel) mData.get(position);
-
-            holder.text.setText(Integer.toString(position));
-            holder.text1.setText(mTempValue.getRoomName());
-         //   holder.image.setImageResource(mResources.getIdentifier("com.example.testui:drawable/marker",null,null));
-            setListItemOnClickListener(listItemView, position);
+        RoomModel item = getItem(position);
+        if (item!= null) {
+            // My layout has only one TextView
+            // do whatever you want with your string and long
+            viewHolder.itemView.setText(item.getRoomName());
         }
 
-        return listItemView;
+        return convertView;
     }
 
-    public void setListItemOnClickListener(View view, final int position) {
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent roomIntent = new Intent(mActivity, RoomActivity.class);
-                RoomModel roomModel = (RoomModel) mData.get(position);
-                roomIntent.putExtra("ROOM_ID", roomModel.getRoomName());
-                //roomIntent.putExtra("ROOM_ID", "109");
-                //roomIntent.putExtra("RESOURCE_EMAIL", roomModel.getEmail());
-                mActivity.startActivity(roomIntent);
-            }
-        });
+    public RoomModel getRoomModel(int position) {
+        return getItem(position);
+    }
+
+    public void sort() {
+        Collections.sort(mRoomModelArrayList, new RoomComparator());
+    }
+
+    public static class RoomComparator implements Comparator<RoomModel> {
+        public int compare(RoomModel lhs, RoomModel rhs) {
+            String lName = lhs.getRoomName();
+            String rName = rhs.getRoomName();
+            return lName.compareToIgnoreCase(rName);
+        }
     }
 }

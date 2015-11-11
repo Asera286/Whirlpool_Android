@@ -43,7 +43,8 @@ public class GeoJsonPolygon extends Geometry<List<List<List<Double>>>> {
     public LatLng getCentroid() {
         LatLngBounds bounds = getBoundingBox();
         if(bounds != null) {
-            return bounds.getCenter();
+            LatLng center =  bounds.getCenter();
+            return new LatLng(center.longitude, center.latitude);
         }
         return null;
     }

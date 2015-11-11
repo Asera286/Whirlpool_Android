@@ -9,9 +9,13 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import edu.msu.elhazzat.whirpool.R;
@@ -76,7 +80,7 @@ public class EventAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = View.inflate(mContext,
-                    R.layout.item_list_app, null);
+                    R.layout.event_row, null);
             new ViewHolder(convertView);
         }
         ViewHolder holder = (ViewHolder) convertView.getTag();
@@ -86,7 +90,36 @@ public class EventAdapter extends BaseAdapter {
 
         holder.room_icon.setImageDrawable(image);
 
-        holder.event_start_end.setText(item.getStartTime());
+        try {
+            Date startDate = new Date(item.getStartDateTime().getValue());
+            Date endDate = new Date(item.getEndDateTime().getValue());
+
+            DateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.US);
+            String startTime = dateFormat.format(startDate);
+            String endTime = dateFormat.format(endDate);
+
+            String interval = startTime + " - " + endTime;
+
+            long seconds = (startDate.getTime() - System.currentTimeMillis()) / 1000;
+            float minutesFloat = seconds / 60;
+            float hours= minutesFloat / 60;
+            float minutesFrac = (float) (hours - Math.floor(hours));
+            int minutes = (int) (60 * minutesFrac);
+            String timeUntil = "";
+            if(hours >= 1) {
+                timeUntil = Integer.toString((int) Math.floor(hours)) + "hrs "
+                        + Integer.toString(minutes) + " min";
+            }
+            else {
+                timeUntil = Integer.toString(minutes) + " min";
+            }
+            holder.event_time_until.setText(timeUntil);
+            holder.event_start_end.setText(interval);
+
+        }
+        catch(android.net.ParseException e) {
+
+        }
         holder.event_summary.setText(item.getSummary());
 
         return convertView;
@@ -96,11 +129,13 @@ public class EventAdapter extends BaseAdapter {
         ImageView room_icon;
         TextView event_start_end;
         TextView event_summary;
+        TextView event_time_until;
 
         public ViewHolder(View view) {
             room_icon = (ImageView) view.findViewById(R.id.room_icon);
             event_start_end = (TextView) view.findViewById(R.id.event_start_end);
             event_summary = (TextView) view.findViewById(R.id.event_summary);
+            event_time_until = (TextView) view.findViewById(R.id.event_time_until);
             view.setTag(this);
         }
     }

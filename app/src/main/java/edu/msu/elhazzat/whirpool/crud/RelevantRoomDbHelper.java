@@ -17,27 +17,34 @@ import edu.msu.elhazzat.whirpool.model.RoomModel;
 
 public class RelevantRoomDbHelper extends SQLiteOpenHelper {
 
-    // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 1;
 
     // Database Name
-    private static final String DATABASE_NAME = "RoomModelDB.db";
+    public static final String DATABASE_NAME = "WhirlPoolRoomDB.db";
 
     private static final String TEXT_TYPE = " TEXT";
+    private static final String INT_TYPE = " INT";
     private static final String COMMA_SEP = ",";
 
     public static final String TABLE_NAME = "room_entry";
-    public static final String ROOM_ENTRY_ID = "entry_id";
-    public static final String ROOM_RESOURCE_EMAIL = "email";
+    public static final String ROOM_NAME = "room_id";
+    public static final String ROOM_BUILDING_NAME = "building_name";
+    public static final String ROOM_EXTENSION = "extension";
+    public static final String ROOM_TYPE = "room_type";
+    public static final String ROOM_CAPACITY = "room_cap";
+    public static final String ROOM_EMAIL = "email";
 
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + TABLE_NAME + " (" + ROOM_ENTRY_ID + TEXT_TYPE + COMMA_SEP + ROOM_RESOURCE_EMAIL + TEXT_TYPE +
-                    " )";
+            "CREATE TABLE " + TABLE_NAME + " (" + ROOM_NAME + TEXT_TYPE + COMMA_SEP
+                + ROOM_BUILDING_NAME + TEXT_TYPE + COMMA_SEP
+                + ROOM_EXTENSION + TEXT_TYPE + COMMA_SEP
+                + ROOM_TYPE + TEXT_TYPE + COMMA_SEP
+                + ROOM_CAPACITY + INT_TYPE + COMMA_SEP
+                + ROOM_EMAIL + TEXT_TYPE + " )";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
-
 
     public RelevantRoomDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -59,35 +66,48 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
     /**
      * All CRUD(Create, Read, Update, Delete) Operations
      */
-
-
     public void addRelevantRoom(RoomModel room) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(ROOM_ENTRY_ID, room.getRoomName()); // Contact Name
-        values.put(ROOM_RESOURCE_EMAIL, room.getEmail()); // Contact Phone
+        RoomModel checkExists = getRoomModel(room.getBuildingName(), room.getRoomName());
 
-        // Inserting Row
-        db.insert(TABLE_NAME, null, values);
+        if(room != null) {
+            ContentValues values = new ContentValues();
+            values.put(ROOM_NAME, room.getRoomName());
+            values.put(ROOM_BUILDING_NAME, room.getBuildingName());
+            values.put(ROOM_EXTENSION, room.getExtension());
+            values.put(ROOM_TYPE, room.getRoomType());
+            values.put(ROOM_CAPACITY, room.getCapacity());
+            values.put(ROOM_EMAIL, room.getEmail());
+
+            // Inserting Row
+            db.insert(TABLE_NAME, null, values);
+        }
         db.close(); // Closing database connection
     }
 
-    // Getting single contact
-  /*  RoomModel getRoomModel(int id) {
+    // Getting single room model
+    RoomModel getRoomModel(String buildingName, String roomId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_NAME, new String[] { _ID,
-                        KEY_NAME, KEY_PH_NO }, KEY_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
+        Cursor cursor = db.query(TABLE_NAME, new String[]{
+                        ROOM_NAME, ROOM_BUILDING_NAME,
+                        ROOM_EXTENSION, ROOM_TYPE,
+                        ROOM_CAPACITY, ROOM_EMAIL}, ROOM_BUILDING_NAME + " =? " + "AND " + ROOM_NAME + " =? ",
+                new String[]{buildingName, roomId}, null, null, null, null);
 
-        Contact contact = new Contact(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2));
-        // return contact
-        return contact;
-    }*/
+        RoomModel room = null;
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            room = new RoomModel(
+                    cursor.getString(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getString(3), cursor.getInt(4),
+                    cursor.getString(5), null, cursor.getString(6));
+        }
+
+        // return room
+        return room;
+    }
 
     // Getting All Contacts
     public List<RoomModel> getAllRelevantRooms() {
@@ -104,8 +124,12 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
             do {
                 RoomModel room = new RoomModel();
                 room.setRoomName(cursor.getString(0));
-                room.setEmail(cursor.getString(1));
-                // Adding contact to list
+                room.setBuildingName(cursor.getString(1));
+                room.setExtension(cursor.getString(2));
+                room.setRoomType(cursor.getString(3));
+                room.setCapacity(cursor.getInt(4));
+                room.setEmail(cursor.getString(5));
+
                 roomList.add(room);
             } while (cursor.moveToNext());
         }
@@ -114,37 +138,29 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
         return roomList;
     }
 
-    // Updating single contact
-  /*  public int updateRoomModel(RoomModel room) {
+    // Updating single room model
+    public int updateRoomModel(RoomModel room) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(ROOM_ENTRY_ID, room.getName());
-        values.put(ROOM_RESOURCE_EMAIL, room.getPhoneNumber());
+
+        values.put(ROOM_NAME, room.getRoomName());
+        values.put(ROOM_BUILDING_NAME, room.getBuildingName());
+        values.put(ROOM_EXTENSION, room.getExtension());
+        values.put(ROOM_TYPE, room.getRoomType());
+        values.put(ROOM_CAPACITY, room.getCapacity());
+        values.put(ROOM_EMAIL, room.getEmail());
 
         // updating row
-        return db.update(TABLE_NAME, values, _ID + " = ?",
-                new String[] { String.valueOf(contact.getID()) });
-    }*/
-
-    // Deleting single contact
- /*   public void deleteContact(RoomModel room) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CONTACTS, KEY_ID + " = ?",
-                new String[] { String.valueOf(contact.getID()) });
-        db.close();
+        return db.update(TABLE_NAME, values, ROOM_BUILDING_NAME + " =? AND " + ROOM_NAME + " =?",
+                new String[] { room.getBuildingName(), room.getRoomName() });
     }
 
-
-    // Getting contacts Count
-    public int getContactsCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_CONTACTS;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-
-        // return count
-        return cursor.getCount();
-    }*/
-
+    // Deleting single room
+     public void deleteRoomModel(RoomModel room) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME, ROOM_BUILDING_NAME + " =? AND " + ROOM_NAME + " =?",
+                new String[]{room.getBuildingName(), room.getRoomName()});
+        db.close();
+    }
 }

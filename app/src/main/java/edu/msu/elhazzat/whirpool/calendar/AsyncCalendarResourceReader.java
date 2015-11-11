@@ -163,8 +163,8 @@ public abstract class AsyncCalendarResourceReader extends AsyncTask<Void, Void, 
                         String city = splitRec[1];
                         name = city.replaceAll("^\\s+|\\s+$", "");
                         if (!name.isEmpty() && name.equals("Benton Harbor")) {
-                            roomModel.setName(roomName);
-                            roomModel.setEmail(roomResources.get("email"));
+                       //     roomModel.setName(roomName);
+                       //     roomModel.setEmail(roomResources.get("email"));
                             mRoomModels.add(roomModel);
                         }
                     }

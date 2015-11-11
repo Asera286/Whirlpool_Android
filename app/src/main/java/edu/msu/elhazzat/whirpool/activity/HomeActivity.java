@@ -1,24 +1,24 @@
 package edu.msu.elhazzat.whirpool.activity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.view.Gravity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
+import android.view.ActionMode;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
-import com.baoyz.swipemenulistview.SwipeMenu;
-import com.baoyz.swipemenulistview.SwipeMenuCreator;
-import com.baoyz.swipemenulistview.SwipeMenuItem;
-import com.baoyz.swipemenulistview.SwipeMenuListView;
+import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
+import com.fortysevendeg.swipelistview.SwipeListView;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -28,12 +28,8 @@ import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.EventAdapter;
-import edu.msu.elhazzat.whirpool.adapter.RoomSearchAdapter;
-import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventDeleter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventReader;
-import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.model.EventModel;
-import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.utils.AsyncTokenFromGoogleAccountCredential;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 import edu.msu.elhazzat.whirpool.utils.TokenHolder;
@@ -45,22 +41,15 @@ import edu.msu.elhazzat.whirpool.utils.TokenHolder;
 public class HomeActivity extends CalendarServiceActivity implements View.OnClickListener {
 
     private static final String LOG_TAG = HomeActivity.class.getSimpleName();
+    private static final int SWIPE_VIEW_OFFSET = 0;
+    private static final int SWIPE_VIEW_DELAY = 500;
 
-    private SwipeMenuListView mCalendarList;
+    private SwipeListView mCalendarListView;
     private EventAdapter mCalendarAdapter;
-    private ArrayList<EventModel> mCalendarListValues = new ArrayList<>();
-    private AsyncCalendarEventReader mEventReader = null;
-
-    private ListView mRoomList;
-    private RoomSearchAdapter mRoomSearchAdapter;
-    private List<RoomModel> mRoomModelListValues = new ArrayList<>();
+    private ArrayList<EventModel> mCalendarListViewValues = new ArrayList<>();
 
     private DrawerLayout mDrawerLayout;
-    private RelativeLayout mDrawerPane;
-
-    private ImageView mHamburgerImage;
-
-    private ImageView mAddEventButton;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,26 +81,10 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             }.execute();
         }
 
-        mCalendarList = (SwipeMenuListView) findViewById(R.id.swipeList);
+        mCalendarListView = (SwipeListView) findViewById(R.id.example_swipe_lv_list);
 
-        mDrawerPane = (RelativeLayout) findViewById(R.id.drawerPane);
-    /*    mRoomList = (ListView)findViewById(R.id.roomList);
-
-        mRoomList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RoomModel model = mRoomModelListValues.get(position);
-                Bundle bundle = new Bundle();
-                bundle.putString("ROOM_ID", model.getRoomName());
-                bundle.putString("ROOM_EMAIL", model.getEmail());
-                Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
-                roomIntent.putExtras(bundle);
-                startActivity(roomIntent);
-            }
-        });*/
-
-        mAddEventButton = (ImageView) findViewById(R.id.eventButton);
-        mAddEventButton.setOnClickListener(new View.OnClickListener() {
+        ImageView addEventButton = (ImageView) findViewById(R.id.eventButton);
+        addEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent createEventIntent = new Intent(getApplicationContext(), CreateEventActivity.class);
@@ -120,174 +93,165 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         });
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
-        mHamburgerImage = (ImageView) findViewById(R.id.hamburger);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+        ActionBar ab = getSupportActionBar();
+        if(ab != null) {
+            ab.setDisplayShowTitleEnabled(false);
+        }
+
+        if (ab != null)
+        {
+            ab.setDisplayHomeAsUpEnabled(true);
+            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.hello_world, R.string.hello_world)
+            {
+
+                public void onDrawerClosed(View view)
+                {
+                    supportInvalidateOptionsMenu();
+                    //drawerOpened = false;
+                }
+
+                public void onDrawerOpened(View drawerView)
+                {
+                    supportInvalidateOptionsMenu();
+                    //drawerOpened = true;
+                }
+            };
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
+            mDrawerLayout.setDrawerListener(mDrawerToggle);
+        }
 
         buildSwipeView();
         inflateEventAdapter();
-
-    //    buildDrawerLayout();
-    //    inflateRoomAdapter();
-    }
-
-    private void buildDrawerLayout() {
-
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
-        mHamburgerImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDrawerLayout.openDrawer(Gravity.LEFT);
-            }
-        });
-
-        mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(View view, float v) {}
-
-            @Override
-            public void onDrawerOpened(View view) {
-                inflateRoomAdapter();
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            }
-
-            @Override
-            public void onDrawerClosed(View view) {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            }
-
-            @Override
-            public void onDrawerStateChanged(int i) {}
-        });
-    }
-
-    private float dp2px(int dip, Context context){
-        float scale = context.getResources().getDisplayMetrics().density;
-        return dip * scale + 0.5f;
     }
 
     private void buildSwipeView() {
-        SwipeMenuCreator creator = new SwipeMenuCreator() {
+        mCalendarListView = (SwipeListView) findViewById(R.id.example_swipe_lv_list);
 
-            @Override
-            public void create(SwipeMenu menu) {
-                buildNavigationSwipeMenuItem(menu);
-                buildEditSwipeMenuItem(menu);
-                buildDeleteSwipeMenuItem(menu);
-            }
-        };
+        mCalendarListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
-        mCalendarList.setMenuCreator(creator);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            mCalendarListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
 
-        mCalendarList.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                switch (index) {
-                    case 0:
-                        // navigation
-                        EventModel model = mCalendarListValues.get(position);
-                        Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
-                        roomIntent.putExtra("EVENT", model);
-                        startActivity(roomIntent);
-                        break;
-                    case 1:
-                        // edit
-                        EventModel editModel = mCalendarListValues.get(position);
-                        String eventId = editModel.getId();
-                        Intent editIntent = new Intent(getApplicationContext(), CreateEventActivity.class);
-                        editIntent.putExtra("EVENT_ID", eventId);
-                        startActivity(editIntent);
-                        break;
-                    case 2:
-                        // delete
-                        EventModel deleteModel = mCalendarListValues.get(position);
-                        new AsyncCalendarEventDeleter(CalendarServiceHolder.getInstance().getService(), deleteModel.getId()) {
-                            public void handleDelete() {
-                                inflateEventAdapter();
-                            }
-                        }.execute();
+                @Override
+                public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                                      long id, boolean checked) {
                 }
-                // false : close the menu; true : not close the menu
-                return false;
+
+                @Override
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                    return true;
+                }
+
+                @Override
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                 /*   MenuInflater inflater = mode.getMenuInflater();
+                    inflater.inflate(R.menu.menu_choice_items, menu);*/
+                    return false;
+                }
+
+                @Override
+                public void onDestroyActionMode(ActionMode mode) {
+                    mCalendarListView.unselectedChoiceStates();
+                }
+
+                @Override
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                    return false;
+                }
+            });
+        }
+
+
+        mCalendarListView.setSwipeListViewListener(new BaseSwipeListViewListener() {
+            @Override
+            public void onOpened(int position, boolean toRight) {
+            }
+
+            @Override
+            public void onClosed(int position, boolean fromRight) {
+            }
+
+            @Override
+            public void onListChanged() {
+            }
+
+            @Override
+            public void onMove(int position, float x) {
+            }
+
+            @Override
+            public void onStartOpen(int position, int action, boolean right) {
+            }
+
+            @Override
+            public void onStartClose(int position, boolean right) {
+            }
+
+            @Override
+            public void onClickFrontView(int position) {
+            }
+
+            @Override
+            public void onClickBackView(int position) {
+            }
+
+            @Override
+            public void onDismiss(int[] reverseSortedPositions) {
+                for (int position : reverseSortedPositions) {
+                    mCalendarListViewValues.remove(position);
+                }
+                mCalendarAdapter.notifyDataSetChanged();
+            }
+
+        });
+
+        mCalendarListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
             }
         });
+
+        mCalendarListView.setSwipeMode(SwipeListView.SWIPE_MODE_LEFT);
+        mCalendarListView.setSwipeActionLeft(SwipeListView.SWIPE_ACTION_REVEAL);
+        mCalendarListView.setSwipeOpenOnLongPress(false);
+        mCalendarListView.setOffsetLeft(SWIPE_VIEW_OFFSET);
+        mCalendarListView.setAnimationTime(SWIPE_VIEW_DELAY);
+        
+        mCalendarListView.setAdapter(mCalendarAdapter);
     }
-
-    private void buildNavigationSwipeMenuItem(SwipeMenu menu) {
-        // create "nav" item
-        SwipeMenuItem navItem = new SwipeMenuItem(
-                getApplicationContext());
-
-        // set item width
-        navItem.setWidth((int) dp2px(60, getApplicationContext()));
-
-        navItem.setBackground(new ColorDrawable(Color.rgb(0x48,
-                0x87, 0xF0)));
-        // set a icon
-        navItem.setIcon(R.drawable.navigate);
-        // add to menu
-        menu.addMenuItem(navItem);
-    }
-
-    private void buildEditSwipeMenuItem(SwipeMenu menu) {
-        // create "edit" item
-        SwipeMenuItem favItem = new SwipeMenuItem(
-                getApplicationContext());
-
-        // set item width
-        favItem.setWidth((int) dp2px(60, getApplicationContext()));
-
-        // set a icon
-        favItem.setIcon(R.drawable.edit);
-
-        // add to menu
-        menu.addMenuItem(favItem);
-    }
-
-    private void buildDeleteSwipeMenuItem(SwipeMenu menu) {
-        // create "delete" item
-        SwipeMenuItem calItem = new SwipeMenuItem(
-                getApplicationContext());
-
-        // set item width
-        calItem.setWidth((int) dp2px(60, getApplicationContext()));
-
-        // set a icon
-        calItem.setIcon(R.drawable.delete);
-
-        // add to menu
-        menu.addMenuItem(calItem);
-    }
-
-    private void inflateRoomAdapter() {
-        mRoomModelListValues.clear();
-        RelevantRoomDbHelper helper = new RelevantRoomDbHelper(this);
-        mRoomModelListValues = helper.getAllRelevantRooms();
-        mRoomSearchAdapter = new RoomSearchAdapter(this, android.R.layout.simple_list_item_1, mRoomModelListValues);
-        mRoomList.setAdapter(mRoomSearchAdapter);
-    }
-
+    
     private void inflateEventAdapter() {
 
         //get user calendar events for the date starting now
-        mEventReader = new AsyncCalendarEventReader(mService, new DateTime(System.currentTimeMillis()), 10) {
+        new AsyncCalendarEventReader(mService, new DateTime(System.currentTimeMillis()), 10) {
 
             // populate calendar event view
             @Override
             public void onAsyncFinished(List<Event> events) {
-                mCalendarListValues.clear();
+                mCalendarListViewValues.clear();
                 if(events != null) {
                     for (Event event : events) {
                         final EventModel sched = new EventModel();
                         sched.setId(event.getId());
                         sched.setLocation(event.getLocation());
                         sched.setSummary(event.getSummary());
+
                         sched.setStartTime(event.getStart().getDateTime().toString());
                         sched.setEndTime(event.getEnd().getDateTime().toString());
+
+                        sched.setStartDateTime(event.getStart().getDateTime());
+                        sched.setEndDateTime(event.getEnd().getDateTime());
+
                         sched.setDescription(event.getDescription());
-                        mCalendarListValues.add(sched);
+                        mCalendarListViewValues.add(sched);
                     }
-                    mCalendarAdapter = new EventAdapter(getApplicationContext(), mCalendarListValues);
-                    mCalendarList.setAdapter(mCalendarAdapter);
+                    mCalendarAdapter = new EventAdapter(getApplicationContext(), mCalendarListViewValues);
+                    mCalendarListView.setAdapter(mCalendarAdapter);
                 }
             }
 
@@ -296,9 +260,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             public void handleUserRecoverableAuthIOException(UserRecoverableAuthIOException e) {
                 startActivityForResult(e.getIntent(), COMPLETE_AUTHORIZATION_REQUEST_CODE);
             }
-        };
-
-        mEventReader.execute();
+        }.execute();
     }
 
     @Override
@@ -319,27 +281,44 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.imageButton:
-                Intent searchIntent = new Intent(this, SearchActivity.class);
-                startActivity(searchIntent);
-                break;
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_home, menu);
-        return super.onCreateOptionsMenu(menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch(id) {
+            case R.id.action_search:
+                Intent searchIntent = new Intent(this, SearchActivity.class);
+                startActivity(searchIntent);
+                break;
         }
-        return true;
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState)
+    {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 }
+
+

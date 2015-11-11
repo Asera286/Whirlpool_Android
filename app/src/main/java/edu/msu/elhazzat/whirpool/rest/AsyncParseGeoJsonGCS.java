@@ -24,13 +24,12 @@ import edu.msu.elhazzat.whirpool.geojson.GeoJsonGeometry;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonGeometryDeserializer;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMap;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMapLayer;
-import edu.msu.elhazzat.whirpool.utils.AsyncResourceReader;
 
 /**
  * Created by christianwhite on 11/5/15.
  */
 public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJsonMap> {
-    public static final String LOG_TAG = AsyncResourceReader.class.getSimpleName();
+    public static final String LOG_TAG = AsyncParseGeoJsonGCS.class.getSimpleName();
 
     public abstract void handleGeoJson(GeoJsonMap map);
 
@@ -70,7 +69,7 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
                   //  String win = floor.getString("wing");
                     String geoJsonStr = floor.getString("geojson");
                     GeoJson floorGeoJson = readGeoJson(geoJsonStr);
-                    GeoJsonMapLayer layer = new GeoJsonMapLayer(floorGeoJson);
+                    GeoJsonMapLayer layer = new GeoJsonMapLayer(floorGeoJson, floorNum);
                     map.addLayer(floorNum, layer);
                 }
 

@@ -36,6 +36,9 @@ public class WIMAppConstants {
         WHIRLPOOL_ABBRV_MAP.put(ST_JOE_TECH_CENTER, "SJTC");
     }
 
-    public static final int MAP_SELECTED_ROOM_COLOR = -7748364;
+    public static final int MAP_DEFAULT_SELECTED_ROOM_COLOR = -7748364;
     public static final int DEFAULT_MAP_CAMERA_ZOOM = 20;
+    public static final int MAP_DEFAULT_FILL_COLOR = -1556;
+    public static final int MAP_DEFAULT_STROKE_COLOR = -9667959;
+    public static final int MAP_DEFAULT_STROKE_WIDTH = 2;
 }

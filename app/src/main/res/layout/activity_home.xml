@@ -1,69 +1,51 @@
 <android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawerLayout"
+    android:background="#ffffff"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:background="#ffffff">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/my_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true">
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
 
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:id="@+id/hamburger"
-                    android:paddingLeft="10dp"
-                    android:src="@drawable/hamburger_menu26x19"
-                    android:background = "#2c8dfc" />
+        <com.fortysevendeg.swipelistview.SwipeListView
+            xmlns:swipe="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/example_swipe_lv_list"
+            android:listSelector="#00000000"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/my_toolbar"
+            swipe:swipeFrontView="@+id/front"
+            swipe:swipeBackView="@+id/back"
+            swipe:swipeCloseAllItemsWhenMoveList="true"
+            swipe:swipeMode="both"
+            />
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom|right"
+            android:clickable="true"
+            android:id = "@+id/eventButton"
+            android:src="@drawable/add_event_button"
+            android:layout_marginRight="25dp"
+            android:layout_marginBottom="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/imageButton"
-                    android:src="@drawable/search_transparent"
-                    android:padding="0dp"
-                    android:background = "#2c8dfc"
-                    android:scaleType="fitCenter"
-                    android:adjustViewBounds="true"
-                    android:onClick="onClick"
-                    android:paddingBottom="10dp" />
-            </LinearLayout>
-
-            <com.baoyz.swipemenulistview.SwipeMenuListView
-                android:id="@+id/swipeList"
-                android:layout_width="fill_parent"
-                android:layout_height="0dp"
-                android:headerDividersEnabled="false"
-                android:layout_weight="0.5"
-                android:dividerHeight="0dp"
-                android:layout_marginBottom="10dp"
-                android:layout_below="@+id/search_button" />
-
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_gravity="bottom|right"
-                android:layout_margin="16dp"
-                android:clickable="true"
-                android:id = "@+id/eventButton"
-                android:src="@drawable/add_event_button" />
-        </LinearLayout>
     </RelativeLayout>
 
     <!-- The navigation drawer -->
@@ -97,3 +79,4 @@
 
     </RelativeLayout>
 </android.support.v4.widget.DrawerLayout>
+

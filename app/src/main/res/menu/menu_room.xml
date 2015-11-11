@@ -16,4 +16,14 @@
         android:title="Go to Favorites"
         android:icon="@android:drawable/star_off"
         app:showAsAction="always"/>
+
+    <item android:id="@+id/action_add_to_favorites"
+        android:title="Add to Favorites"
+        android:icon="@android:drawable/ic_menu_save"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/action_create_event"
+        android:title="Add to Favorites"
+        android:icon="@android:drawable/ic_menu_month"
+        app:showAsAction="always"/>
 </menu>

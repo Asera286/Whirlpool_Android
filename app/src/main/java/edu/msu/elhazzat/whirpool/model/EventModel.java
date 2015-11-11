@@ -3,10 +3,12 @@ package edu.msu.elhazzat.whirpool.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.api.client.util.DateTime;
+
 /**
  * Created by Stephanie on 9/29/2015.
  */
-public class EventModel implements Parcelable{
+public class EventModel implements Parcelable {
 
     private String mStartTime;
     private String mEndTime;
@@ -15,6 +17,9 @@ public class EventModel implements Parcelable{
     private String mSummary;
     private String mEmail;
     private String mId;
+
+    private DateTime mStartDateTime;
+    private DateTime mEndDateTime;
 
     public EventModel(String id, String email, String description,
                       String location, String startTime, String endTime) {
@@ -89,6 +94,22 @@ public class EventModel implements Parcelable{
     public String getEmail() { return mEmail; }
 
     public String getId() { return mId; }
+
+    public DateTime getStartDateTime() {
+        return mStartDateTime;
+    }
+
+    public DateTime getEndDateTime() {
+        return mEndDateTime;
+    }
+
+    public void setStartDateTime(DateTime time) {
+        mStartDateTime = time;
+    }
+
+    public void setEndDateTime(DateTime time) {
+        mEndDateTime = time;
+    }
 
     @Override
     public int describeContents(){

@@ -1,33 +1,37 @@
 package edu.msu.elhazzat.whirpool.activity;
 
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.msu.elhazzat.whirpool.R;
-import edu.msu.elhazzat.whirpool.adapter.RoomSearchAdapter;
+import edu.msu.elhazzat.whirpool.adapter.RoomAdapter;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
-import edu.msu.elhazzat.whirpool.utils.AsyncResourceReader;
 
 /**
  *
  */
-public class SearchActivity extends Activity {
+public class SearchActivity extends AppCompatActivity {
 
-    private RoomSearchAdapter mAdapter;
+    private RoomAdapter mAdapter;
     private ListView mList;
-    private AsyncResourceReader mResourceReader;
     private List<RoomModel> mRoomModelListValues = new ArrayList<>();
+    private Map<String, List<RoomModel>> mVals = new HashMap<>();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,19 +42,8 @@ public class SearchActivity extends Activity {
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
-                RoomModel room = mAdapter.getRoomModel(position);
-                Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
-                Bundle extras = new Bundle();
-                extras.putString("ROOM_ID", room.getRoomName());
-                extras.putString("ROOM_EMAIL", room.getEmail());
-                roomIntent.putExtras(extras);
-                startActivity(roomIntent);
             }
         });
-
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        final SearchView sV = (SearchView)findViewById(R.id.searchView);
-        sV.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         SearchView.OnQueryTextListener searchQueryListener = new SearchView.OnQueryTextListener() {
             @Override
@@ -65,25 +58,18 @@ public class SearchActivity extends Activity {
                 return true;
             }
         };
-        sV.setOnQueryTextListener(searchQueryListener);
 
-        mResourceReader = new AsyncResourceReader() {
-            @Override
-            public void handleRooms(List<RoomModel> rooms) {
-                if(rooms != null) {
-                    for (RoomModel roomModel : rooms) {
-                        mRoomModelListValues.add(roomModel);
-                    }
-                    mAdapter = new RoomSearchAdapter(getApplicationContext(),
-                            android.R.layout.simple_list_item_1, mRoomModelListValues);
-                    mAdapter.sort();
-                    Collections.sort(mRoomModelListValues, new RoomSearchAdapter.RoomComparator());
-                    mList.setAdapter(mAdapter);
-                }
-            }
-        };
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
-        mResourceReader.execute();
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+
+        ab.setDisplayShowTitleEnabled(false);
+    }
+
+    private void getRoomsInfo() {
+
     }
 
     @Override
@@ -103,11 +89,30 @@ public class SearchActivity extends Activity {
         mAdapter.getFilter().filter(queryStr);
     }
 
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case (R.id.cancel_button):
-                this.finish();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+        // Associate searchable configuration with the SearchView
+
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_favorites:
+                Intent favoritesIntent = new Intent(this, FavoritesActivity.class);
+                startActivity(favoritesIntent);
                 break;
         }
+        return super.onOptionsItemSelected(item);
     }
 }

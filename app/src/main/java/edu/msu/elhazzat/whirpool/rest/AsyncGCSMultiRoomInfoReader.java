@@ -1,5 +1,9 @@
 package edu.msu.elhazzat.whirpool.rest;
 
+/**
+ * Created by christianwhite on 11/7/15.
+ */
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -13,6 +17,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -21,33 +27,26 @@ import edu.msu.elhazzat.whirpool.model.RoomModel;
 /**
  * Created by christianwhite on 11/5/15.
  */
-public abstract class AsyncGCSRoomInfoReader extends AsyncTask<Void, Void, RoomModel> {
+public abstract class AsyncGCSMultiRoomInfoReader extends AsyncTask<Void, Void, List<RoomModel>> {
     public static final String LOG_TAG = AsyncGCSRoomInfoReader.class.getSimpleName();
 
-    public abstract void handleRoom(RoomModel room);
+    public abstract void handleRooms(List<RoomModel> rooms);
 
     public static final String GET_PARAM_BUILDING = "building_name=";
-    public static final String GET_PARAM_ROOM = "room_name=";
     public String mBuildingName;
-    public String mRoomName;
 
-    public AsyncGCSRoomInfoReader(String buildingName, String roomName) {
-
+    public AsyncGCSMultiRoomInfoReader(String buildingName) {
         mBuildingName = buildingName;
-        mRoomName = roomName;
     }
 
     @Override
-    public RoomModel doInBackground(Void... params) {
+    public List<RoomModel> doInBackground(Void... params) {
         try {
 
             StringBuilder builder = new StringBuilder()
                     .append(GCSRestConstants.GCS_ROOM_BASE_URL)
                     .append(GET_PARAM_BUILDING)
-                    .append(mBuildingName)
-                    .append('&')
-                    .append(GET_PARAM_ROOM)
-                    .append(mRoomName);
+                    .append(mBuildingName);
 
             String tmpUrl = builder.toString();
             URL url = new URL(tmpUrl);
@@ -69,25 +68,24 @@ public abstract class AsyncGCSRoomInfoReader extends AsyncTask<Void, Void, RoomM
                     return null;
                 }
 
-                JSONArray amenitiesJson = roomJson.getJSONArray("amenities");
-                String[] amenities = new String[amenitiesJson.length()];
-                for(int i = 0; i < amenities.length; i++) {
-                    amenities[i] = amenitiesJson.getString(i);
-                }
                 JSONArray rooms = roomJson.getJSONArray("rooms");
+                List<RoomModel> roomModels = new ArrayList<>();
 
-                if(rooms.length() > 0) {
-                    JSONObject roomObj = (JSONObject) rooms.get(0);
+                for(int i = 0; i < rooms.length(); i++) {
+                    JSONObject roomObj = (JSONObject) rooms.get(i);
+                    String roomName = roomObj.getString("room_name");
                     String occupancyStatus = roomObj.getString("occupancy_status");
                     int capacity = roomObj.getInt("capacity");
                     String extension = roomObj.getString("extension");
                     String roomType = roomObj.getString("room_type");
                     String email = roomObj.getString("email");
 
-                    RoomModel model = new RoomModel(mRoomName, mBuildingName, extension, roomType,
-                            capacity, occupancyStatus, amenities, email);
-                    return model;
+                    RoomModel model = new RoomModel(roomName, mBuildingName, extension, roomType,
+                            capacity, occupancyStatus, null, email);
+                    roomModels.add(model);
                 }
+
+                return roomModels;
             }
         }
         catch(ProtocolException e) {
@@ -104,7 +102,7 @@ public abstract class AsyncGCSRoomInfoReader extends AsyncTask<Void, Void, RoomM
     }
 
     @Override
-    public void onPostExecute(RoomModel room) {
-        handleRoom(room);
+    public void onPostExecute(List<RoomModel> rooms) {
+        handleRooms(rooms);
     }
 }

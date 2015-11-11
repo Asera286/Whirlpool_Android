@@ -20,4 +20,5 @@
     <string name="title_activity_create_event">CreateEventActivity</string>
     <string name="title_activity_create_event_date_picker">CreateEventDatePickerActivity</string>
     <string name="title_activity_create_event_time_picker">CreateEventTimePickerActivity</string>
+    <string name="title_activity_favorites">FavoritesActivity</string>
 </resources>

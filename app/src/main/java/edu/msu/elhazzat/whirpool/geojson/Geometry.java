@@ -56,4 +56,16 @@ public class Geometry<T> {
 
         return latLngCoordinates;
     }
+
+    public static LatLng getRoomCenter(GeoJsonMapLayer layer, String roomId) {
+        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON) &&
+                    feature.getProperty(GeoJsonConstants.ROOM_TAG).equals(roomId)) {
+
+                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                return polygon.getCentroid();
+            }
+        }
+        return null;
+    }
 }
