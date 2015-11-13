@@ -19,6 +19,121 @@
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
+        <HorizontalScrollView
+            android:layout_below="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/horizontalScrollView"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/ben_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/benson_road3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/bhtc_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/benton_harbor_tech_center3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/etc_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/edge_water_tech_center3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/ghc_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/ghq3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/hbt_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/harbor_town3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/htps_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/hilltop_150_south3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/htpn_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/hilltop_211_north"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/rande_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/rande3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/rv_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/riverview3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/sjtc_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/stjoetechcenter3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+                <ImageButton
+                    android:id="@+id/mmc_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:adjustViewBounds="false"
+                    android:background="@drawable/us_benton_harbor_mmc3x"
+                    android:layout_marginRight= "3dp"
+                    android:layout_marginLeft= "3dp"/>
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
 
         <com.fortysevendeg.swipelistview.SwipeListView
             xmlns:swipe="http://schemas.android.com/apk/res-auto"
@@ -26,12 +141,15 @@
             android:listSelector="#00000000"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/my_toolbar"
+            android:layout_below="@+id/horizontalScrollView"
+            android:animateLayoutChanges="true"
             swipe:swipeFrontView="@+id/front"
             swipe:swipeBackView="@+id/back"
             swipe:swipeCloseAllItemsWhenMoveList="true"
             swipe:swipeMode="both"
             />
+
+
         <ImageView
             android:layout_width="60dp"
             android:layout_height="60dp"
@@ -49,7 +167,9 @@
     </RelativeLayout>
 
     <!-- The navigation drawer -->
-    <RelativeLayout
+    <LinearLayout
+        android:background="#ffffff"
+        android:orientation="vertical"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:id="@+id/drawerPane"
@@ -67,16 +187,29 @@
                 android:textColor="#ffffff"
                 android:textSize="20dp"
                 android:layout_centerVertical="true"
-                android:text = "Relevant Rooms"/>
+                android:text = "Profile"/>
         </RelativeLayout>
 
-        <ListView
-            android:id="@+id/roomList"
+        <TextView
+            android:text = "Sign out"
+            android:clickable="true"
+            android:onClick="onClick"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/profileBox"
+            android:layout_height="wrap_content"
+            android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+            android:textSize="20sp"
+            android:paddingTop="25dp"
+            android:paddingBottom="25dp"
+            android:textColor="#000000" />
+
+
+        <ExpandableListView
+            android:id="@+id/exp_favorites_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:background="#ffffff"/>
 
-    </RelativeLayout>
+
+    </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
 

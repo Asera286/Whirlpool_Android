@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -38,8 +39,10 @@ import edu.msu.elhazzat.whirpool.geojson.GeoJsonMap;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMapLayer;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonPolygon;
 import edu.msu.elhazzat.whirpool.geojson.Geometry;
+import edu.msu.elhazzat.whirpool.model.BuildingModel;
 import edu.msu.elhazzat.whirpool.model.EventModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
+import edu.msu.elhazzat.whirpool.rest.AsyncGCSBuildingInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncParseGeoJsonGCS;
 import edu.msu.elhazzat.whirpool.utils.RoomNameRegexMapper;
@@ -66,6 +69,7 @@ public class RoomActivity extends AppCompatActivity {
     private RoomModel mRoomModel = null;
 
     private String mBuildingName;
+    private int mNumFloors;
     private String mRoomName;
 
     private String mBuildingAbbrName;
@@ -83,6 +87,8 @@ public class RoomActivity extends AppCompatActivity {
     private int mViewMinHeight;
     private boolean mAnimationInEffect = false;
     private boolean mCollapsed = false;
+
+    private LinearLayout mScrollViewDirectChild;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +112,8 @@ public class RoomActivity extends AppCompatActivity {
         }
 
         else if(mRoomModel != null) {
-
+            mBuildingAbbrName = mRoomModel.getBuildingName();
+            mGeoJsonRoomName = mRoomModel.getRoomName();
         }
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -119,7 +126,7 @@ public class RoomActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
 
         mRoomNameTextView = (TextView) findViewById(R.id.roomNameText);
-        mRoomNameTextView.setText(mRoomName);
+        mRoomNameTextView.setText(mGeoJsonRoomName);
         mRoomNameTextView.setTextColor(Color.BLUE);
 
         mRoomNameTextView.setOnTouchListener(new View.OnTouchListener() {
@@ -158,8 +165,52 @@ public class RoomActivity extends AppCompatActivity {
 
         mRoomAttributeListView = (ListView) findViewById(R.id.roomInfoList);
 
+        mScrollViewDirectChild = (LinearLayout) findViewById(R.id.scroll_view_direct_child);
+
+        mScrollViewDirectChild.setVisibility(View.INVISIBLE);
+
+        buildScrollView();
         getLayoutDimensions();
         setUpView();
+    }
+
+    private void buildScrollView() {
+        new AsyncGCSBuildingInfoReader(mBuildingAbbrName) {
+
+            public void handleBuilding(BuildingModel model) {
+                if(model != null) {
+                    mNumFloors = model.getFloors();
+                    for (int i = 1; i < mNumFloors + 1; i++) {
+                        TextView tv = new TextView(getApplicationContext());
+                        tv.setWidth(50);
+                        tv.setTextSize(25f);
+                        String text = Integer.toString(i);
+                        tv.setText(text);
+                        tv.setTextColor(Color.BLACK);
+                        tv.setGravity(Gravity.CENTER);
+                        tv.setBackgroundResource(R.drawable.floor_picker_border);
+
+                        tv.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                TextView tv = (TextView) v;
+                                tv.setTextColor(Color.BLUE);
+                                mGeoJsonMap.drawLayer(Integer.parseInt(tv.getText().toString()), WIMAppConstants.MAP_DEFAULT_FILL_COLOR,
+                                        WIMAppConstants.MAP_DEFAULT_STROKE_COLOR,
+                                        WIMAppConstants.MAP_DEFAULT_STROKE_WIDTH);
+                                for(int i = 0; i < mScrollViewDirectChild.getChildCount(); i++) {
+                                    TextView child = (TextView) mScrollViewDirectChild.getChildAt(i);
+                                    if(!child.getText().toString().equals(tv.getText().toString())) {
+                                        child.setTextColor(Color.BLACK);
+                                    }
+                                }
+                            }
+                        });
+                        mScrollViewDirectChild.addView(tv);
+                    }
+                }
+            }
+        }.execute();
     }
 
     private void getLayoutDimensions() {
@@ -200,8 +251,10 @@ public class RoomActivity extends AppCompatActivity {
             dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION);
             view.startAnimation(heightAnim);
             mCollapsed = false;
+            mScrollViewDirectChild.setVisibility(View.INVISIBLE);
         }
     }
+
     private void animateSlideUp() {
         if(mViewCurrentHeight > THRESHOLD_SLIDE_DOWN_PRECENTAGE * mViewMaxHeight) {
             mViewCurrentHeight = mViewMaxHeight;
@@ -228,6 +281,7 @@ public class RoomActivity extends AppCompatActivity {
             dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION);
             view.startAnimation(heightAnim);
             mCollapsed = true;
+            mScrollViewDirectChild.setVisibility(View.VISIBLE);
         }
     }
 
@@ -249,10 +303,10 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void setUpView() {
-        new AsyncParseGeoJsonGCS(WIMAppConstants.WHIRLPOOL_ABBRV_MAP.get(mBuildingName)) {
+        new AsyncParseGeoJsonGCS(mBuildingAbbrName) {
             public void handleGeoJson(GeoJsonMap map) {
                 mGeoJsonMap = map;
-                int initialFloor = getInitialFloor(mRoomName);
+                int initialFloor = getInitialFloor(mGeoJsonRoomName);
                 mGeoJsonMap.setCurrentLayer(initialFloor);
                 setUpMap();
                 inflateRoomAttributes(mGeoJsonRoomName, mBuildingAbbrName);
@@ -314,10 +368,10 @@ public class RoomActivity extends AppCompatActivity {
 
 
     private void mapListen() {
-        final GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
                 for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
                     if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
                         GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
@@ -372,10 +426,6 @@ public class RoomActivity extends AppCompatActivity {
                     );
                     helper.addRelevantRoom(roomModel);
                 }
-                break;
-            case R.id.action_favorites:
-                Intent favoritesIntent = new Intent(this, FavoritesActivity.class);
-                startActivity(favoritesIntent);
                 break;
             case R.id.action_create_event:
                 break;

@@ -69,7 +69,8 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
                   //  String win = floor.getString("wing");
                     String geoJsonStr = floor.getString("geojson");
                     GeoJson floorGeoJson = readGeoJson(geoJsonStr);
-                    GeoJsonMapLayer layer = new GeoJsonMapLayer(floorGeoJson, floorNum);
+                    GeoJsonMapLayer layer = new GeoJsonMapLayer(floorGeoJson);
+                    layer.setFloorNum(floorNum);
                     map.addLayer(floorNum, layer);
                 }
 

@@ -13,12 +13,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
 import com.fortysevendeg.swipelistview.SwipeListView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.plus.Plus;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -28,8 +34,11 @@ import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.EventAdapter;
+import edu.msu.elhazzat.whirpool.adapter.FavoritesAdapter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventReader;
+import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.model.EventModel;
+import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.utils.AsyncTokenFromGoogleAccountCredential;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 import edu.msu.elhazzat.whirpool.utils.TokenHolder;
@@ -38,7 +47,8 @@ import edu.msu.elhazzat.whirpool.utils.TokenHolder;
 /**
  * Created by Christian on 9/27/2015.
  */
-public class HomeActivity extends CalendarServiceActivity implements View.OnClickListener {
+public class HomeActivity extends CalendarServiceActivity implements View.OnClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String LOG_TAG = HomeActivity.class.getSimpleName();
     private static final int SWIPE_VIEW_OFFSET = 0;
@@ -49,7 +59,13 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
     private ArrayList<EventModel> mCalendarListViewValues = new ArrayList<>();
 
     private DrawerLayout mDrawerLayout;
+    private boolean mDrawerOpen = false;
     private ActionBarDrawerToggle mDrawerToggle;
+
+    private ExpandableListView mFavoritesView;
+    private FavoritesAdapter mFavoritesAdapter;
+
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,10 +97,17 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             }.execute();
         }
 
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(new Scope(Scopes.PROFILE))
+                .build();
+
         mCalendarListView = (SwipeListView) findViewById(R.id.example_swipe_lv_list);
 
         ImageView addEventButton = (ImageView) findViewById(R.id.eventButton);
-        addEventButton.setOnClickListener(new View.OnClickListener() {
+        addEventButton. setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent createEventIntent = new Intent(getApplicationContext(), CreateEventActivity.class);
@@ -92,6 +115,23 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             }
         });
 
+        mFavoritesView = (ExpandableListView) findViewById(R.id.exp_favorites_list);
+        mFavoritesView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                Toast.makeText(getApplicationContext(), "test", Toast.LENGTH_LONG).show();
+                return false;
+            }
+        });
+
+
+        buildDrawer();
+        buildSwipeView();
+        inflateEventAdapter();
+        inflateFavoritesAdapter();
+    }
+
+    private void buildDrawer() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -99,33 +139,36 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
         ActionBar ab = getSupportActionBar();
         if(ab != null) {
-            ab.setDisplayShowTitleEnabled(false);
+    //        ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#0000ff")));
         }
 
-        if (ab != null)
-        {
-            ab.setDisplayHomeAsUpEnabled(true);
-            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.hello_world, R.string.hello_world)
-            {
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
-                public void onDrawerClosed(View view)
-                {
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.hello_world, R.string.hello_world)  {
+
+                public void onDrawerClosed(View view) {
+                    mDrawerOpen = false;
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     supportInvalidateOptionsMenu();
                     //drawerOpened = false;
                 }
 
-                public void onDrawerOpened(View drawerView)
-                {
+                public void onDrawerOpened(View drawerView) {
+                    //mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+
+                    mDrawerLayout.bringToFront();
+                    mDrawerLayout.requestLayout();
                     supportInvalidateOptionsMenu();
                     //drawerOpened = true;
                 }
             };
+
             mDrawerToggle.setDrawerIndicatorEnabled(true);
             mDrawerLayout.setDrawerListener(mDrawerToggle);
         }
 
-        buildSwipeView();
-        inflateEventAdapter();
     }
 
     private void buildSwipeView() {
@@ -193,6 +236,12 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
             @Override
             public void onClickFrontView(int position) {
+                EventModel model = mCalendarAdapter.getItem(position);
+                if (model.getLocation() != null) {
+                    Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
+                    roomIntent.putExtra("EVENT", model);
+                    startActivity(roomIntent);
+                }
             }
 
             @Override
@@ -207,13 +256,6 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                 mCalendarAdapter.notifyDataSetChanged();
             }
 
-        });
-
-        mCalendarListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            }
         });
 
         mCalendarListView.setSwipeMode(SwipeListView.SWIPE_MODE_LEFT);
@@ -263,6 +305,13 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         }.execute();
     }
 
+    private void inflateFavoritesAdapter() {
+        RelevantRoomDbHelper helper = new RelevantRoomDbHelper(this);
+        List<RoomModel> rooms = helper.getAllRelevantRooms();
+        mFavoritesAdapter = new FavoritesAdapter(this, rooms);
+        mFavoritesView.setAdapter(mFavoritesAdapter);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -280,7 +329,11 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
+        if (mGoogleApiClient.isConnected()) {
+            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+            mGoogleApiClient.disconnect();
+            Intent mainActivity = new Intent(this, MainActivity.class);
+            startActivity(mainActivity);
         }
     }
 
@@ -296,12 +349,22 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        switch(id) {
-            case R.id.action_search:
-                Intent searchIntent = new Intent(this, SearchActivity.class);
-                startActivity(searchIntent);
-                break;
+
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            if(!mDrawerOpen) {
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                mDrawerOpen = true;
+            }
+            return true;
+        }
+        else {
+            int id = item.getItemId();
+            switch (id) {
+                case R.id.action_search:
+                    Intent searchIntent = new Intent(this, SearchActivity.class);
+                    startActivity(searchIntent);
+                    break;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -313,12 +376,43 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         mDrawerToggle.syncState();
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig)
+        @Override
+    public void onConfigurationChanged (Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
+
+    @Override
+    public void onConnected(Bundle arg0) {
+        //
+    }
+
+    @Override
+    public void onConnectionSuspended(int arg0) {
+        // TODO Auto-generated method stub
+        mGoogleApiClient.connect();
+        // updateUI(false);
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
 }
 
 

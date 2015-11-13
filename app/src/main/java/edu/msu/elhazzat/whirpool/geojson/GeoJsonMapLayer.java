@@ -6,7 +6,6 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.geometry.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,19 +14,18 @@ import java.util.List;
  * Created by christianwhite on 10/8/15.
  */
 public class GeoJsonMapLayer {
+
     private GeoJson mGeoJson = null;
-    private int mFloorNum;
+
     private List<Polygon> mPolygons = new ArrayList<>(); // gms polygon
     private List<Polyline> mPolylines = new ArrayList<>(); // gms polyline
-    private List<Point> mPoints = new ArrayList<>();
-    private boolean mIsVisible = false;
+
+    private int mFloorNum;
+
     private boolean mIsDrawn = false;
+    private boolean mIsHidden = false;
 
-    public List<Polygon> getPolygons() {
-        return mPolygons;
-    }
-
-    public void setGeoJson(GeoJson json) {
+    public GeoJsonMapLayer(GeoJson json) {
         mGeoJson = json;
     }
 
@@ -35,17 +33,26 @@ public class GeoJsonMapLayer {
         return mGeoJson;
     }
 
-    public GeoJsonMapLayer(GeoJson json) {
+    public void setGeoJson(GeoJson json) {
         mGeoJson = json;
     }
-    public GeoJsonMapLayer(GeoJson json, int floorNum) {
-        mGeoJson = json;
-        mFloorNum = floorNum;
+
+    public List<Polygon> getPolygons() {
+        return mPolygons;
     }
 
-    public GeoJsonMapLayer() {
-
+    public void setPolygons(List<Polygon> polygons) {
+        mPolygons = polygons;
     }
+
+    public boolean isHidden() {
+        return mIsHidden;
+    }
+
+    public boolean isDrawn() {
+        return mIsDrawn;
+    }
+
 
     /**
      * Draws the map using uniform properties.
@@ -62,7 +69,7 @@ public class GeoJsonMapLayer {
                 if (jsonGeometry == null) {
                     continue;
                 }
-                switch(jsonGeometry.getType()) {
+                switch (jsonGeometry.getType()) {
                     case GeoJsonConstants.POINT:
                         GeoJsonPoint point = (GeoJsonPoint) jsonGeometry.getGeometry();
                         LatLng latLng = Geometry.geoJsonCoordinateToLatLng(point.getPoints(), false);
@@ -73,7 +80,7 @@ public class GeoJsonMapLayer {
                     case GeoJsonConstants.LINESTRING:
                         GeoJsonPolyline lineString = (GeoJsonPolyline) jsonGeometry.getGeometry();
                         List<LatLng> latLngList = Geometry.geoJsonCoordinateListToLatLng(lineString.getPoints(), false);
-                        Polyline polyline  = map.addPolyline(new PolylineOptions()
+                        Polyline polyline = map.addPolyline(new PolylineOptions()
                                 .addAll(latLngList).color(strokeColor).width(strokeWidth));
                         mPolylines.add(polyline);
                         break;
@@ -81,7 +88,7 @@ public class GeoJsonMapLayer {
                         GeoJsonPolygon poly1 = (GeoJsonPolygon) jsonGeometry.getGeometry();
                         List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
                         int color = fillColor;
-                        Polygon poly2  = map.addPolygon(new PolygonOptions()
+                        Polygon poly2 = map.addPolygon(new PolygonOptions()
                                 .addAll(latLngPoly).fillColor(color).strokeWidth(strokeWidth));
                         poly1.setGMSPolygon(poly2);
                         mPolygons.add(poly2);
@@ -91,7 +98,7 @@ public class GeoJsonMapLayer {
             mIsDrawn = true;
         }
         else {
-            hide(false);
+            show(true);
         }
     }
 
@@ -111,14 +118,15 @@ public class GeoJsonMapLayer {
      * Hide the map. Does not have to be redrawn.
      * @param toShow
      */
-    public void hide(boolean toShow) {
+    public void show(boolean toShow) {
         for(Polygon polygon : mPolygons) {
             polygon.setVisible(toShow);
         }
         for(Polyline polyline : mPolylines) {
             polyline.setVisible(toShow);
         }
-        mIsVisible = toShow;
+
+        mIsHidden = !toShow;
     }
 
     public void setFloorNum(int floorNum) {

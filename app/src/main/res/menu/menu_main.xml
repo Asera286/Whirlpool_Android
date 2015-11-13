@@ -12,8 +12,4 @@
         android:icon="@android:drawable/ic_menu_search"
         app:showAsAction="always" />
 
-    <item android:id="@+id/action_favorites"
-        android:title="Go to Favorites"
-        android:icon="@android:drawable/star_off"
-        app:showAsAction="always"/>
 </menu>

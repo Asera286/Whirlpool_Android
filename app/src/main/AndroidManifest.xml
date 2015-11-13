@@ -51,13 +51,18 @@
                 android:value=".activity.HomeActivity" />
         </activity>
         <activity
+            android:launchMode="singleTop"
             android:name=".activity.SearchActivity"
             android:label="@string/title_activity_search"
             android:parentActivityName=".activity.HomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.HomeActivity" />
-            <meta-data android:name="android.app.searchable"
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
         <activity
@@ -67,10 +72,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.HomeActivity" />
-        </activity>
-        <activity
-            android:name=".activity.FavoritesActivity"
-            android:label="@string/title_activity_favorites" >
         </activity>
     </application>
 

@@ -6,113 +6,160 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SearchView;
+import android.widget.ExpandableListView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import edu.msu.elhazzat.whirpool.R;
-import edu.msu.elhazzat.whirpool.adapter.RoomAdapter;
+import edu.msu.elhazzat.whirpool.adapter.SearchAdapter;
+import edu.msu.elhazzat.whirpool.model.BuildingModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
+import edu.msu.elhazzat.whirpool.rest.AsyncGCSAllRooms;
+import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 
 /**
- *
+ * Created by christianwhite on 11/11/15.
  */
 public class SearchActivity extends AppCompatActivity {
 
-    private RoomAdapter mAdapter;
-    private ListView mList;
-    private List<RoomModel> mRoomModelListValues = new ArrayList<>();
-    private Map<String, List<RoomModel>> mVals = new HashMap<>();
+    private List<BuildingModel> mBuildingModels = new ArrayList<>();
+    private List<BuildingModel> mBuildingModelsFiltered = new ArrayList<>();
+
+    private ExpandableListView mListView;
+    private SearchAdapter mSearchAdapter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        handleIntent(getIntent());
         setContentView(R.layout.activity_search);
 
-        mList = (ListView) findViewById(R.id.list);
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView = (ExpandableListView) findViewById(R.id.exp_list_view);
+        mListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                if (mListView.isGroupExpanded(groupPosition)) {
+                    mListView.collapseGroup(groupPosition);
+                } else {
+                    mListView.expandGroup(groupPosition, true);
+                }
+                return true;
             }
         });
 
-        SearchView.OnQueryTextListener searchQueryListener = new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                doSearch(query);
-                return true;
+        new AsyncGCSAllRooms() {
+            public void handleBuildings(List<BuildingModel> items) {
+                for(BuildingModel model : items) {
+                    if(WIMAppConstants.WHIRLPOOL_ABBRV_MAP.containsValue(model.getBuildingName())) {
+                        mBuildingModelsFiltered.add(model);
+                        mBuildingModels.add(model);
+                    }
+                }
+                mSearchAdapter = new SearchAdapter(getApplicationContext(), mBuildingModelsFiltered);
+                mListView.setAdapter(mSearchAdapter);
             }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                doSearch(newText);
-                return true;
-            }
-        };
+        }.execute();
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
         ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-
-        ab.setDisplayShowTitleEnabled(false);
-    }
-
-    private void getRoomsInfo() {
-
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            doSearch(query);
+        if(ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowTitleEnabled(false);
         }
+
+        mListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                RoomModel model = mSearchAdapter.getChild(groupPosition, childPosition);
+                Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
+                roomIntent.putExtra("ROOM", model);
+                startActivity(roomIntent);
+                return false;
+            }
+        });
     }
 
     private void doSearch(String queryStr) {
-        mAdapter.sort();
-        mAdapter.getFilter().filter(queryStr);
+        filterData(queryStr);
     }
 
-    @Override
+    public void filterData(String query) {
+
+        query = query.toLowerCase();
+        mBuildingModelsFiltered.clear();
+
+        if(query.isEmpty()){
+            mBuildingModelsFiltered.addAll(mBuildingModels);
+            mSearchAdapter.notifyDataSetChanged();
+            for ( int i = 0; i < mBuildingModelsFiltered.size(); i++ ) {
+                mListView.collapseGroup(i);
+            }
+        }
+        else {
+
+            for(BuildingModel building: mBuildingModels){
+
+                List<RoomModel> roomList = building.getRooms();
+                List<RoomModel> newList = new ArrayList<RoomModel>();
+                if(roomList != null) {
+                    for (RoomModel room : roomList) {
+                        if (room.getRoomName().toLowerCase().contains(query)) {
+                            newList.add(room);
+                        }
+                    }
+                    if (newList.size() > 0) {
+                        BuildingModel nBuildingModel = new BuildingModel(building.getBuildingName(),
+                                newList);
+                        mBuildingModelsFiltered.add(nBuildingModel);
+                    }
+                }
+            }
+            mSearchAdapter.notifyDataSetChanged();
+            for ( int i = 0; i < mBuildingModelsFiltered.size(); i++ ) {
+                mListView.expandGroup(i);
+            }
+        }
+    }
+
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_search, menu);
-        // Associate searchable configuration with the SearchView
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_search, menu);
 
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
-        return true;
-    }
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                doSearch(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                doSearch(query);
+                return false;
+            }
+        });
+
+        return super.onCreateOptionsMenu(menu);
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_favorites:
-                Intent favoritesIntent = new Intent(this, FavoritesActivity.class);
-                startActivity(favoritesIntent);
-                break;
-        }
         return super.onOptionsItemSelected(item);
     }
+
+
 }

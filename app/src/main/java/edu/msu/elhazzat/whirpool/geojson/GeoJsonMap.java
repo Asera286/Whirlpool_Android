@@ -20,6 +20,7 @@ public class GeoJsonMap {
     public GeoJsonMap(GoogleMap map) {
         mMap = map;
     }
+
     public GeoJsonMap() {
 
     }
@@ -34,6 +35,9 @@ public class GeoJsonMap {
     }
 
     public void drawLayer(int floor, int fillColor, int strokeColor, int strokeWidth) {
+        if(mCurrentLayer != 0) {
+            mLayers.get(mCurrentLayer).show(false);
+        }
         mLayers.get(floor).draw(mMap, fillColor, strokeColor, strokeWidth);
         mCurrentLayer = floor;
     }
@@ -47,8 +51,11 @@ public class GeoJsonMap {
         mLayers.get(floor).remove();
     }
 
-    public void hideLayer(int floor, boolean toHide) {
-        mLayers.get(floor).hide(toHide);
+    public void showLayer(int floor, boolean toShow) {
+        if(toShow) {
+            mCurrentLayer = floor;
+        }
+        mLayers.get(floor).show(toShow);
     }
 
 }

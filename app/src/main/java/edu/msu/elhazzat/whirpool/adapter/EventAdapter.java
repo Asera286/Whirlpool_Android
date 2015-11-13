@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -19,6 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import edu.msu.elhazzat.whirpool.R;
+import edu.msu.elhazzat.whirpool.activity.RoomActivity;
 import edu.msu.elhazzat.whirpool.model.EventModel;
 import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 
@@ -77,17 +79,19 @@ public class EventAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = View.inflate(mContext,
                     R.layout.event_row, null);
-            new ViewHolder(convertView);
+            new  ViewHolder(convertView);
         }
+
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        EventModel item = getItem(position);
+        final EventModel item = getItem(position);
+
+        // front
         Integer resource = getBuildingImageResource(item);
         Drawable image = ContextCompat.getDrawable(mContext, resource);
-
         holder.room_icon.setImageDrawable(image);
 
         try {
@@ -120,22 +124,52 @@ public class EventAdapter extends BaseAdapter {
         catch(android.net.ParseException e) {
 
         }
+
         holder.event_summary.setText(item.getSummary());
+
+        //back
+
+        if(item.getLocation() != null) {
+            holder.nav_icon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent roomIntent = new Intent(mContext, RoomActivity.class);
+                    roomIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    roomIntent.putExtra("EVENT", item);
+                    mContext.startActivity(roomIntent);
+                }
+            });
+        }
+        else {
+            holder.nav_icon.setVisibility(View.GONE);
+        }
 
         return convertView;
     }
 
     class ViewHolder {
+
+        //front
         ImageView room_icon;
         TextView event_start_end;
         TextView event_summary;
         TextView event_time_until;
+
+        //back
+        ImageView nav_icon;
+        ImageView delete_icon;
+        ImageView edit_icon;
+
 
         public ViewHolder(View view) {
             room_icon = (ImageView) view.findViewById(R.id.room_icon);
             event_start_end = (TextView) view.findViewById(R.id.event_start_end);
             event_summary = (TextView) view.findViewById(R.id.event_summary);
             event_time_until = (TextView) view.findViewById(R.id.event_time_until);
+
+            nav_icon = (ImageView) view.findViewById(R.id.nav1x);
+            delete_icon = (ImageView) view.findViewById(R.id.delete1x);
+            edit_icon = (ImageView) view.findViewById(R.id.edit1x);
             view.setTag(this);
         }
     }

@@ -3,57 +3,33 @@ package edu.msu.elhazzat.whirpool.activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
-import edu.msu.elhazzat.whirpool.R;
-
 /**
- * Created by christianwhite on 9/20/15.
+ * Created by christianwhite on 11/12/15.
  */
-public class MainActivity extends FragmentActivity implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class GoogleApiBaseClient extends AppCompatActivity implements
+            GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener {
 
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String LOG_TAG = GoogleApiBaseClient.class.getSimpleName();
 
     private static final int REQUEST_CODE_SIGN_IN = 0;
-    private static final String DIALOG_ERROR = "dialog_error";
 
     protected GoogleApiClient mGoogleApiClient;
     protected boolean mIsResolving = false;
     protected boolean mShouldResolve = false;
-    protected SignInButton mSignInButton;
 
-    /**
-     * Main activity - sign in user with google auth.
-     * @param savedInstanceState
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         buildGoogleApiClient();
-        if(!mGoogleApiClient.isConnected()) {
-            setContentView(R.layout.activity_main);
-            mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
-            mSignInButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (v.getId() == R.id.sign_in_button) {
-                        onSignInClicked();
-                    }
-                }
-            });
-        }
     }
 
     @Override
@@ -81,13 +57,13 @@ public class MainActivity extends FragmentActivity implements
                 .build();
     }
 
-
-    public void onSignInClicked() {
-        mShouldResolve = true;
-        mGoogleApiClient.connect();
+    public void signIn() {
+        if(mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
     }
 
-    public void onSignOutClicked() {
+    public void signOut() {
         if (mGoogleApiClient.isConnected()) {
             Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             mGoogleApiClient.disconnect();
@@ -133,15 +109,5 @@ public class MainActivity extends FragmentActivity implements
                 }
             }
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -24,14 +24,14 @@
             android:layout_toStartOf="@id/delete1x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/nav1xreplace"/>
+            android:src="@drawable/edit"/>
         <ImageView
             android:id="@+id/nav1x"
             android:layout_toLeftOf="@id/edit1x"
             android:layout_toStartOf="@id/edit1x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/edit"/>
+            android:src="@drawable/nav1xreplace"/>
 
     </RelativeLayout>
 
