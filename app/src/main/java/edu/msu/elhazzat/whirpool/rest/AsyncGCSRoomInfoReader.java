@@ -83,9 +83,10 @@ public abstract class AsyncGCSRoomInfoReader extends AsyncTask<Void, Void, RoomM
                     String extension = roomObj.getString("extension");
                     String roomType = roomObj.getString("room_type");
                     String email = roomObj.getString("email");
+                    String resourceName = roomObj.getString("resource_name");
 
                     RoomModel model = new RoomModel(mRoomName, mBuildingName, extension, roomType,
-                            capacity, occupancyStatus, amenities, email);
+                            capacity, occupancyStatus, amenities, email, resourceName);
                     return model;
                 }
             }

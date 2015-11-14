@@ -10,6 +10,8 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,13 +30,10 @@ public abstract class AsyncCalendarEventReader extends AsyncTask<Void, Void, Lis
 
     private com.google.api.services.calendar.Calendar mCalendarService;
     private DateTime mTime;
-    private int mMaxResults;
 
-    public AsyncCalendarEventReader(com.google.api.services.calendar.Calendar service,
-                             DateTime time, int max) {
+    public AsyncCalendarEventReader(com.google.api.services.calendar.Calendar service, DateTime time) {
         mCalendarService = service;
         mTime = time;
-        mMaxResults = max;
     }
 
     @Override
@@ -53,8 +52,8 @@ public abstract class AsyncCalendarEventReader extends AsyncTask<Void, Void, Lis
     private List<Event> getCalendarEvents() throws IOException {
         try {
             Events events = mCalendarService.events().list("primary")
-                    .setMaxResults(mMaxResults)
                     .setTimeMin(mTime)
+                    .setTimeMax(getEndOfDay(new Date(mTime.getValue())))
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute();
@@ -63,6 +62,16 @@ public abstract class AsyncCalendarEventReader extends AsyncTask<Void, Void, Lis
            handleUserRecoverableAuthIOException(e);
         }
         return null;
+    }
+
+    private DateTime getEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return new DateTime(calendar.getTime());
     }
 
     @Override

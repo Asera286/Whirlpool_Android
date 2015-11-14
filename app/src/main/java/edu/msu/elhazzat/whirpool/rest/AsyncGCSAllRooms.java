@@ -65,9 +65,10 @@ public abstract class AsyncGCSAllRooms extends AsyncTask<Void, Void, List<Buildi
                         String extension = roomObj.getString("extension");
                         String roomType = roomObj.getString("room_type");
                         String email = roomObj.getString("email");
+                        String resourceName = roomObj.getString("resource_name");
 
                         RoomModel model = new RoomModel(roomName, buildingAbbrv, extension, roomType,
-                                capacity, occupancyStatus, null, email);
+                                capacity, occupancyStatus, null, email, resourceName);
                         roomModels.add(model);
                     }
 

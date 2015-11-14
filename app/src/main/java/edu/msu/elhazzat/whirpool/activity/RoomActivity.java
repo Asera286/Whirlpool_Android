@@ -2,6 +2,7 @@ package edu.msu.elhazzat.whirpool.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -32,7 +33,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 
 import edu.msu.elhazzat.whirpool.R;
-import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonConstants;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonFeature;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMap;
@@ -123,7 +123,11 @@ public class RoomActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
 
         // Enable the Up button
-        ab.setDisplayHomeAsUpEnabled(true);
+        if(ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowTitleEnabled(false);
+            ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#8286F8")));
+        }
 
         mRoomNameTextView = (TextView) findViewById(R.id.roomNameText);
         mRoomNameTextView.setText(mGeoJsonRoomName);
@@ -416,18 +420,6 @@ public class RoomActivity extends AppCompatActivity {
             case R.id.action_search:
                 Intent searchIntent = new Intent(this, SearchActivity.class);
                 startActivity(searchIntent);
-                break;
-            case R.id.action_add_to_favorites:
-                RelevantRoomDbHelper helper = new RelevantRoomDbHelper(this);
-                if (mRoomModel == null) {
-                    RoomModel roomModel = new RoomModel(
-                            mGeoJsonRoomName, mBuildingName, null, "C", 0, null, null,
-                            mEvent.getEmail()
-                    );
-                    helper.addRelevantRoom(roomModel);
-                }
-                break;
-            case R.id.action_create_event:
                 break;
         }
         return super.onOptionsItemSelected(item);

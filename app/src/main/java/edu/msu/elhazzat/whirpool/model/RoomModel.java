@@ -17,13 +17,7 @@ public class RoomModel implements Parcelable {
     private String mOccupancyStatus;
     private String mEmail;
     private String[] mAmenities;
-
-    public static final String ROOM_NAME = "room_id";
-    public static final String ROOM_BUILDING_NAME = "building_name";
-    public static final String ROOM_EXTENSION = "extension";
-    public static final String ROOM_TYPE = "room_type";
-    public static final String ROOM_CAPACITY = "room_cap";
-    public static final String ROOM_EMAIL = "email";
+    private String mResourceName;
 
     public RoomModel() {
 
@@ -31,7 +25,7 @@ public class RoomModel implements Parcelable {
 
     public RoomModel(String roomName, String buildingName, String extension,
                      String roomType, int capacity, String occupancyStatus,
-                     String[] amenities, String email) {
+                     String[] amenities, String email, String resourceName) {
         mBuildingName = buildingName;
         mRoomName = roomName;
         mCapacity = capacity;
@@ -40,6 +34,7 @@ public class RoomModel implements Parcelable {
         mRoomType = roomType;
         mAmenities = amenities;
         mEmail = email;
+        mResourceName = resourceName;
     }
 
     public RoomModel(Parcel in){
@@ -50,6 +45,7 @@ public class RoomModel implements Parcelable {
         mExtension = in.readString();
         mRoomType = in.readString();
         mEmail = in.readString();
+        mResourceName = in.readString();
         mAmenities = (String[]) in.readSerializable();
     }
 
@@ -81,6 +77,8 @@ public class RoomModel implements Parcelable {
 
     public String[] getAmenities() { return mAmenities; }
 
+    public String getResourceName() { return mResourceName; }
+
     public void setAmenities(String[] amenities) {
         mAmenities = amenities;
     }
@@ -109,6 +107,8 @@ public class RoomModel implements Parcelable {
 
     public void setExtension(String ext) { mExtension = ext; }
 
+    public void setResourceName(String resource) { mResourceName = resource;}
+
     public String toString() {
         return this.getRoomName();
     }
@@ -126,6 +126,7 @@ public class RoomModel implements Parcelable {
         dest.writeString(mOccupancyStatus);
         dest.writeString(mExtension);
         dest.writeString(mRoomType);
+        dest.writeString(mResourceName);
         dest.writeSerializable(mAmenities);
     }
 

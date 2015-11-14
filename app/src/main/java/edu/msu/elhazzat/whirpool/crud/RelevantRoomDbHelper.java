@@ -34,6 +34,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
     public static final String ROOM_TYPE = "room_type";
     public static final String ROOM_CAPACITY = "room_cap";
     public static final String ROOM_EMAIL = "email";
+    public static final String ROOM_RESOURCE_NAME = "resource_name";
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + TABLE_NAME + " (" + ROOM_NAME + TEXT_TYPE + COMMA_SEP
@@ -41,7 +42,8 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
                 + ROOM_EXTENSION + TEXT_TYPE + COMMA_SEP
                 + ROOM_TYPE + TEXT_TYPE + COMMA_SEP
                 + ROOM_CAPACITY + INT_TYPE + COMMA_SEP
-                + ROOM_EMAIL + TEXT_TYPE + " )";
+                + ROOM_EMAIL + TEXT_TYPE + COMMA_SEP + ROOM_RESOURCE_NAME
+                    + TEXT_TYPE + " )";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
@@ -79,6 +81,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
             values.put(ROOM_TYPE, room.getRoomType());
             values.put(ROOM_CAPACITY, room.getCapacity());
             values.put(ROOM_EMAIL, room.getEmail());
+            values.put(ROOM_RESOURCE_NAME, room.getResourceName());
 
             // Inserting Row
             db.insert(TABLE_NAME, null, values);
@@ -93,7 +96,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(TABLE_NAME, new String[]{
                         ROOM_NAME, ROOM_BUILDING_NAME,
                         ROOM_EXTENSION, ROOM_TYPE,
-                        ROOM_CAPACITY, ROOM_EMAIL}, ROOM_BUILDING_NAME + " =? " + "AND " + ROOM_NAME + " =? ",
+                        ROOM_CAPACITY, ROOM_EMAIL, ROOM_RESOURCE_NAME}, ROOM_BUILDING_NAME + " =? " + "AND " + ROOM_NAME + " =? ",
                 new String[]{buildingName, roomId}, null, null, null, null);
 
         RoomModel room = null;
@@ -102,7 +105,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
             room = new RoomModel(
                     cursor.getString(0), cursor.getString(1),
                     cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getString(5), null, cursor.getString(6));
+                    cursor.getString(5), null, cursor.getString(6), cursor.getString(7));
         }
 
         // return room
@@ -129,7 +132,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
                 room.setRoomType(cursor.getString(3));
                 room.setCapacity(cursor.getInt(4));
                 room.setEmail(cursor.getString(5));
-
+                room.setResourceName(cursor.getString(6));
                 roomList.add(room);
             } while (cursor.moveToNext());
         }
@@ -150,6 +153,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
         values.put(ROOM_TYPE, room.getRoomType());
         values.put(ROOM_CAPACITY, room.getCapacity());
         values.put(ROOM_EMAIL, room.getEmail());
+        values.put(ROOM_RESOURCE_NAME, room.getResourceName());
 
         // updating row
         return db.update(TABLE_NAME, values, ROOM_BUILDING_NAME + " =? AND " + ROOM_NAME + " =?",

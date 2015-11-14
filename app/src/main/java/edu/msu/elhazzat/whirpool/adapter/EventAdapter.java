@@ -1,14 +1,16 @@
 package edu.msu.elhazzat.whirpool.adapter;
 
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,8 +22,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import edu.msu.elhazzat.whirpool.R;
+import edu.msu.elhazzat.whirpool.activity.CreateEventActivity;
+import edu.msu.elhazzat.whirpool.activity.HomeActivity;
 import edu.msu.elhazzat.whirpool.activity.RoomActivity;
+import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventDeleter;
 import edu.msu.elhazzat.whirpool.model.EventModel;
+import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 
 /**
@@ -29,11 +35,11 @@ import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
  */
 public class EventAdapter extends BaseAdapter {
 
-    private Context mContext;
+    private HomeActivity mContext;
     private List<EventModel> mCalendarListValues = new ArrayList<>();
     private Map<String, Integer> mBuildingMap = new HashMap<>();
 
-    public EventAdapter(Context context, List<EventModel> eventModels) {
+    public EventAdapter(HomeActivity context, List<EventModel> eventModels) {
         super();
         mContext = context;
         mCalendarListValues = eventModels;
@@ -144,7 +150,42 @@ public class EventAdapter extends BaseAdapter {
             holder.nav_icon.setVisibility(View.GONE);
         }
 
+        holder.edit_icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent editIntent = new Intent(mContext, CreateEventActivity.class);
+                editIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                editIntent.putExtra("EVENT", item);
+                mContext.startActivity(editIntent);
+            }
+        });
+
+        holder.delete_icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteDialog(item);
+            }
+        });
+
         return convertView;
+    }
+
+    public void deleteDialog(final EventModel item) {
+        new AlertDialog.Builder(mContext)
+                .setTitle("Confirm Delete")
+                .setMessage("Do you really want to delete this event?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                        new AsyncCalendarEventDeleter(CalendarServiceHolder.getInstance().getService(),
+                                item.getId()) {
+                            public void handleDelete() {}
+                        }.execute();
+
+                        Toast.makeText(mContext, "Event deleted", Toast.LENGTH_SHORT).show();
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
     }
 
     class ViewHolder {

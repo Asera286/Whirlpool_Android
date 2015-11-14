@@ -179,7 +179,7 @@
             android:id="@+id/profileBox"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:background = "#2c8dfc"
+            android:background = "#3870EB"
             android:padding="8dp" >
             <TextView
                 android:layout_width="wrap_content"
@@ -208,7 +208,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#ffffff"/>
-
 
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

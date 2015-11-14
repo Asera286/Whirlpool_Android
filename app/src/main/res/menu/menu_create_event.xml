@@ -7,9 +7,8 @@
         android:orderInCategory="100"
         app:showAsAction="never" />
 
-    <item android:id="@+id/navigate"
-        android:title="Navigate"
-        android:icon="@android:drawable/ic_menu_save"
+    <item android:id="@+id/action_add_event"
+        android:title="Search"
+        android:icon="@android:drawable/ic_menu_add"
         app:showAsAction="always"/>
-
 </menu>

@@ -23,11 +23,12 @@ import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 public abstract class CalendarServiceActivity extends AppCompatActivity {
     private static final String LOG_TAG = CalendarServiceActivity.class.getSimpleName();
 
-    public static final int COMPLETE_AUTHORIZATION_REQUEST_CODE = 1001;
     public static final String APPLICATION_NAME = "Whirlpool Indoor Maps";
+    protected static final int COMPLETE_AUTHORIZATION_REQUEST_CODE = 1001;
 
-    private static final String[] SCOPES = { CalendarScopes.CALENDAR ,
-            "https://apps-apis.google.com/a/feeds/calendar/resource/"};
+    public static final String RESOURCE_SCOPE = "https://apps-apis.google.com/a/feeds/calendar/resource/";
+
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR , RESOURCE_SCOPE };
 
     private final HttpTransport mTransport = AndroidHttp.newCompatibleTransport();
     private final JsonFactory mJsonFactory = JacksonFactory.getDefaultInstance();
@@ -72,6 +73,8 @@ public abstract class CalendarServiceActivity extends AppCompatActivity {
                 mTransport, mJsonFactory, mCredential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
+
+        // Set service for application wide use
         CalendarServiceHolder.getInstance().setService(mService);
     }
 

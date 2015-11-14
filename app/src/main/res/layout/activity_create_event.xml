@@ -1,154 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="#ffffff"
+    android:animateLayoutChanges="true" >
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    <EditText
+        android:id="@+id/event_summary_text"
+        android:layout_width ="match_parent"
+        android:textSize="15sp"
+        android:layout_height = "wrap_content"
+        android:paddingBottom="15dp"
+        android:paddingTop="15dp"
+        android:paddingLeft = "35dp"
+        android:background="#ffffff"
+        android:hint="Event Title">
+    </EditText>
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:background="#ffffff"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:src="@android:drawable/ic_menu_month"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"/>
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text = "Title"/>
-
-        <EditText
-            android:id="@+id/event_summary_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:ems="10" />
+            android:id="@+id/date_text_view"
+            android:text="Date"
+            android:textSize = "20sp"
+            android:layout_width ="match_parent"
+            android:layout_height = "wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:paddingLeft = "40dp"
+            android:layout_alignParentTop="true" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:src="@android:drawable/ic_lock_idle_alarm"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:paddingLeft="10dp"
+            android:layout_gravity="center_vertical"/>
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text = "Description"/>
-
-        <EditText
-            android:id="@+id/event_description_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:ems="10" />
+            android:id="@+id/start_time_text_view"
+            android:text="Start"
+            android:textSize = "20sp"
+            android:layout_width ="match_parent"
+            android:layout_height = "wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:paddingLeft = "50dp" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+    <TextView
+        android:id="@+id/end_time_text_view"
+        android:text="End"
+        android:textSize = "20sp"
+        android:layout_width ="match_parent"
+        android:layout_height = "wrap_content"
+        android:paddingBottom="15dp"
+        android:paddingTop="15dp"
+        android:paddingLeft = "90dp"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text = "Date"/>
+    <EditText
+        android:id="@+id/location_text_view"
+        android:hint="Location"
+        android:textSize = "15dp"
+        android:layout_width ="match_parent"
+        android:layout_height = "wrap_content"
+        android:paddingBottom="15dp"
+        android:paddingTop="15dp"
+        android:paddingLeft = "35dp"/>
 
-        <EditText
-            android:id="@+id/event_date_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:onClick = "true"
-            android:focusable="false"
-            android:ems="10" />
-    </LinearLayout>
+    <ListView
+        android:background="#ffffff"
+        android:id="@+id/location_lv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></ListView>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0.25"
-            android:text = "Begin Time"/>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:orientation="horizontal" >
-
-            <EditText
-                android:id="@+id/event_begin_time_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="false"
-                android:onClick = "true"
-                android:ems="5" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0.25"
-            android:text = "End Time"/>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:orientation="horizontal" >
-
-            <EditText
-                android:id="@+id/event_end_time_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="false"
-                android:onClick = "true"
-                android:ems="5" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.75"
-            android:orientation="horizontal" >
-
-            <Button
-                android:id="@+id/btnCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:text = "Cancel"/>
-
-            <Button
-                android:id="@+id/btnSubmit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:text = "Submit"/>
-        </LinearLayout>
-    </LinearLayout>
+    <EditText
+        android:background="#ffffff"
+        android:id="@+id/description_text_view"
+        android:hint="Add Note"
+        android:textSize = "15dp"
+        android:layout_width ="match_parent"
+        android:layout_height = "wrap_content"
+        android:paddingBottom="15dp"
+        android:paddingTop="15dp"
+        android:paddingLeft = "35dp"/>
 
 </LinearLayout>
