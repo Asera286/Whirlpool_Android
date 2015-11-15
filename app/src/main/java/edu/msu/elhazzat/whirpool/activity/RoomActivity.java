@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -30,14 +29,21 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.TimePeriod;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
+import edu.msu.elhazzat.whirpool.adapter.AmenityAdapter;
+import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarFreeBusyReader;
 import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonConstants;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonFeature;
@@ -51,6 +57,7 @@ import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSBuildingInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncParseGeoJsonGCS;
+import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 import edu.msu.elhazzat.whirpool.utils.RoomNameRegexMapper;
 import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 
@@ -75,13 +82,16 @@ public class RoomActivity extends AppCompatActivity {
     private static final float THRESHOLD_SLIDE_UP_PERCENTAGE = .30f;
     private static final float ATTRIBUTE_MAX_VIEW_PERCENTAGE = .95f;
 
-    private ArrayAdapter<String> mAmenitiesAdapter;
+    private AmenityAdapter mAmenitiesAdapter;
     private ListView mRoomAttributeListView;
-    TextView mRoomNameTextView;
+    private TextView mRoomNameTextView;
 
     private GeoJsonMap mGeoJsonMap;
     private Marker mCurrentMarker;
-    private Marker mLocationMarker;
+
+
+    private ImageView mLocationMarker;
+    private LatLng mLocationMarkerLatLng;
 
     private boolean mNavigationOn = false;
 
@@ -180,6 +190,9 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
 
+        mLocationMarker = (ImageView) findViewById(R.id.start_location);
+        mLocationMarker.setVisibility(View.GONE);
+
         buildSlideView();
         getLayoutDimensions();
         buildFloorPicker();
@@ -245,6 +258,7 @@ public class RoomActivity extends AppCompatActivity {
                         String text = Integer.toString(i);
 
                         tv.setText(text);
+                        tv.setPadding(10, 10, 10, 10);
                         tv.setTextColor(Color.BLACK);
                         tv.setGravity(Gravity.CENTER);
                         tv.setBackgroundResource(R.drawable.floor_picker_border);
@@ -360,27 +374,75 @@ public class RoomActivity extends AppCompatActivity {
                 mCollapsed = true;
                 mScrollViewDirectChild.setVisibility(View.VISIBLE);
             }
-
+            mLocationMarker.setVisibility(View.VISIBLE);
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
 
                 @Override
                 public void onCameraChange(CameraPosition arg0) {
-                    if(mLocationMarker == null) {
-                        mLocationMarker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory
-                                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                                .position(mMap.getCameraPosition().target));
-                    }
-                    else {
-                        mLocationMarker.setPosition(mMap.getCameraPosition().target);
-                    }
+                    LatLng tmp = mMap.getCameraPosition().target;
+                    mLocationMarkerLatLng = new LatLng(tmp.longitude, tmp.latitude);
                 }
             });
+            mNavigationOn = true;
         }
         else {
-            if(mLocationMarker != null) {
-                mLocationMarker.setVisible(false);
+            mLocationMarker.setVisibility(View.GONE);
+            mNavigationOn = false;
+        }
+    }
+
+    private LatLng getLocationMarkerCenter() {
+        GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
+        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
+                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                if (polygon.contains(mLocationMarkerLatLng)) {
+                    return polygon.getCentroid();
+                }
             }
         }
+        return null;
+    }
+
+    private Date getEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return calendar.getTime();
+    }
+
+    private void setRoomAvailable(String email) {
+        long nowLong = System.currentTimeMillis();
+        Date nowDate = new Date(nowLong);
+        final DateTime now = new DateTime(nowLong);
+        DateTime end = new DateTime(getEndOfDay(nowDate));
+        new AsyncCalendarFreeBusyReader(CalendarServiceHolder.getInstance().getService(),
+                email, now, end) {
+            @Override
+            public void handleTimePeriods(List<TimePeriod> timePeriods) {
+                boolean isBusy = false;
+                for(TimePeriod period : timePeriods) {
+                    if(now.getValue() >= period.getStart().getValue() && now.getValue() <=
+                            period.getEnd().getValue()) {
+                        isBusy = true;
+                        break;
+                    }
+                }
+                if(isBusy) {
+                    ((ImageView)findViewById(R.id.available_img)).setImageResource(
+                            android.R.drawable.checkbox_off_background
+                    );
+                }
+                else {
+                    ((ImageView)findViewById(R.id.available_img)).setImageResource(
+                            android.R.drawable.checkbox_on_background
+                    );
+                }
+            }
+        }.execute();
     }
 
     private void inflateRoomAttributes(String geoJsonRoomName, String buildingAbbr) {
@@ -389,12 +451,18 @@ public class RoomActivity extends AppCompatActivity {
             public void handleRoom(RoomModel room) {
                 if (room != null) {
                     String[] amenities = room.getAmenities();
-                    mAmenitiesAdapter = new ArrayAdapter<String>(getApplicationContext(),
-                            R.layout.room_simple_text, amenities);
+                    mAmenitiesAdapter = new AmenityAdapter(getApplicationContext(), 0, amenities);
                     mRoomAttributeListView.setAdapter(mAmenitiesAdapter);
+                    setRoomAvailable(room.getEmail());
+                    String occupancy = Integer.toString(room.getCapacity());
+                    ((TextView)findViewById(R.id.occupancy_val)).setText(occupancy);
                     CurrentRoom.ROOM_MODEL = room;
+                    ((LinearLayout)findViewById(R.id.occupancy_layout)).setVisibility(View.VISIBLE);
+                    ((LinearLayout)findViewById(R.id.available_layout)).setVisibility(View.VISIBLE);
                 } else {
                     mRoomAttributeListView.setAdapter(null);
+                    ((LinearLayout)findViewById(R.id.occupancy_layout)).setVisibility(View.GONE);
+                    ((LinearLayout)findViewById(R.id.available_layout)).setVisibility(View.GONE);
                 }
             }
         };
