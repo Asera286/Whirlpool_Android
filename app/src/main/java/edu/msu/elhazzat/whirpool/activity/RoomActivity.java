@@ -1,11 +1,13 @@
 package edu.msu.elhazzat.whirpool.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -19,6 +21,7 @@ import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -27,12 +30,15 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 
 import edu.msu.elhazzat.whirpool.R;
+import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonConstants;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonFeature;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMap;
@@ -50,8 +56,19 @@ import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 
 public class RoomActivity extends AppCompatActivity {
 
+    private static class CurrentRoom {
+        public static EventModel EVENT_MODEL;
+        public static RoomModel ROOM_MODEL;
+    }
+
     private static final String EVENT = "EVENT";
     private static final String ROOM = "ROOM";
+
+    private static final String ACTION_BAR_COLOR =  "#8286F8";
+
+    private static final float FLOOR_TEXT_SIZE = 25f;
+    private static final int FLOOR_TEXT_WIDTH = 50;
+
     private static final long SLIDE_DOWN_ANIM_DURATION = 250;
     private static final long SLIDE_UP_ANIM_DURATION = 400;
     private static final float THRESHOLD_SLIDE_DOWN_PRECENTAGE = .70f;
@@ -64,6 +81,9 @@ public class RoomActivity extends AppCompatActivity {
 
     private GeoJsonMap mGeoJsonMap;
     private Marker mCurrentMarker;
+    private Marker mLocationMarker;
+
+    private boolean mNavigationOn = false;
 
     private EventModel mEvent = null;
     private RoomModel mRoomModel = null;
@@ -98,8 +118,13 @@ public class RoomActivity extends AppCompatActivity {
         Bundle b = getIntent().getExtras();
         if (b != null) {
             mEvent = (EventModel) b.getParcelable(EVENT);
+
             if(mEvent == null) {
                 mRoomModel = (RoomModel) b.getParcelable(ROOM);
+                CurrentRoom.ROOM_MODEL = mRoomModel;
+            }
+            else {
+                CurrentRoom.EVENT_MODEL = mEvent;
             }
         }
 
@@ -126,12 +151,53 @@ public class RoomActivity extends AppCompatActivity {
         if(ab != null) {
             ab.setDisplayHomeAsUpEnabled(true);
             ab.setDisplayShowTitleEnabled(false);
-            ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#8286F8")));
+            ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(ACTION_BAR_COLOR)));
         }
+
+        ImageView favoritesImageView = (ImageView) findViewById(R.id.add_to_favorites);
+        favoritesImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RelevantRoomDbHelper helper = new RelevantRoomDbHelper(getApplicationContext());
+                if(CurrentRoom.ROOM_MODEL != null) {
+                    helper.addRelevantRoom(CurrentRoom.ROOM_MODEL);
+                }
+            }
+        });
+
+        ImageView editEventImageView = (ImageView) findViewById(R.id.edit_event);
+        editEventImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent eventIntent = new Intent(getApplicationContext(), CreateEventActivity.class);
+                if(CurrentRoom.ROOM_MODEL != null) {
+                    eventIntent.putExtra(ROOM, CurrentRoom.ROOM_MODEL);
+                }
+                else if(CurrentRoom.EVENT_MODEL != null) {
+                    eventIntent.putExtra(EVENT, CurrentRoom.EVENT_MODEL);
+                }
+                startActivity(eventIntent);
+            }
+        });
+
+        buildSlideView();
+        getLayoutDimensions();
+        buildFloorPicker();
+        buildMap();
+    }
+
+    private void buildSlideView() {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float heightdp = displayMetrics.heightPixels / displayMetrics.density;
+
+        mAttributeLayout = (LinearLayout) findViewById(R.id.attribute_list_view);
+        mAttributeLayout.getLayoutParams().height = (int) (heightdp * ATTRIBUTE_MAX_VIEW_PERCENTAGE);
+
+        mRoomAttributeListView = (ListView) findViewById(R.id.roomInfoList);
 
         mRoomNameTextView = (TextView) findViewById(R.id.roomNameText);
         mRoomNameTextView.setText(mGeoJsonRoomName);
-        mRoomNameTextView.setTextColor(Color.BLUE);
+        mRoomNameTextView.setTextColor(Color.WHITE);
 
         mRoomNameTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -145,10 +211,9 @@ public class RoomActivity extends AppCompatActivity {
                             return true;
                         case MotionEvent.ACTION_MOVE:
                             float currentHeight = mViewCurrentHeight - delta;
-                            if(mCollapsed && delta < 0) {
+                            if (mCollapsed && delta < 0) {
                                 slideUp(currentHeight, delta);
-                            }
-                            else if(delta > 0) {
+                            } else if (delta > 0) {
                                 animateSlideDown(currentHeight, delta);
                             }
                             return true;
@@ -160,35 +225,25 @@ public class RoomActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        float heightdp = displayMetrics.heightPixels / displayMetrics.density;
-
-        mAttributeLayout = (LinearLayout) findViewById(R.id.attribute_list_view);
-        mAttributeLayout.getLayoutParams().height = (int) (heightdp * ATTRIBUTE_MAX_VIEW_PERCENTAGE);
-
-        mRoomAttributeListView = (ListView) findViewById(R.id.roomInfoList);
-
-        mScrollViewDirectChild = (LinearLayout) findViewById(R.id.scroll_view_direct_child);
-
-        mScrollViewDirectChild.setVisibility(View.INVISIBLE);
-
-        buildScrollView();
-        getLayoutDimensions();
-        setUpView();
     }
 
-    private void buildScrollView() {
-        new AsyncGCSBuildingInfoReader(mBuildingAbbrName) {
+    private void buildFloorPicker() {
+        mScrollViewDirectChild = (LinearLayout) findViewById(R.id.scroll_view_direct_child);
+        mScrollViewDirectChild.setVisibility(View.INVISIBLE);
 
+        new AsyncGCSBuildingInfoReader(mBuildingAbbrName) {
             public void handleBuilding(BuildingModel model) {
                 if(model != null) {
                     mNumFloors = model.getFloors();
+
                     for (int i = 1; i < mNumFloors + 1; i++) {
+
                         TextView tv = new TextView(getApplicationContext());
-                        tv.setWidth(50);
-                        tv.setTextSize(25f);
+                        tv.setWidth(FLOOR_TEXT_WIDTH);
+                        tv.setTextSize(FLOOR_TEXT_SIZE);
+
                         String text = Integer.toString(i);
+
                         tv.setText(text);
                         tv.setTextColor(Color.BLACK);
                         tv.setGravity(Gravity.CENTER);
@@ -199,9 +254,12 @@ public class RoomActivity extends AppCompatActivity {
                             public void onClick(View v) {
                                 TextView tv = (TextView) v;
                                 tv.setTextColor(Color.BLUE);
-                                mGeoJsonMap.drawLayer(Integer.parseInt(tv.getText().toString()), WIMAppConstants.MAP_DEFAULT_FILL_COLOR,
+
+                                mGeoJsonMap.drawLayer(Integer.parseInt(tv.getText().toString()),
+                                        WIMAppConstants.MAP_DEFAULT_FILL_COLOR,
                                         WIMAppConstants.MAP_DEFAULT_STROKE_COLOR,
                                         WIMAppConstants.MAP_DEFAULT_STROKE_WIDTH);
+
                                 for(int i = 0; i < mScrollViewDirectChild.getChildCount(); i++) {
                                     TextView child = (TextView) mScrollViewDirectChild.getChildAt(i);
                                     if(!child.getText().toString().equals(tv.getText().toString())) {
@@ -225,7 +283,8 @@ public class RoomActivity extends AppCompatActivity {
                 mViewMaxHeight = mAttributeLayout.getHeight();
                 mViewMinHeight = findViewById(R.id.roomNameText).getHeight();
                 mViewCurrentHeight = mViewMaxHeight;
-                mAttributeLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);            }
+                mAttributeLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
         });
     }
 
@@ -289,6 +348,41 @@ public class RoomActivity extends AppCompatActivity {
         }
     }
 
+    private void startNavigation() {
+        if(!mNavigationOn) {
+            if (!mCollapsed) {
+                mViewCurrentHeight = mViewMinHeight;
+                LinearLayout view = (LinearLayout) findViewById(R.id.attribute_list_view);
+                HeightAnimation heightAnim = new HeightAnimation(view, view.getHeight(), mViewMinHeight);
+                heightAnim.setDuration(SLIDE_DOWN_ANIM_DURATION);
+                dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION);
+                view.startAnimation(heightAnim);
+                mCollapsed = true;
+                mScrollViewDirectChild.setVisibility(View.VISIBLE);
+            }
+
+            mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+
+                @Override
+                public void onCameraChange(CameraPosition arg0) {
+                    if(mLocationMarker == null) {
+                        mLocationMarker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory
+                                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                                .position(mMap.getCameraPosition().target));
+                    }
+                    else {
+                        mLocationMarker.setPosition(mMap.getCameraPosition().target);
+                    }
+                }
+            });
+        }
+        else {
+            if(mLocationMarker != null) {
+                mLocationMarker.setVisible(false);
+            }
+        }
+    }
+
     private void inflateRoomAttributes(String geoJsonRoomName, String buildingAbbr) {
         AsyncGCSRoomInfoReader reader = new AsyncGCSRoomInfoReader(buildingAbbr, geoJsonRoomName) {
             @Override
@@ -298,6 +392,7 @@ public class RoomActivity extends AppCompatActivity {
                     mAmenitiesAdapter = new ArrayAdapter<String>(getApplicationContext(),
                             R.layout.room_simple_text, amenities);
                     mRoomAttributeListView.setAdapter(mAmenitiesAdapter);
+                    CurrentRoom.ROOM_MODEL = room;
                 } else {
                     mRoomAttributeListView.setAdapter(null);
                 }
@@ -306,14 +401,32 @@ public class RoomActivity extends AppCompatActivity {
         reader.execute();
     }
 
-    private void setUpView() {
+    public void bulidingUnderConstructionDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Building")
+                .setMessage("Building under construction.")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+                        startActivity(homeIntent);
+                    }
+                }).show();
+    }
+
+    private void buildMap() {
         new AsyncParseGeoJsonGCS(mBuildingAbbrName) {
             public void handleGeoJson(GeoJsonMap map) {
-                mGeoJsonMap = map;
-                int initialFloor = getInitialFloor(mGeoJsonRoomName);
-                mGeoJsonMap.setCurrentLayer(initialFloor);
-                setUpMap();
-                inflateRoomAttributes(mGeoJsonRoomName, mBuildingAbbrName);
+                if(map != null) {
+                    mGeoJsonMap = map;
+                    int initialFloor = getInitialFloor(mGeoJsonRoomName);
+                    mGeoJsonMap.setCurrentLayer(initialFloor);
+                    setUpMap();
+                    inflateRoomAttributes(mGeoJsonRoomName, mBuildingAbbrName);
+                }
+                else {
+                    bulidingUnderConstructionDialog();
+                }
             }
         }.execute();
     }
@@ -394,8 +507,7 @@ public class RoomActivity extends AppCompatActivity {
                             String selectedRoomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
                             mRoomNameTextView.setText(selectedRoomName);
                             inflateRoomAttributes(selectedRoomName, mBuildingAbbrName);
-                        }
-                        else {
+                        } else {
                             Polygon gmsPoly = polygon.getGMSPolygon();
                             int color1 = WIMAppConstants.MAP_DEFAULT_FILL_COLOR;
                             gmsPoly.setFillColor(color1);
@@ -404,25 +516,6 @@ public class RoomActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_room, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_search:
-                Intent searchIntent = new Intent(this, SearchActivity.class);
-                startActivity(searchIntent);
-                break;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     public class HeightAnimation extends Animation {
@@ -446,5 +539,23 @@ public class RoomActivity extends AppCompatActivity {
         public boolean willChangeBounds() {
             return true;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_room, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.navigate:
+                startNavigation();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

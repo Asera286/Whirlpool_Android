@@ -61,7 +61,12 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
 
                 String responseString = responseBuilder.toString();
                 JSONObject jsonObj = new JSONObject(responseString);
+
                 int count = jsonObj.getInt("count");
+                if(count == 0) {
+                    return null;
+                }
+
                 JSONArray floors = jsonObj.getJSONArray("floors");
                 for(int i = 0; i < count; i++) {
                     JSONObject floor = floors.getJSONObject(i);

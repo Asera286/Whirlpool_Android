@@ -21,7 +21,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
 
     // Database Name
-    public static final String DATABASE_NAME = "WhirlPoolRoomDB.db";
+    public static final String DATABASE_NAME = "WhirlpoolRoomModelDB.db";
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String INT_TYPE = " INT";
@@ -73,7 +73,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
 
         RoomModel checkExists = getRoomModel(room.getBuildingName(), room.getRoomName());
 
-        if(room != null) {
+        if(checkExists == null) {
             ContentValues values = new ContentValues();
             values.put(ROOM_NAME, room.getRoomName());
             values.put(ROOM_BUILDING_NAME, room.getBuildingName());
@@ -99,17 +99,16 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
                         ROOM_CAPACITY, ROOM_EMAIL, ROOM_RESOURCE_NAME}, ROOM_BUILDING_NAME + " =? " + "AND " + ROOM_NAME + " =? ",
                 new String[]{buildingName, roomId}, null, null, null, null);
 
-        RoomModel room = null;
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
-            room = new RoomModel(
+            return new RoomModel(
                     cursor.getString(0), cursor.getString(1),
                     cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getString(5), null, cursor.getString(6), cursor.getString(7));
+                    cursor.getString(5), null, cursor.getString(6), null);
         }
 
         // return room
-        return room;
+        return null;
     }
 
     // Getting All Contacts

@@ -66,6 +66,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
+            android:windowSoftInputMode="adjustPan"
             android:name=".activity.CreateEventActivity"
             android:label="@string/title_activity_create_event"
             android:parentActivityName=".activity.HomeActivity" >

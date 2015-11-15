@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -25,6 +26,7 @@ import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
@@ -56,11 +58,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private EventModel mEvent;
     private RoomModel mRoom;
-
-    private String mRoomId;
-    private String mRoomEmail;
-
-    private String mDescription;
 
     private EditText mSummaryEditText;
     private EditText mLocationEditText;
@@ -211,11 +208,11 @@ public class CreateEventActivity extends AppCompatActivity {
                 String dateString = DateFormat.format("MM/dd/yyyy", new Date(millisecondStart)).toString();
 
                 mDateTextView.setText(dateString);
-                String timeStringStart = DateFormat.format("hh:ss", new Date(millisecondStart)).toString();
+                String timeStringStart = DateFormat.format("hh:ss a", new Date(millisecondStart)).toString();
                 mBeginTimeTextView.setText(timeStringStart);
 
                 long millisecondEnd = event.getEnd().getDateTime().getValue();
-                String timeStringEnd = DateFormat.format("hh:ss", new Date(millisecondEnd)).toString();
+                String timeStringEnd = DateFormat.format("hh:ss a", new Date(millisecondEnd)).toString();
 
                 mEndTimeTextView.setText(timeStringEnd);
 
@@ -256,6 +253,13 @@ public class CreateEventActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * Format time
+     *
+     * @param hourOfDay
+     * @param minute
+     * @return
+     */
     private String getTime(int hourOfDay, int minute) {
         Calendar c = Calendar.getInstance();
         c.set(0,0,0, hourOfDay, minute);
@@ -263,6 +267,9 @@ public class CreateEventActivity extends AppCompatActivity {
         return  formatDate.format(c.getTime());
     }
 
+    /**
+     * Create dialog for selecting initial time
+     */
     private void onBeginTimeSelected() {
         Calendar now = Calendar.getInstance();
         int hour = now.get(Calendar.HOUR_OF_DAY);
@@ -284,7 +291,7 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Create dialog for selecting end time
      */
     private void onEndTimeSelected() {
         Calendar now = Calendar.getInstance();
@@ -415,24 +422,55 @@ public class CreateEventActivity extends AppCompatActivity {
         com.google.api.services.calendar.Calendar service = CalendarServiceHolder.getInstance().getService();
 
         if(mEvent != null) {
-            new AsyncCalendarEventUpdater(service, mEvent.getId()
-                    , event) {
-                public void handleEventUpdate(Event event) {
-                    Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
-                    startActivity(homeIntent);
-                }
-            }.execute();
+          editEventDialog(service, event);
         }
 
         else {
-            new AsyncCalendarEventWriter(service, event) {
-                @Override
-                public void handleEventWrite(boolean success) {
-                    Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
-                    startActivity(homeIntent);
-                }
-            }.execute();
+           addEventDialog(service, event);
         }
+    }
+
+    public void editEventDialog(final com.google.api.services.calendar.Calendar
+            service, final Event event) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirm Edit")
+                .setMessage("Do you really want to edit this event?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        new AsyncCalendarEventUpdater(service, mEvent.getId()
+                                , event) {
+                            public void handleEventUpdate(Event event) {
+                                Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+                                startActivity(homeIntent);
+                            }
+                        }.execute();
+
+                        Toast.makeText(getApplicationContext(), "Event updated", Toast.LENGTH_SHORT).show();
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
+    }
+
+    public void addEventDialog(final com.google.api.services.calendar.Calendar
+            service, final Event event) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirm New Event")
+                .setMessage("Do you really want to add this event?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                        new AsyncCalendarEventWriter(service, event) {
+                            @Override
+                            public void handleEventWrite(boolean success) {
+                                Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
+                                startActivity(homeIntent);
+                            }
+                        }.execute();
+
+                        Toast.makeText(getApplicationContext(), "Event updated", Toast.LENGTH_SHORT).show();
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
     }
 
     @Override
@@ -453,3 +491,5 @@ public class CreateEventActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+
+

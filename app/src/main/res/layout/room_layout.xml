@@ -43,29 +43,33 @@ android:layout_height="match_parent" >
     android:layout_height="0dp"
     android:layout_alignParentBottom="true">
     <LinearLayout
+        android:background="#8286F8"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/edit_event"
             android:src="@android:drawable/ic_menu_my_calendar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
         <TextView
-            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:paddingTop="16dp"
+            android:paddingTop="10dp"
             android:id="@+id/roomNameText"
-            android:textColor="#000000"
             android:textSize="@dimen/abc_text_size_headline_material"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="#ffffff"
-            android:paddingBottom="16dp"/>
+            android:paddingRight="30dp"
+            android:paddingBottom="10dp"/>
         <ImageView
             android:id="@+id/add_to_favorites"
             android:src="@android:drawable/btn_star"
             android:layout_width="wrap_content"
+            android:paddingTop = "10dp"
+            android:paddingRight    = "5dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
 

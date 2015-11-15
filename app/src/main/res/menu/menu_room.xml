@@ -9,7 +9,7 @@
 
     <item android:id="@+id/navigate"
         android:title="Navigate"
-        android:icon="@android:drawable/ic_menu_save"
+        android:icon="@drawable/landmark"
         app:showAsAction="always"/>
 
 </menu>
