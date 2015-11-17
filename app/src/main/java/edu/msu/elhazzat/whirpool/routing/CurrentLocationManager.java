@@ -1,4 +1,4 @@
-package edu.msu.elhazzat.whirpool.location;
+package edu.msu.elhazzat.whirpool.routing;
 
 import android.content.Context;
 import android.location.Criteria;

@@ -97,7 +97,6 @@ public class FavoritesAdapter extends BaseExpandableListAdapter {
             resultView = inflater.inflate(R.layout.exp_list_favorites_header, null);
             holder = new ViewHolder();
             holder.favoritesLabel = (TextView) resultView.findViewById(R.id.favorites_label);
-       //     holder.favoritesImg = (ImageView) resultView.findViewById(R.id.building_img);
             resultView.setTag(holder);
 
         } else {

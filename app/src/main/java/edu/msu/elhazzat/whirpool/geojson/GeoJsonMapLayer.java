@@ -71,11 +71,7 @@ public class GeoJsonMapLayer {
                 }
                 switch (jsonGeometry.getType()) {
                     case GeoJsonConstants.POINT:
-                        GeoJsonPoint point = (GeoJsonPoint) jsonGeometry.getGeometry();
-                        LatLng latLng = Geometry.geoJsonCoordinateToLatLng(point.getPoints(), false);
-                        Polygon polygon = map.addPolygon(new PolygonOptions()
-                                .add(latLng).fillColor(fillColor).strokeWidth(strokeWidth));
-                        mPolygons.add(polygon);
+
                         break;
                     case GeoJsonConstants.LINESTRING:
                         GeoJsonPolyline lineString = (GeoJsonPolyline) jsonGeometry.getGeometry();
@@ -92,6 +88,7 @@ public class GeoJsonMapLayer {
                                 .addAll(latLngPoly).fillColor(color).strokeWidth(strokeWidth));
                         poly1.setGMSPolygon(poly2);
                         mPolygons.add(poly2);
+
                         break;
                 }
             }

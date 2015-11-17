@@ -19,7 +19,40 @@ android:layout_height="match_parent" >
     android:scrollbars="vertical"
     class="com.google.android.gms.maps.SupportMapFragment"/>
 
+    <RelativeLayout
+        android:id="@+id/nav_info_layout"
+        android:layout_below="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F2A440">
+
+        <TextView
+            android:id="@+id/navigation_text"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/start_navigation"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/circle_background"
+        android:gravity="center"
+        android:text="Yes"
+        android:textColor="#FFFFFF"
+        android:textSize="10dp"
+        android:layout_marginTop="27dp"
+        android:layout_below="@+id/my_toolbar"
+        android:layout_alignRight="@+id/scroll_view"
+        android:layout_alignEnd="@+id/scroll_view"
+        android:layout_marginRight="13dp"
+        android:layout_marginEnd="13dp" />
+
     <ScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="wrap_content"
         android:layout_height="200dp"
         android:scrollbars="none"
@@ -38,13 +71,13 @@ android:layout_height="match_parent" >
 
     <ImageView
         android:id="@+id/start_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/start"/>
+        android:src="@drawable/start_location3x"/>
 
-<LinearLayout
+    <LinearLayout
     android:id="@+id/attribute_list_view"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -57,7 +90,9 @@ android:layout_height="match_parent" >
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/edit_event"
-            android:src="@android:drawable/ic_menu_my_calendar"
+            android:src="@drawable/book_room_3x"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="20dp"
             android:layout_width="50dp"
             android:layout_height="50dp" />
         <TextView
@@ -70,81 +105,15 @@ android:layout_height="match_parent" >
             android:textSize="@dimen/abc_text_size_headline_material"
             android:textStyle="bold"
             android:gravity="center"
-            android:paddingRight="30dp"
             android:paddingBottom="10dp"/>
         <ImageView
             android:id="@+id/add_to_favorites"
-            android:src="@android:drawable/btn_star"
-            android:layout_width="wrap_content"
-            android:paddingTop = "10dp"
-            android:paddingRight   = "5dp"
-            android:layout_height="wrap_content" />
+            android:src="@drawable/favorite_room_3x"
+            android:layout_width="50dp"
+            android:paddingRight="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_height="50dp" />
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/occupancy_layout"
-        android:orientation="horizontal"
-        android:background="#ffffff"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:textColor="#000000"
-            android:text="Capacity"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="20dp"
-            android:textSize="20sp"
-            android:layout_weight = "1"
-            android:layout_width= "0dp"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:textColor="#000000"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:id="@+id/occupancy_val"
-            android:textSize="@dimen/abc_text_size_headline_material"
-            android:textStyle="bold"
-            android:paddingLeft = "20dp"
-            android:paddingBottom="10dp"/>
-    </LinearLayout>
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:id="@+id/separator"
-        android:visibility="visible"
-        android:background="@android:color/darker_gray"/>
-
-    <LinearLayout
-        android:id="@+id/available_layout"
-        android:orientation="horizontal"
-        android:background="#ffffff"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:textColor="#000000"
-            android:text="Available"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="20dp"
-            android:textSize="20sp"
-            android:id="@+id/attribute_key"
-            android:layout_weight = "1"
-            android:layout_width= "0dp"
-            android:layout_height="wrap_content" />
-        <ImageView
-            android:paddingRight = "10dp"
-            android:id="@+id/available_img"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-    </LinearLayout>
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:id="@+id/separator2"
-        android:visibility="visible"
-        android:background="@android:color/darker_gray"/>
 
     <ListView
         android:layout_width="match_parent"

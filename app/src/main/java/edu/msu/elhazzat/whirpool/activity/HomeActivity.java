@@ -1,6 +1,7 @@
 package edu.msu.elhazzat.whirpool.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -53,8 +54,10 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
     private static final String LOG_TAG = HomeActivity.class.getSimpleName();
     private static final String ACCOUNT_NAME_BUNDLE_KEY = "accountName";
-    private static final String EVENT_BUNDLE_KEY = "EVENT";
     private static final String ACTION_BAR_COLOR = "#3870EB";
+
+    private static final String BUNDLE_BUILDING_KEY = "BUILDING_NAME";
+    private static final String BUNDLE_ROOM_KEY = "ROOM_NAME";
 
     private static final int SWIPE_VIEW_OFFSET = 0;
     private static final int SWIPE_VIEW_DELAY = 500;
@@ -105,7 +108,6 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(ACTION_BAR_COLOR)));
         }
 
-
         buildDrawerLayout();
         buildSwipeView();
         inflateEventAdapter();
@@ -114,7 +116,10 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
     private void authorize() {
         if(CalendarServiceHolder.getInstance().getService() == null) {
-            String accountName = getIntent().getExtras().getString(ACCOUNT_NAME_BUNDLE_KEY);
+
+            //String accountName = getIntent().getExtras().getString(ACCOUNT_NAME_BUNDLE_KEY);
+            SharedPreferences myPrefs = getSharedPreferences(MainActivity.PREF_FILE_NAME, MODE_PRIVATE);
+            String accountName = myPrefs.getString(MainActivity.PREF_FILE_ACCOUNT_NAME_KEY, null);
 
             //build calendar service and acquire oauth2 credential
             super.buildCredential(accountName);
@@ -245,14 +250,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             }
 
             @Override
-            public void onClickFrontView(int position) {
-                EventModel model = mCalendarAdapter.getItem(position);
-                if (model.getLocation() != null) {
-                    Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
-                    roomIntent.putExtra(EVENT_BUNDLE_KEY, model);
-                    startActivity(roomIntent);
-                }
-            }
+            public void onClickFrontView(int position) { }
 
             @Override
             public void onClickBackView(int position) {

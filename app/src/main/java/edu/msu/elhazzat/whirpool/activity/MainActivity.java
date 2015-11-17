@@ -2,6 +2,7 @@ package edu.msu.elhazzat.whirpool.activity;
 
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -25,6 +26,9 @@ public class MainActivity extends FragmentActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    public static final String PREF_FILE_NAME = "ACCOUNT_PREFS";
+    public static final String PREF_FILE_ACCOUNT_NAME_KEY = "accountName";
 
     private static final int REQUEST_CODE_SIGN_IN = 0;
     private static final String DIALOG_ERROR = "dialog_error";
@@ -101,7 +105,11 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         Intent homeIntent = new Intent(this, HomeActivity.class);
-        homeIntent.putExtra("accountName", Plus.AccountApi.getAccountName(mGoogleApiClient));
+        SharedPreferences myPrefs = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor e = myPrefs.edit();
+        e.putString(PREF_FILE_ACCOUNT_NAME_KEY,  Plus.AccountApi.getAccountName(mGoogleApiClient));
+        e.commit();
+        //homeIntent.putExtra("accountName", Plus.AccountApi.getAccountName(mGoogleApiClient));
         startActivity(homeIntent);
     }
 

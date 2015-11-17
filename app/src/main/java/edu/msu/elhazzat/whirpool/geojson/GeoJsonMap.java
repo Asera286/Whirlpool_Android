@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class GeoJsonMap {
 
     private GoogleMap mMap;
-    private HashMap<Integer, GeoJsonMapLayer> mLayers = new HashMap<>();
+    public HashMap<Integer, GeoJsonMapLayer> mLayers = new HashMap<>();
     private int mCurrentLayer;
 
     public GeoJsonMap(GoogleMap map) {

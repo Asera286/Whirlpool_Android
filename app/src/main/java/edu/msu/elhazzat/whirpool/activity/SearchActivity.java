@@ -32,8 +32,11 @@ import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 public class SearchActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = SearchActivity.class.getSimpleName();
+
     private static final String TOOL_BAR_COLOR = "#F9DC71";
-    private static final String ROOM_BUNDLE_EXTRA_KEY = "ROOM";
+
+    private static final String BUNDLE_BUILDING_KEY = "BUILDING_NAME";
+    private static final String BUNDLE_ROOM_KEY = "ROOM_NAME";
 
     private List<BuildingModel> mBuildingModels = new ArrayList<>();
     private List<BuildingModel> mBuildingModelsFiltered = new ArrayList<>();
@@ -81,7 +84,13 @@ public class SearchActivity extends AppCompatActivity {
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 RoomModel model = mSearchAdapter.getChild(groupPosition, childPosition);
                 Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
-                roomIntent.putExtra(ROOM_BUNDLE_EXTRA_KEY, model);
+
+                Bundle bundle = new Bundle();
+                bundle.putString(BUNDLE_BUILDING_KEY, model.getBuildingName());
+                bundle.putString(BUNDLE_ROOM_KEY, model.getRoomName());
+
+                roomIntent.putExtras(bundle);
+
                 startActivity(roomIntent);
                 return false;
             }
@@ -119,7 +128,7 @@ public class SearchActivity extends AppCompatActivity {
         if(query.isEmpty()){
             mBuildingModelsFiltered.addAll(mBuildingModels);
             mSearchAdapter.notifyDataSetChanged();
-            for ( int i = 0; i < mBuildingModelsFiltered.size(); i++ ) {
+            for ( int i = 0; i < mBuildingModelsFiltered.size(); i++) {
                 mListView.collapseGroup(i);
             }
         }

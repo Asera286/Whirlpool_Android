@@ -3,6 +3,7 @@ package edu.msu.elhazzat.whirpool.adapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -28,12 +29,16 @@ import edu.msu.elhazzat.whirpool.activity.RoomActivity;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventDeleter;
 import edu.msu.elhazzat.whirpool.model.EventModel;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
+import edu.msu.elhazzat.whirpool.utils.RoomNameRegexMapper;
 import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
 
 /**
  * Created by Christian on 10/23/2015.
  */
 public class EventAdapter extends BaseAdapter {
+
+    private static String BUNDLE_ROOM_KEY = "ROOM_NAME";
+    private static String BUNDLE_BUILDING_KEY = "BUILDING_NAME";
 
     private HomeActivity mContext;
     private List<EventModel> mCalendarListValues = new ArrayList<>();
@@ -44,18 +49,18 @@ public class EventAdapter extends BaseAdapter {
         mContext = context;
         mCalendarListValues = eventModels;
 
-        mBuildingMap.put(WIMAppConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default3x);
-        mBuildingMap.put(WIMAppConstants.BENSON_ROAD, R.drawable.benson_road3x);
-        mBuildingMap.put(WIMAppConstants.BHTC, R.drawable.benton_harbor_tech_center3x);
-        mBuildingMap.put(WIMAppConstants.EDGEWATER, R.drawable.edge_water_tech_center3x);
-        mBuildingMap.put(WIMAppConstants.GHQ, R.drawable.ghq3x);
-        mBuildingMap.put(WIMAppConstants.HARBORTOWN, R.drawable.harbor_town3x);
-        mBuildingMap.put(WIMAppConstants.HILLTOP_150, R.drawable.hilltop_150_south3x);
-        mBuildingMap.put(WIMAppConstants.HILLTOP_211, R.drawable.hilltop_211_north);
-        mBuildingMap.put(WIMAppConstants.MMC, R.drawable.us_benton_harbor_mmc3x);
-        mBuildingMap.put(WIMAppConstants.R_AND_E, R.drawable.rande3x);
-        mBuildingMap.put(WIMAppConstants.RIVERVIEW, R.drawable.riverview3x);
-        mBuildingMap.put(WIMAppConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter3x);
+        mBuildingMap.put(WIMAppConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default_trans3x);
+        mBuildingMap.put(WIMAppConstants.BENSON_ROAD, R.drawable.benson_road_trans3x);
+        mBuildingMap.put(WIMAppConstants.BHTC, R.drawable.benton_harbor_tech_center_trans3x);
+        mBuildingMap.put(WIMAppConstants.EDGEWATER, R.drawable.edge_water_tech_center_trans3x);
+        mBuildingMap.put(WIMAppConstants.GHQ, R.drawable.ghq_trans3x);
+        mBuildingMap.put(WIMAppConstants.HARBORTOWN, R.drawable.harbor_town_trans3x);
+        mBuildingMap.put(WIMAppConstants.HILLTOP_150, R.drawable.hilltop_150_south_trans3x);
+        mBuildingMap.put(WIMAppConstants.HILLTOP_211, R.drawable.hilltop_211_north_trans3x);
+        mBuildingMap.put(WIMAppConstants.MMC, R.drawable.mmc_trans3x);
+        mBuildingMap.put(WIMAppConstants.R_AND_E, R.drawable.rande_trans3x);
+        mBuildingMap.put(WIMAppConstants.RIVERVIEW, R.drawable.riverview_trans3x);
+        mBuildingMap.put(WIMAppConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter_trans3x);
     }
 
     @Override
@@ -133,15 +138,21 @@ public class EventAdapter extends BaseAdapter {
 
         holder.event_summary.setText(item.getSummary());
 
-        //back
-
         if(item.getLocation() != null) {
             holder.nav_icon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent roomIntent = new Intent(mContext, RoomActivity.class);
                     roomIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    roomIntent.putExtra("EVENT", item);
+
+                    String buildingName = RoomNameRegexMapper.getBuildingNameFromResource(item.getLocation());
+                    String roomName = RoomNameRegexMapper.getRoomNameFromResource(item.getLocation());
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString(BUNDLE_ROOM_KEY, roomName);
+                    bundle.putString(BUNDLE_BUILDING_KEY, buildingName);
+
+                    roomIntent.putExtras(bundle);
                     mContext.startActivity(roomIntent);
                 }
             });
