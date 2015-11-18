@@ -1,5 +1,7 @@
 package edu.msu.elhazzat.whirpool.geojson;
 
+import android.graphics.Color;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polygon;
@@ -71,7 +73,6 @@ public class GeoJsonMapLayer {
                 }
                 switch (jsonGeometry.getType()) {
                     case GeoJsonConstants.POINT:
-
                         break;
                     case GeoJsonConstants.LINESTRING:
                         GeoJsonPolyline lineString = (GeoJsonPolyline) jsonGeometry.getGeometry();
@@ -84,6 +85,21 @@ public class GeoJsonMapLayer {
                         GeoJsonPolygon poly1 = (GeoJsonPolygon) jsonGeometry.getGeometry();
                         List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
                         int color = fillColor;
+          //              String feat = feature.getProperty("room");
+                        switch(feature.getProperty("room")) {
+                            case "HW":
+                                color = Color.WHITE;
+                                break;
+                            case "WB":
+                                color = Color.rgb(234, 230, 245);
+                                break;
+                            case "MB":
+                                color = Color.rgb(234, 230, 245);
+                                break;
+                            case "STR":
+                                color = Color.parseColor("#F2A440");
+                                break;
+                        }
                         Polygon poly2 = map.addPolygon(new PolygonOptions()
                                 .addAll(latLngPoly).fillColor(color).strokeWidth(strokeWidth));
                         poly1.setGMSPolygon(poly2);

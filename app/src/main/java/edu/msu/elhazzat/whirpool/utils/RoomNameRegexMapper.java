@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class RoomNameRegexMapper {
     public static final Map<String, String> REGEX_MAP = new HashMap<>();
     static {
-        REGEX_MAP.put(WIMAppConstants.RIVERVIEW, "(B\\d{3}-\\d{2}$|B\\d{3})");
+        REGEX_MAP.put(WIMAppConstants.RIVERVIEW, "([ABC]\\d{3}-\\d{2}$|[ABC]\\d{3})");
         REGEX_MAP.put(WIMAppConstants.GHQ, "(N\\d{3}-\\d{2}$|N\\d{3})");
      /*   REGEX_MAP.put(WIMAppConstants.BENSON_ROAD, );
         REGEX_MAP.put(WIMAppConstants.EDGEWATER, );

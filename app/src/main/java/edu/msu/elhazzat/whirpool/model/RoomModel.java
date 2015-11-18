@@ -38,15 +38,15 @@ public class RoomModel implements Parcelable {
     }
 
     public RoomModel(Parcel in){
-        mBuildingName = in.readString();
         mRoomName = in.readString();
-        mCapacity = in.readInt();
-        mOccupancyStatus = in.readString();
+        mBuildingName = in.readString();
         mExtension = in.readString();
         mRoomType = in.readString();
+        mCapacity = in.readInt();
+        mOccupancyStatus = in.readString();
+        mAmenities = (String[]) in.readSerializable();
         mEmail = in.readString();
         mResourceName = in.readString();
-        mAmenities = (String[]) in.readSerializable();
     }
 
     public String getRoomName() {
@@ -120,14 +120,15 @@ public class RoomModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mBuildingName);
         dest.writeString(mRoomName);
-        dest.writeInt(mCapacity);
-        dest.writeString(mOccupancyStatus);
+        dest.writeString(mBuildingName);
         dest.writeString(mExtension);
         dest.writeString(mRoomType);
-        dest.writeString(mResourceName);
+        dest.writeInt(mCapacity);
+        dest.writeString(mOccupancyStatus);
         dest.writeSerializable(mAmenities);
+        dest.writeString(mEmail);
+        dest.writeString(mResourceName);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

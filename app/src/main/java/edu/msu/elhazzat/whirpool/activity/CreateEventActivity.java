@@ -58,6 +58,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private EventModel mEvent;
     private RoomModel mRoom;
+    private Event mEditEvent;
 
     private EditText mSummaryEditText;
     private EditText mLocationEditText;
@@ -66,8 +67,8 @@ public class CreateEventActivity extends AppCompatActivity {
     private TextView mBeginTimeTextView;
     private TextView mEndTimeTextView;
 
-    private Calendar mBeginTime = Calendar.getInstance();
-    private Calendar mEndTime = Calendar.getInstance();
+    private Calendar mBeginTime;
+    private Calendar mEndTime;
 
     private List<RoomModel> mRooms = new ArrayList<>();
     private RoomAdapter mLocationAdapter;
@@ -94,6 +95,9 @@ public class CreateEventActivity extends AppCompatActivity {
         Bundle content = getIntent().getExtras();
         if(content != null) {
             mEvent = content.getParcelable("EVENT");
+            if(mEvent == null) {
+                mRoom = content.getParcelable("ROOM_MODEL");
+            }
         }
 
         mSummaryEditText = (EditText) findViewById(R.id.event_summary_text);
@@ -105,6 +109,9 @@ public class CreateEventActivity extends AppCompatActivity {
 
         if(mEvent != null) {
             populateViewFromEvent();
+        }
+        else if(mRoom != null) {
+            mLocationEditText.setText(mRoom.getRoomName());
         }
     }
 
@@ -208,15 +215,17 @@ public class CreateEventActivity extends AppCompatActivity {
                 String dateString = DateFormat.format("MM/dd/yyyy", new Date(millisecondStart)).toString();
 
                 mDateTextView.setText(dateString);
-                String timeStringStart = DateFormat.format("hh:ss a", new Date(millisecondStart)).toString();
+                String timeStringStart = DateFormat.format("hh:mm a", new Date(millisecondStart)).toString();
                 mBeginTimeTextView.setText(timeStringStart);
 
                 long millisecondEnd = event.getEnd().getDateTime().getValue();
-                String timeStringEnd = DateFormat.format("hh:ss a", new Date(millisecondEnd)).toString();
+                String timeStringEnd = DateFormat.format("hh:mm a", new Date(millisecondEnd)).toString();
 
                 mEndTimeTextView.setText(timeStringEnd);
 
                 mLocationEditText.setText(mEvent.getLocation());
+
+                mEditEvent = event;
             }
         }.execute();
     }
@@ -233,6 +242,12 @@ public class CreateEventActivity extends AppCompatActivity {
         DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                if(mBeginTime == null) {
+                    mBeginTime = Calendar.getInstance();
+                }
+                if(mEndTime == null) {
+                    mEndTime = Calendar.getInstance();
+                }
                 Calendar c = Calendar.getInstance();
                 c.set(year, monthOfYear, dayOfMonth);
                 String date = new SimpleDateFormat("MM/dd/yyyy").format(c.getTime());
@@ -281,6 +296,10 @@ public class CreateEventActivity extends AppCompatActivity {
                 String time = getTime(hourOfDay, minute);
                 mBeginTimeTextView.setText(time);
 
+                if(mBeginTime == null) {
+                    mBeginTime = Calendar.getInstance();
+                }
+
                 mBeginTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 mBeginTime.set(Calendar.MINUTE, minute);
             }
@@ -304,6 +323,10 @@ public class CreateEventActivity extends AppCompatActivity {
                 String time = getTime(hourOfDay, minute);
                 mEndTimeTextView.setText(time);
 
+                if(mEndTime == null) {
+                    mEndTime = Calendar.getInstance();
+                }
+
                 mEndTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 mEndTime.set(Calendar.MINUTE, minute);
             }
@@ -318,7 +341,7 @@ public class CreateEventActivity extends AppCompatActivity {
      */
     public class CustomTimePickerDialog extends TimePickerDialog {
 
-        private final static int TIME_PICKER_INTERVAL = 10;
+        private final static int TIME_PICKER_INTERVAL = 5;
         private TimePicker mTimePicker;
         private final OnTimeSetListener mCallback;
 
@@ -377,17 +400,30 @@ public class CreateEventActivity extends AppCompatActivity {
         Event event = new Event();
 
         // Room parsible has been passed in
+        // if the location has not changed, book associated room via resource email
         if(mRoom != null && mLocationEditText.getText().toString().equals(mRoom.getRoomName())) {
             event.setLocation(mRoom.getResourceName());
-            String email = mRoom.getEmail();
-            EventAttendee attendee = new EventAttendee();
-            attendee.setEmail(email);
-            List<EventAttendee> attendees = new ArrayList<>();
-            attendees.add(attendee);
-            event.setAttendees(attendees);
+            if(mRoom.getEmail() != null) {
+                String email = mRoom.getEmail();
+                EventAttendee attendee = new EventAttendee();
+                attendee.setEmail(email);
+                List<EventAttendee> attendees = new ArrayList<>();
+                attendees.add(attendee);
+                event.setAttendees(attendees);
+            }
         }
+
+        // Event parsible has been passed in
+        // if the location has not changed, book associated room via resource email
         else if(mEvent != null && mLocationEditText.getText().toString().equals(mEvent.getLocation())) {
             event.setLocation(mEvent.getLocation());
+            if(mEvent.getEmail() != null) {
+                EventAttendee attendee = new EventAttendee();
+                attendee.setEmail(mEvent.getEmail());
+                List<EventAttendee> attendees = new ArrayList<>();
+                attendees.add(attendee);
+                event.setAttendees(attendees);
+            }
         }
         else {
             event.setLocation(mLocationEditText.getText().toString());
@@ -396,19 +432,28 @@ public class CreateEventActivity extends AppCompatActivity {
         event.setSummary(mSummaryEditText.getText().toString());
         event.setDescription(mDescriptionEditText.getText().toString());
 
-        Calendar cal = Calendar.getInstance();
+        if(mBeginTime != null) {
 
-        DateTime startDateTime = new DateTime(mBeginTime.getTime());
-        DateTime endDateTime = new DateTime(mEndTime.getTime());
+            DateTime startDateTime = new DateTime(mBeginTime.getTime());
+            EventDateTime startEventDateTime = new EventDateTime()
+                    .setDateTime(startDateTime);
+            event.setStart(startEventDateTime);
+        }
+        else {
+            event.setStart(mEditEvent.getStart());
+        }
 
-        EventDateTime startEventDateTime = new EventDateTime()
-                .setDateTime(startDateTime);
 
-        EventDateTime endEventDateTime = new EventDateTime()
-                .setDateTime(endDateTime);
+        if(mEndTime != null) {
 
-        event.setStart(startEventDateTime);
-        event.setEnd(endEventDateTime);
+            DateTime endDateTime = new DateTime(mEndTime.getTime());
+            EventDateTime endEventDateTime = new EventDateTime()
+                    .setDateTime(endDateTime);
+            event.setEnd(endEventDateTime);
+        }
+        else {
+            event.setEnd(mEditEvent.getEnd());
+        }
 
         return event;
     }
@@ -422,7 +467,7 @@ public class CreateEventActivity extends AppCompatActivity {
         com.google.api.services.calendar.Calendar service = CalendarServiceHolder.getInstance().getService();
 
         if(mEvent != null) {
-          editEventDialog(service, event);
+           editEventDialog(service, event);
         }
 
         else {

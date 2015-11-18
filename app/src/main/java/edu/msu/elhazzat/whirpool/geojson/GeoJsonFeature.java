@@ -26,6 +26,9 @@ public class GeoJsonFeature {
     }
 
     public String getProperty(String key) {
-        return mProperties.get(key);
+        if(mProperties.containsKey(key)){
+            return mProperties.get(key);
+        }
+        return null;
     }
 }

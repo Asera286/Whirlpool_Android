@@ -30,6 +30,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -180,9 +181,101 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         mFavoritesView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                RoomModel model = mFavoritesAdapter.getChild(groupPosition, childPosition);
+                Bundle bundle = new Bundle();
+                bundle.putString(BUNDLE_ROOM_KEY, model.getRoomName());
+                bundle.putString(BUNDLE_BUILDING_KEY, model.getBuildingName());
+                Intent roomIntent = new Intent(getApplicationContext(), RoomActivity.class);
+                roomIntent.putExtras(bundle);
+                startActivity(roomIntent);
                 return false;
             }
         });
+
+        tmpClickEvents();
+    }
+
+    private void tmpClickEvents() {
+        ((ImageView)findViewById(R.id.ben_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("BEN");
+            }
+        });
+        ((ImageView)findViewById(R.id.bhtc_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("BHTC");
+            }
+        });
+        ((ImageView)findViewById(R.id.etc_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("ETC");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.ghc_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("GHQ");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.hbt_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("HBT");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.htps_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("HTPS");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.htpn_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("HTPN");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.rande_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("R&E");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.rv_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("RV");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.sjtc_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("SJTC");
+            }
+        });
+
+        ((ImageView)findViewById(R.id.mmc_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoomActivity("MMC");
+            }
+        });
+    }
+
+    private void startRoomActivity(String buildingName) {
+        Intent roomIntent = new Intent(this, RoomActivity.class);
+        roomIntent.putExtra("BUILDING_NAME_CARA", buildingName);
+        startActivity(roomIntent);
     }
 
     /**
@@ -301,6 +394,12 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
                         sched.setEndDateTime(event.getEnd().getDateTime());
 
                         sched.setDescription(event.getDescription());
+
+                        List<EventAttendee> attendees = event.getAttendees();
+                        if(attendees != null && attendees.size() > 0) {
+                            sched.setEmail(attendees.get(0).getEmail());
+                        }
+
                         mCalendarListViewValues.add(sched);
                     }
                     mCalendarAdapter = new EventAdapter(HomeActivity.this, mCalendarListViewValues);
@@ -424,6 +523,9 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         }
     }
 
+    public void refreshEvents() {
+        inflateEventAdapter();
+    }
 }
 
 

@@ -1,9 +1,10 @@
 package edu.msu.elhazzat.whirpool.activity;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -30,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -132,15 +134,24 @@ public class RoomActivity extends AppCompatActivity {
 
     private Map<Integer, List<Marker>> mRoomNames = new HashMap<>();
 
+    private RoomModel mCurrentRoom;
+
+    private ImageView mBookRoomImageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.room_layout);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Bundle b = getIntent().getExtras();
         if(b != null) {
             mBuildingName = b.getString(BUNDLE_BUILDING_NAME_KEY);
             mRoomName = b.getString(BUNDLE_ROOM_NAME);
+        }
+
+        if(mBuildingName == null && mRoomName == null) {
+            mBuildingName = b.getString("BUILDING_NAME_CARA");
         }
 
         //temporary start values
@@ -164,15 +175,28 @@ public class RoomActivity extends AppCompatActivity {
         favoritesImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RelevantRoomDbHelper helper = new RelevantRoomDbHelper(getApplicationContext());
+                final RelevantRoomDbHelper helper = new RelevantRoomDbHelper(getApplicationContext());
+                AsyncGCSRoomInfoReader reader = new AsyncGCSRoomInfoReader(mBuildingName,
+                        mRoomNameTextView.getText().toString()) {
+                    @Override
+                    public void handleRoom(RoomModel room) {
+                        if (room != null) {
+                            helper.addRelevantRoom(room);
+                            Toast.makeText(getApplicationContext(), mRoomNameTextView.getText().toString()
+                                    + " favorited!", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                };
+                reader.execute();
             }
         });
 
-        ImageView editEventImageView = (ImageView) findViewById(R.id.edit_event);
-        editEventImageView.setOnClickListener(new View.OnClickListener() {
+        mBookRoomImageView = (ImageView) findViewById(R.id.edit_event);
+        mBookRoomImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent eventIntent = new Intent(getApplicationContext(), CreateEventActivity.class);
+                eventIntent.putExtra("ROOM_MODEL", mCurrentRoom);
                 startActivity(eventIntent);
             }
         });
@@ -193,6 +217,13 @@ public class RoomActivity extends AppCompatActivity {
 
         mLocationMarker = (ImageView) findViewById(R.id.start_location);
         mLocationMarker.setVisibility(View.GONE);
+        mLocationMarker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((TextView)findViewById(R.id.start_navigation)).setVisibility(View.VISIBLE);
+                ((RelativeLayout)findViewById(R.id.nav_info_layout)).setVisibility(View.VISIBLE);
+            }
+        });
 
         buildSlideView();
         getLayoutDimensions();
@@ -200,7 +231,7 @@ public class RoomActivity extends AppCompatActivity {
         buildMap();
     }
 
-    private float computeWalkingTime(LatLng start, LatLng end) {
+    private String computeWalkingTime(LatLng start, LatLng end) {
         Location location1 = new Location("");
         location1.setLatitude(start.latitude);
         location1.setLongitude(start.longitude);
@@ -211,8 +242,19 @@ public class RoomActivity extends AppCompatActivity {
 
         float distanceInMeters = location1.distanceTo(location2);
 
-        int speed = 84;
-        return distanceInMeters / speed;
+        float speed = 1.4f;
+        float timeInSeconds = distanceInMeters / speed;
+        float minutes = timeInSeconds / 60;
+        if(minutes >= 1) {
+            return minutes + " minutes";
+        }
+        else {
+            return timeInSeconds + " seconds";
+        }
+    }
+
+    private void setUpHorizontalView() {
+
     }
 
     public static BitmapDescriptor getTextMarker(String text) {
@@ -251,6 +293,8 @@ public class RoomActivity extends AppCompatActivity {
             mStartFloorNum = mCurrentFloorNum;
             MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
             mPolyLine = mRoute.drawRoute(startLocation, mStartFloorNum, mNavEndPosition, mEndFloorNum);
+            String distance = "Estimated walking time: " + computeWalkingTime(startLocation, mNavEndPosition);
+            ((TextView)findViewById(R.id.navigation_text)).setText(distance);
         }
     }
 
@@ -311,7 +355,7 @@ public class RoomActivity extends AppCompatActivity {
         for(RoomModel model : mRooms) {
             for(GeoJsonMapLayer layer : mGeoJsonMap.mLayers.values()) {
                 for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-                    if (feature.getProperty("room").equals(model.getRoomName())) {
+                    if (feature.getProperty("room") != null && feature.getProperty("room").equals(model.getRoomName())) {
                         GeoJsonPolygon poly = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
                         BitmapDescriptor text = RoomActivity.getTextMarker(feature.getProperty("room"));
                         Marker m = mMap.addMarker(new MarkerOptions()
@@ -390,6 +434,16 @@ public class RoomActivity extends AppCompatActivity {
                                     if(mNavigationOn) {
                                         if(mPolyLine != null) {
                                             mPolyLine.remove();
+                                        }
+
+                                        if((mCurrentFloorNum == mEndFloorNum || mCurrentFloorNum == mStartFloorNum) && mNavigationOn) {
+
+                                            MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
+
+                                            mPolyLine = mRoute.drawRoute(mNavStartPosition, mStartFloorNum, mNavEndPosition, mEndFloorNum);
+
+                                            String distance = "Estimated walking time: " + computeWalkingTime(mNavStartPosition, mNavEndPosition);
+                                            ((TextView)findViewById(R.id.navigation_text)).setText(distance);
                                         }
                                     }
                                 }
@@ -531,8 +585,6 @@ public class RoomActivity extends AppCompatActivity {
             }
 
             mLocationMarker.setVisibility(View.VISIBLE);
-            ((TextView)findViewById(R.id.start_navigation)).setVisibility(View.VISIBLE);
-            ((RelativeLayout)findViewById(R.id.nav_info_layout)).setVisibility(View.VISIBLE);
 
             /**
              * Listen for camera position changes - record the center point -
@@ -552,11 +604,14 @@ public class RoomActivity extends AppCompatActivity {
             mLocationMarker.setVisibility(View.GONE);
             mNavigationOn = false;
             if(mPolyLine != null) mPolyLine.remove();
+            ((TextView)findViewById(R.id.start_navigation)).setVisibility(View.GONE);
+            ((RelativeLayout)findViewById(R.id.nav_info_layout)).setVisibility(View.GONE);
+
         }
     }
 
     /**
-     * Get locaiton of navigation pin
+     * Get location of navigation pin
      * @return
      */
     private LatLng getLocationMarkerCenter() {
@@ -620,8 +675,16 @@ public class RoomActivity extends AppCompatActivity {
                     String[] amenities = room.getAmenities();
                     int occupancy = room.getCapacity();
                     setRoomAvailable(amenities, occupancy, room.getEmail());
+                    mCurrentRoom = room;
+                    if(room.getRoomType() != null && room.getRoomType().equals("C")) {
+                        mBookRoomImageView.setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        mBookRoomImageView.setVisibility(View.INVISIBLE);
+                    }
                 } else {
                     mRoomAttributeListView.setAdapter(null);
+                    mBookRoomImageView.setVisibility(View.INVISIBLE);
                 }
             }
         };
@@ -649,7 +712,12 @@ public class RoomActivity extends AppCompatActivity {
             public void handleGeoJson(GeoJsonMap map) {
                 if(map != null) {
                     mGeoJsonMap = map;
-                    int initialFloor = getInitialFloor(mRoomName);
+                    int initialFloor = 1;
+
+                    if(mRoomName != null) {
+                        initialFloor = getInitialFloor(mRoomName);
+                    }
+
                     mGeoJsonMap.setCurrentLayer(initialFloor);
 
                     mCurrentFloorNum = initialFloor;
@@ -658,6 +726,13 @@ public class RoomActivity extends AppCompatActivity {
 
                     setUpMap();
                     getRooms();
+
+                    if(mRoomName == null && mBuildingName.equals("GHQ")) {
+                        mRoomName = "N116";
+                    }
+                    else if(mRoomName == null && mBuildingName.equals("RV")) {
+                        mRoomName = "A119";
+                    }
                     inflateRoomAttributes(mRoomName, mBuildingName);
                 }
                 else {
@@ -698,6 +773,12 @@ public class RoomActivity extends AppCompatActivity {
         return -1;
     }
 
+    public Bitmap resizeMapIcons(String iconName,int width, int height){
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+        return resizedBitmap;
+    }
+
     private void loadMap() {
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
@@ -722,7 +803,8 @@ public class RoomActivity extends AppCompatActivity {
                     }
                 }
                 mMap.moveCamera(cameraUpdate);
-                mCurrentMarker = mMap.addMarker(new MarkerOptions().position(center));
+                mCurrentMarker = mMap.addMarker(new MarkerOptions().position(center)
+                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("end_location3x", 70, 105))));
 
                 mNavEndPosition = mCurrentMarker.getPosition();
             }
@@ -744,7 +826,12 @@ public class RoomActivity extends AppCompatActivity {
                     gmsPoly.setFillColor(color1);
                     LatLng center1 = polygon.getCentroid();
 
-                    mCurrentMarker = mMap.addMarker(new MarkerOptions().position(center1));
+                    mCurrentMarker = mMap.addMarker(new MarkerOptions().position(center1).
+                            icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("end_location3x", 70, 105))));
+
+                    if(mPolyLine != null) {
+                        mPolyLine.remove();
+                    }
 
                     mNavEndPosition = mCurrentMarker.getPosition();
 
@@ -755,10 +842,26 @@ public class RoomActivity extends AppCompatActivity {
 
                     inflateRoomAttributes(selectedRoomName, mBuildingName);
 
+
                 } else {
                     Polygon gmsPoly = polygon.getGMSPolygon();
                     int color1 = WIMAppConstants.MAP_DEFAULT_FILL_COLOR;
+
+                    switch(feature.getProperty("room")) {
+                        case "HW":
+                            color1 = Color.WHITE;
+                            break;
+                        case "WB":
+                            color1 = Color.rgb(234, 230, 245);
+                            break;
+                        case "MB":
+                            color1 = Color.rgb(234, 230, 245);
+                            break;
+
+                    }
+
                     gmsPoly.setFillColor(color1);
+
                 }
             }
         }
@@ -812,25 +915,5 @@ public class RoomActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public class CircleView extends View {
-
-        private Paint paint;
-
-        public CircleView(Context context) {
-            super(context);
-
-            // create the Paint and set its color
-            paint = new Paint();
-            paint.setColor(Color.GRAY);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            canvas.drawColor(Color.GRAY);
-            canvas.drawCircle(200, 200, 100, paint);
-        }
-
     }
 }

@@ -145,8 +145,11 @@ public class EventAdapter extends BaseAdapter {
                     Intent roomIntent = new Intent(mContext, RoomActivity.class);
                     roomIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                    String buildingName = RoomNameRegexMapper.getBuildingNameFromResource(item.getLocation());
-                    String roomName = RoomNameRegexMapper.getRoomNameFromResource(item.getLocation());
+                    String buildingNameFull = RoomNameRegexMapper.getBuildingNameFromResource(item.getLocation());
+                    String buildingName = WIMAppConstants.WHIRLPOOL_ABBRV_MAP.get(buildingNameFull);
+                    String roomNameFull = RoomNameRegexMapper.getRoomNameFromResource(item.getLocation());
+                    String roomName = RoomNameRegexMapper.getGeoJsonRoomNameFromMap(buildingNameFull, roomNameFull);
+
 
                     Bundle bundle = new Bundle();
                     bundle.putString(BUNDLE_ROOM_KEY, roomName);
@@ -191,7 +194,9 @@ public class EventAdapter extends BaseAdapter {
 
                         new AsyncCalendarEventDeleter(CalendarServiceHolder.getInstance().getService(),
                                 item.getId()) {
-                            public void handleDelete() {}
+                            public void handleDelete() {
+                                mContext.refreshEvents();
+                            }
                         }.execute();
 
                         Toast.makeText(mContext, "Event deleted", Toast.LENGTH_SHORT).show();
