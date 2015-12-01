@@ -18,7 +18,7 @@ import java.util.Map;
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.model.BuildingModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
-import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
+import edu.msu.elhazzat.whirpool.utils.WIMConstants;
 
 /**
  * Created by christianwhite on 11/11/15.
@@ -44,18 +44,18 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         inflater = LayoutInflater.from(context);
         mBuildingModels = itemList;
 
-        mBuildingMap.put(WIMAppConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default_trans3x);
-        mBuildingMap.put(WIMAppConstants.BENSON_ROAD, R.drawable.benson_road_trans3x);
-        mBuildingMap.put(WIMAppConstants.BHTC, R.drawable.benton_harbor_tech_center_trans3x);
-        mBuildingMap.put(WIMAppConstants.EDGEWATER, R.drawable.edge_water_tech_center_trans3x);
-        mBuildingMap.put(WIMAppConstants.GHQ, R.drawable.ghq_trans3x);
-        mBuildingMap.put(WIMAppConstants.HARBORTOWN, R.drawable.harbor_town_trans3x);
-        mBuildingMap.put(WIMAppConstants.HILLTOP_150, R.drawable.hilltop_150_south_trans3x);
-        mBuildingMap.put(WIMAppConstants.HILLTOP_211, R.drawable.hilltop_211_north_trans3x);
-        mBuildingMap.put(WIMAppConstants.MMC, R.drawable.mmc_trans3x);
-        mBuildingMap.put(WIMAppConstants.R_AND_E, R.drawable.rande_trans3x);
-        mBuildingMap.put(WIMAppConstants.RIVERVIEW, R.drawable.riverview_trans3x);
-        mBuildingMap.put(WIMAppConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter_trans3x);
+        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default_trans3x);
+        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.benson_road_trans3x);
+        mBuildingMap.put(WIMConstants.BHTC, R.drawable.benton_harbor_tech_center_trans3x);
+        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.edge_water_tech_center_trans3x);
+        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_trans3x);
+        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.harbor_town_trans3x);
+        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.hilltop_150_south_trans3x);
+        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.hilltop_211_north_trans3x);
+        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_trans3x);
+        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_trans3x);
+        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.riverview_trans3x);
+        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter_trans3x);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
 
         BuildingModel item = getGroup(groupPosition);
         String buildingNameFull = "";
-        for (Map.Entry<String, String> e : WIMAppConstants.WHIRLPOOL_ABBRV_MAP.entrySet()) {
+        for (Map.Entry<String, String> e : WIMConstants.WHIRLPOOL_ABBRV_MAP.entrySet()) {
             String full = e.getKey();
             String abbr = e.getValue();
             if(abbr.equals(item.getBuildingName())) {

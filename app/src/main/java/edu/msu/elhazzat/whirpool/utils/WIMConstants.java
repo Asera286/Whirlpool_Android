@@ -6,7 +6,10 @@ import java.util.Map;
 /**
  * Created by christianwhite on 11/5/15.
  */
-public class WIMAppConstants {
+public class WIMConstants {
+    public static final String BUNDLE_BUILDING_NAME_KEY = "BUILDING_NAME";
+    public static final String BUNDLE_ROOM_NAME_KEY = "ROOM_NAME";
+
     public static final String WHIRLPOOL_DEFAULT = "whirlpoolDefault";
     public static final String BENSON_ROAD = "Benson Road";
     public static final String BHTC = "BHTC";

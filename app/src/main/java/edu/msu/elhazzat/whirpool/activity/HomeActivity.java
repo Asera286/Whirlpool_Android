@@ -54,7 +54,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String LOG_TAG = HomeActivity.class.getSimpleName();
-    private static final String ACCOUNT_NAME_BUNDLE_KEY = "accountName";
+
     private static final String ACTION_BAR_COLOR = "#3870EB";
 
     private static final String BUNDLE_BUILDING_KEY = "BUILDING_NAME";
@@ -111,10 +111,15 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
         buildDrawerLayout();
         buildSwipeView();
+        buildCarousel();
+
         inflateEventAdapter();
         inflateFavoritesAdapter();
     }
 
+    /**
+     * Acquire a Calendar service object and auth token
+     */
     private void authorize() {
         if(CalendarServiceHolder.getInstance().getService() == null) {
 
@@ -192,22 +197,23 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             }
         });
 
-        tmpClickEvents();
     }
 
-    private void tmpClickEvents() {
+    private void buildCarousel() {
         ((ImageView)findViewById(R.id.ben_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("BEN");
             }
         });
+
         ((ImageView)findViewById(R.id.bhtc_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("BHTC");
             }
         });
+
         ((ImageView)findViewById(R.id.etc_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -283,7 +289,6 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
      */
     private void buildSwipeView() {
         mCalendarListView = (SwipeListView) findViewById(R.id.example_swipe_lv_list);
-
         mCalendarListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -439,16 +444,12 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
 
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             if(!mDrawerOpen) {
@@ -498,9 +499,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
     }
 
     @Override
-    public void onConnected(Bundle arg0) {
-        //
-    }
+    public void onConnected(Bundle arg0) {}
 
     @Override
     public void onConnectionSuspended(int arg0) {

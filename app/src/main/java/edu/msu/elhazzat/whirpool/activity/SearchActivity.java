@@ -24,7 +24,7 @@ import edu.msu.elhazzat.whirpool.adapter.SearchAdapter;
 import edu.msu.elhazzat.whirpool.model.BuildingModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSAllRooms;
-import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
+import edu.msu.elhazzat.whirpool.utils.WIMConstants;
 
 /**
  * Created by christianwhite on 11/11/15.
@@ -100,7 +100,7 @@ public class SearchActivity extends AppCompatActivity {
         new AsyncGCSAllRooms() {
             public void handleBuildings(List<BuildingModel> items) {
                 for(BuildingModel model : items) {
-                    if(WIMAppConstants.WHIRLPOOL_ABBRV_MAP.containsValue(model.getBuildingName())) {
+                    if(WIMConstants.WHIRLPOOL_ABBRV_MAP.containsValue(model.getBuildingName())) {
                         mBuildingModelsFiltered.add(model);
                         mBuildingModels.add(model);
                     }

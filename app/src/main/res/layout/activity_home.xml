@@ -149,7 +149,6 @@
             swipe:swipeMode="both"
             />
 
-
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"

@@ -73,7 +73,7 @@ import edu.msu.elhazzat.whirpool.rest.AsyncGCSRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncParseGeoJsonGCS;
 import edu.msu.elhazzat.whirpool.routing.MapRoute;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
-import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
+import edu.msu.elhazzat.whirpool.utils.WIMConstants;
 
 public class RoomActivity extends AppCompatActivity {
 
@@ -125,11 +125,6 @@ public class RoomActivity extends AppCompatActivity {
     private String mBuildingName;
     private String mRoomName;
 
-    private static final String BUNDLE_BUILDING_NAME_KEY = "BUILDING_NAME";
-    private static final String BUNDLE_ROOM_NAME = "ROOM_NAME";
-
-    private Marker mNavIconFixed;
-
     private List<RoomModel> mRooms = new ArrayList<>();
 
     private Map<Integer, List<Marker>> mRoomNames = new HashMap<>();
@@ -142,21 +137,18 @@ public class RoomActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.room_layout);
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Bundle b = getIntent().getExtras();
         if(b != null) {
-            mBuildingName = b.getString(BUNDLE_BUILDING_NAME_KEY);
-            mRoomName = b.getString(BUNDLE_ROOM_NAME);
+            mBuildingName = b.getString(WIMConstants.BUNDLE_BUILDING_NAME_KEY);
+            mRoomName = b.getString(WIMConstants.BUNDLE_ROOM_NAME_KEY);
         }
 
         if(mBuildingName == null && mRoomName == null) {
             mBuildingName = b.getString("BUILDING_NAME_CARA");
         }
-
-        //temporary start values
-        mNavEndPosition = new LatLng(42.15099619463289,-86.44287049770355);
-        mNavStartPosition = new LatLng(42.150831643314156,-86.4429010078311);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -211,7 +203,7 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
 
-        ((RelativeLayout)findViewById(R.id.nav_info_layout)).setVisibility(View.GONE);
+        findViewById(R.id.nav_info_layout).setVisibility(View.GONE);
 
         startNavigation.setVisibility(View.GONE);
 
@@ -220,8 +212,8 @@ public class RoomActivity extends AppCompatActivity {
         mLocationMarker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((TextView)findViewById(R.id.start_navigation)).setVisibility(View.VISIBLE);
-                ((RelativeLayout)findViewById(R.id.nav_info_layout)).setVisibility(View.VISIBLE);
+                findViewById(R.id.start_navigation).setVisibility(View.VISIBLE);
+                findViewById(R.id.nav_info_layout).setVisibility(View.VISIBLE);
             }
         });
 
@@ -251,10 +243,6 @@ public class RoomActivity extends AppCompatActivity {
         else {
             return timeInSeconds + " seconds";
         }
-    }
-
-    private void setUpHorizontalView() {
-
     }
 
     public static BitmapDescriptor getTextMarker(String text) {
@@ -393,7 +381,6 @@ public class RoomActivity extends AppCompatActivity {
 
                         tv.setBackgroundColor(Color.WHITE);
                         tv.setText(text);
-                   //     tv.setPadding(30, 30, 30, 30);
                         tv.setTextColor(Color.BLACK);
                         tv.setGravity(Gravity.CENTER);
 
@@ -414,9 +401,9 @@ public class RoomActivity extends AppCompatActivity {
                                     mCurrentFloorNum = tmpFloorNum;
 
                                     mGeoJsonMap.drawLayer(mCurrentFloorNum,
-                                            WIMAppConstants.MAP_DEFAULT_FILL_COLOR,
-                                            WIMAppConstants.MAP_DEFAULT_STROKE_COLOR,
-                                            WIMAppConstants.MAP_DEFAULT_STROKE_WIDTH);
+                                            WIMConstants.MAP_DEFAULT_FILL_COLOR,
+                                            WIMConstants.MAP_DEFAULT_STROKE_COLOR,
+                                            WIMConstants.MAP_DEFAULT_STROKE_WIDTH);
 
                                     if(mRoomNames.containsKey(mCurrentFloorNum)) {
                                         for (Marker m : mRoomNames.get(mCurrentFloorNum)) {
@@ -784,21 +771,21 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onMapLoaded() {
                 GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
-                mGeoJsonMap.drawLayer(layer.getFloorNum(), WIMAppConstants.MAP_DEFAULT_FILL_COLOR,
-                        WIMAppConstants.MAP_DEFAULT_STROKE_COLOR,
-                        WIMAppConstants.MAP_DEFAULT_STROKE_WIDTH);
+                mGeoJsonMap.drawLayer(layer.getFloorNum(), WIMConstants.MAP_DEFAULT_FILL_COLOR,
+                        WIMConstants.MAP_DEFAULT_STROKE_COLOR,
+                        WIMConstants.MAP_DEFAULT_STROKE_WIDTH);
 
                 LatLng center = Geometry.getRoomCenter(layer, mRoomName);
 
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(center,
-                        WIMAppConstants.DEFAULT_MAP_CAMERA_ZOOM);
+                        WIMConstants.DEFAULT_MAP_CAMERA_ZOOM);
 
                 for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
                     if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
                         GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
                         if (polygon.contains(center)) {
                             Polygon gmsPoly = polygon.getGMSPolygon();
-                            gmsPoly.setFillColor(WIMAppConstants.MAP_DEFAULT_SELECTED_ROOM_COLOR);
+                            gmsPoly.setFillColor(WIMConstants.MAP_DEFAULT_SELECTED_ROOM_COLOR);
                         }
                     }
                 }
@@ -821,7 +808,7 @@ public class RoomActivity extends AppCompatActivity {
                     mCurrentMarker.remove();
 
                     Polygon gmsPoly = polygon.getGMSPolygon();
-                    int color1 = WIMAppConstants.MAP_DEFAULT_SELECTED_ROOM_COLOR;
+                    int color1 = WIMConstants.MAP_DEFAULT_SELECTED_ROOM_COLOR;
 
                     gmsPoly.setFillColor(color1);
                     LatLng center1 = polygon.getCentroid();
@@ -845,7 +832,7 @@ public class RoomActivity extends AppCompatActivity {
 
                 } else {
                     Polygon gmsPoly = polygon.getGMSPolygon();
-                    int color1 = WIMAppConstants.MAP_DEFAULT_FILL_COLOR;
+                    int color1 = WIMConstants.MAP_DEFAULT_FILL_COLOR;
 
                     switch(feature.getProperty("room")) {
                         case "HW":

@@ -11,18 +11,18 @@ import java.util.regex.Pattern;
 public class RoomNameRegexMapper {
     public static final Map<String, String> REGEX_MAP = new HashMap<>();
     static {
-        REGEX_MAP.put(WIMAppConstants.RIVERVIEW, "([ABC]\\d{3}-\\d{2}$|[ABC]\\d{3})");
-        REGEX_MAP.put(WIMAppConstants.GHQ, "(N\\d{3}-\\d{2}$|N\\d{3})");
-     /*   REGEX_MAP.put(WIMAppConstants.BENSON_ROAD, );
-        REGEX_MAP.put(WIMAppConstants.EDGEWATER, );
-        REGEX_MAP.put(WIMAppConstants.BHTC, );
-        REGEX_MAP.put(WIMAppConstants.GHQ, );
-        REGEX_MAP.put(WIMAppConstants.HARBORTOWN, );
-        REGEX_MAP.put(WIMAppConstants.HILLTOP_150, );
-        REGEX_MAP.put(WIMAppConstants.HILLTOP_211, );
-        REGEX_MAP.put(WIMAppConstants.MMC, );
-        REGEX_MAP.put(WIMAppConstants.ST_JOE_TECH_CENTER, );
-        REGEX_MAP.put(WIMAppConstants.R_AND_E, )*/
+        REGEX_MAP.put(WIMConstants.RIVERVIEW, "([ABC]\\d{3}-\\d{2}$|[ABC]\\d{3})");
+        REGEX_MAP.put(WIMConstants.GHQ, "(N\\d{3}-\\d{2}$|N\\d{3})");
+     /*   REGEX_MAP.put(WIMConstants.BENSON_ROAD, );
+        REGEX_MAP.put(WIMConstants.EDGEWATER, );
+        REGEX_MAP.put(WIMConstants.BHTC, );
+        REGEX_MAP.put(WIMConstants.GHQ, );
+        REGEX_MAP.put(WIMConstants.HARBORTOWN, );
+        REGEX_MAP.put(WIMConstants.HILLTOP_150, );
+        REGEX_MAP.put(WIMConstants.HILLTOP_211, );
+        REGEX_MAP.put(WIMConstants.MMC, );
+        REGEX_MAP.put(WIMConstants.ST_JOE_TECH_CENTER, );
+        REGEX_MAP.put(WIMConstants.R_AND_E, )*/
     }
 
     public static String getGeoJsonRoomNameFromMap(String buildingName, String roomName) {

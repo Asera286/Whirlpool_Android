@@ -31,12 +31,11 @@ public class MainActivity extends FragmentActivity implements
     public static final String PREF_FILE_ACCOUNT_NAME_KEY = "accountName";
 
     private static final int REQUEST_CODE_SIGN_IN = 0;
-    private static final String DIALOG_ERROR = "dialog_error";
 
-    protected GoogleApiClient mGoogleApiClient;
-    protected boolean mIsResolving = false;
-    protected boolean mShouldResolve = false;
-    protected SignInButton mSignInButton;
+    private GoogleApiClient mGoogleApiClient;
+    private boolean mIsResolving = false;
+    private boolean mShouldResolve = false;
+    private SignInButton mSignInButton;
 
     /**
      * Main activity - sign in user with google auth.
@@ -85,17 +84,9 @@ public class MainActivity extends FragmentActivity implements
                 .build();
     }
 
-
     public void onSignInClicked() {
         mShouldResolve = true;
         mGoogleApiClient.connect();
-    }
-
-    public void onSignOutClicked() {
-        if (mGoogleApiClient.isConnected()) {
-            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-            mGoogleApiClient.disconnect();
-        }
     }
 
     /**

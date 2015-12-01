@@ -30,15 +30,12 @@ import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventDeleter;
 import edu.msu.elhazzat.whirpool.model.EventModel;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 import edu.msu.elhazzat.whirpool.utils.RoomNameRegexMapper;
-import edu.msu.elhazzat.whirpool.utils.WIMAppConstants;
+import edu.msu.elhazzat.whirpool.utils.WIMConstants;
 
 /**
  * Created by Christian on 10/23/2015.
  */
 public class EventAdapter extends BaseAdapter {
-
-    private static String BUNDLE_ROOM_KEY = "ROOM_NAME";
-    private static String BUNDLE_BUILDING_KEY = "BUILDING_NAME";
 
     private HomeActivity mContext;
     private List<EventModel> mCalendarListValues = new ArrayList<>();
@@ -49,18 +46,18 @@ public class EventAdapter extends BaseAdapter {
         mContext = context;
         mCalendarListValues = eventModels;
 
-        mBuildingMap.put(WIMAppConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default_trans3x);
-        mBuildingMap.put(WIMAppConstants.BENSON_ROAD, R.drawable.benson_road_trans3x);
-        mBuildingMap.put(WIMAppConstants.BHTC, R.drawable.benton_harbor_tech_center_trans3x);
-        mBuildingMap.put(WIMAppConstants.EDGEWATER, R.drawable.edge_water_tech_center_trans3x);
-        mBuildingMap.put(WIMAppConstants.GHQ, R.drawable.ghq_trans3x);
-        mBuildingMap.put(WIMAppConstants.HARBORTOWN, R.drawable.harbor_town_trans3x);
-        mBuildingMap.put(WIMAppConstants.HILLTOP_150, R.drawable.hilltop_150_south_trans3x);
-        mBuildingMap.put(WIMAppConstants.HILLTOP_211, R.drawable.hilltop_211_north_trans3x);
-        mBuildingMap.put(WIMAppConstants.MMC, R.drawable.mmc_trans3x);
-        mBuildingMap.put(WIMAppConstants.R_AND_E, R.drawable.rande_trans3x);
-        mBuildingMap.put(WIMAppConstants.RIVERVIEW, R.drawable.riverview_trans3x);
-        mBuildingMap.put(WIMAppConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter_trans3x);
+        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default_trans3x);
+        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.benson_road_trans3x);
+        mBuildingMap.put(WIMConstants.BHTC, R.drawable.benton_harbor_tech_center_trans3x);
+        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.edge_water_tech_center_trans3x);
+        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_trans3x);
+        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.harbor_town_trans3x);
+        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.hilltop_150_south_trans3x);
+        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.hilltop_211_north_trans3x);
+        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_trans3x);
+        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_trans3x);
+        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.riverview_trans3x);
+        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter_trans3x);
     }
 
     @Override
@@ -146,14 +143,14 @@ public class EventAdapter extends BaseAdapter {
                     roomIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                     String buildingNameFull = RoomNameRegexMapper.getBuildingNameFromResource(item.getLocation());
-                    String buildingName = WIMAppConstants.WHIRLPOOL_ABBRV_MAP.get(buildingNameFull);
+                    String buildingName = WIMConstants.WHIRLPOOL_ABBRV_MAP.get(buildingNameFull);
                     String roomNameFull = RoomNameRegexMapper.getRoomNameFromResource(item.getLocation());
                     String roomName = RoomNameRegexMapper.getGeoJsonRoomNameFromMap(buildingNameFull, roomNameFull);
 
 
                     Bundle bundle = new Bundle();
-                    bundle.putString(BUNDLE_ROOM_KEY, roomName);
-                    bundle.putString(BUNDLE_BUILDING_KEY, buildingName);
+                    bundle.putString(WIMConstants.BUNDLE_ROOM_NAME_KEY, roomName);
+                    bundle.putString(WIMConstants.BUNDLE_BUILDING_NAME_KEY, buildingName);
 
                     roomIntent.putExtras(bundle);
                     mContext.startActivity(roomIntent);
@@ -235,7 +232,7 @@ public class EventAdapter extends BaseAdapter {
 
         String location = item.getLocation();
         if(location == null) {
-            return mBuildingMap.get(WIMAppConstants.WHIRLPOOL_DEFAULT);
+            return mBuildingMap.get(WIMConstants.WHIRLPOOL_DEFAULT);
         }
         String[] resourceSplit = location.split("-");
         Integer png = null;
@@ -245,7 +242,7 @@ public class EventAdapter extends BaseAdapter {
         }
 
         if(png == null) {
-            return mBuildingMap.get(WIMAppConstants.WHIRLPOOL_DEFAULT);
+            return mBuildingMap.get(WIMConstants.WHIRLPOOL_DEFAULT);
         }
         else {
             return png;
