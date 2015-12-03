@@ -1,9 +1,11 @@
 package edu.msu.elhazzat.whirpool.geojson;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -17,10 +19,14 @@ import java.util.List;
  */
 public class GeoJsonMapLayer {
 
+    private static final String LOG_TAG = GeoJsonMapLayer.class.getSimpleName();
+
     private GeoJson mGeoJson = null;
 
     private List<Polygon> mPolygons = new ArrayList<>(); // gms polygon
     private List<Polyline> mPolylines = new ArrayList<>(); // gms polyline
+
+    private List<Marker> mRoomLabels;
 
     private int mFloorNum;
 
@@ -55,6 +61,18 @@ public class GeoJsonMapLayer {
         return mIsDrawn;
     }
 
+    public void showRoomLabels() {
+        for(Marker marker : mRoomLabels) {
+            marker.setVisible(true);
+        }
+    }
+
+    public void hideRoomLabels() {
+        for(Marker marker : mRoomLabels) {
+            marker.setVisible(false);
+        }
+    }
+
 
     /**
      * Draws the map using uniform properties.
@@ -85,26 +103,30 @@ public class GeoJsonMapLayer {
                         GeoJsonPolygon poly1 = (GeoJsonPolygon) jsonGeometry.getGeometry();
                         List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
                         int color = fillColor;
-          //              String feat = feature.getProperty("room");
-                        switch(feature.getProperty("room")) {
-                            case "HW":
-                                color = Color.WHITE;
-                                break;
-                            case "WB":
-                                color = Color.rgb(234, 230, 245);
-                                break;
-                            case "MB":
-                                color = Color.rgb(234, 230, 245);
-                                break;
-                            case "STR":
-                                color = Color.parseColor("#F2A440");
-                                break;
+                        try {
+                            switch (feature.getProperty("room")) {
+                                case "HW":
+                                    color = Color.WHITE;
+                                    break;
+                                case "WB":
+                                    color = Color.rgb(234, 230, 245);
+                                    break;
+                                case "MB":
+                                    color = Color.rgb(234, 230, 245);
+                                    break;
+                                case "STR":
+                                    color = Color.parseColor("#F2A440");
+                                    break;
+                            }
                         }
+                        catch(NullPointerException e) {
+                            Log.d(LOG_TAG, e.getMessage());
+                        }
+
                         Polygon poly2 = map.addPolygon(new PolygonOptions()
                                 .addAll(latLngPoly).fillColor(color).strokeWidth(strokeWidth));
                         poly1.setGMSPolygon(poly2);
                         mPolygons.add(poly2);
-
                         break;
                 }
             }
@@ -114,6 +136,7 @@ public class GeoJsonMapLayer {
             show(true);
         }
     }
+
 
     /**
      * Removes layer. Will have to be redrawn to be visible again.

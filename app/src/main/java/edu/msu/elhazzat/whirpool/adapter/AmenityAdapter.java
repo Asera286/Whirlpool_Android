@@ -95,10 +95,10 @@ public class AmenityAdapter extends ArrayAdapter<String> {
                 break;
             case TYPE_ITEM2:
                 if(mAvailable) {
-                    viewHolder.imageView.setImageResource(R.drawable.check_3x);
+                    viewHolder.imageView.setImageResource(R.drawable.check);
                 }
                 else {
-                    viewHolder.imageView.setImageResource(R.drawable.not_check_3x);
+                    viewHolder.imageView.setImageResource(R.drawable.not_check);
                 }
 
                 viewHolder.imageView.getLayoutParams().height = 120;

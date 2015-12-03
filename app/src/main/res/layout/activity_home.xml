@@ -34,100 +34,100 @@
 
                 <ImageButton
                     android:id="@+id/ben_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/benson_road3x"
+                    android:background="@drawable/ben_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/bhtc_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/benton_harbor_tech_center3x"
+                    android:background="@drawable/bhtc_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/etc_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/edge_water_tech_center3x"
+                    android:background="@drawable/etc_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/ghc_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/ghq3x"
+                    android:background="@drawable/ghq_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/hbt_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/harbor_town3x"
+                    android:background="@drawable/hbt_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/htps_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/hilltop_150_south3x"
+                    android:background="@drawable/htps_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/htpn_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/hilltop_211_north"
+                    android:background="@drawable/htpn_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/rande_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/rande3x"
+                    android:background="@drawable/rande_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/rv_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/riverview3x"
+                    android:background="@drawable/rv_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/sjtc_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/stjoetechcenter3x"
+                    android:background="@drawable/sjtc_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
                 <ImageButton
                     android:id="@+id/mmc_button"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:adjustViewBounds="false"
-                    android:background="@drawable/us_benton_harbor_mmc3x"
+                    android:background="@drawable/mmc_icon"
                     android:layout_marginRight= "3dp"
                     android:layout_marginLeft= "3dp"/>
 
@@ -155,7 +155,7 @@
             android:layout_gravity="bottom|right"
             android:clickable="true"
             android:id = "@+id/eventButton"
-            android:src="@drawable/add_event_button_blue_3x"
+            android:src="@drawable/add_event_button"
             android:layout_marginRight="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="12dp"

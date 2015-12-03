@@ -16,7 +16,7 @@
     <ImageView
         android:paddingRight = "30dp"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/check_3x"
+        android:src="@drawable/check"
         android:id="@+id/attribute_present_img"
         android:layout_width="60dp"
         android:layout_height="60dp" />

@@ -221,56 +221,56 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
             }
         });
 
-        ((ImageView)findViewById(R.id.ghc_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.ghc_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("GHQ");
             }
         });
 
-        ((ImageView)findViewById(R.id.hbt_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.hbt_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("HBT");
             }
         });
 
-        ((ImageView)findViewById(R.id.htps_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.htps_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("HTPS");
             }
         });
 
-        ((ImageView)findViewById(R.id.htpn_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.htpn_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("HTPN");
             }
         });
 
-        ((ImageView)findViewById(R.id.rande_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.rande_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("R&E");
             }
         });
 
-        ((ImageView)findViewById(R.id.rv_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.rv_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("RV");
             }
         });
 
-        ((ImageView)findViewById(R.id.sjtc_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.sjtc_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("SJTC");
             }
         });
 
-        ((ImageView)findViewById(R.id.mmc_button)).setOnClickListener(new View.OnClickListener() {
+        ((ImageView) findViewById(R.id.mmc_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startRoomActivity("MMC");
@@ -491,7 +491,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
         mDrawerToggle.syncState();
     }
 
-        @Override
+    @Override
     public void onConfigurationChanged (Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);

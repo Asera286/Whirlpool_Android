@@ -12,4 +12,12 @@ public class MapConstants {
 
     // Camera Options
     public static final int DEFAULT_CAMERA_ZOOM_LEVEL = 20;
+
+    // Building constants
+    public static final String HALLWAY = "HW";
+    public static final String STAIRS = "STR";
+    public static final String MENS_BATHROOM = "MB";
+    public static final String WOMENS_BATHROOM = "WB";
+
+    public static final int INIT_FLOOR = 1;
 }

@@ -1,5 +1,7 @@
 package edu.msu.elhazzat.whirpool.rest;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -31,13 +33,28 @@ import edu.msu.elhazzat.whirpool.geojson.GeoJsonMapLayer;
 public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJsonMap> {
     public static final String LOG_TAG = AsyncParseGeoJsonGCS.class.getSimpleName();
 
-    public abstract void handleGeoJson(GeoJsonMap map);
+    public abstract void handleGeoJson(GeoJsonMap map, ProgressDialog dialog);
+
+    private ProgressDialog mDialog = null;
 
     public static final String GET_PARAM = "building_name=";
     public String mBuildingName;
+    private Context mContext;
 
-    public AsyncParseGeoJsonGCS(String buildingName) {
+    public AsyncParseGeoJsonGCS(Context context, String buildingName) {
         mBuildingName = buildingName;
+        mContext = context;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        // create a ProgressDialog instance, with a specified theme:
+        mDialog = new ProgressDialog(mContext, ProgressDialog.THEME_HOLO_DARK);
+        mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mDialog.setTitle("Please wait");
+        mDialog.setMessage("Downloading building map...");
+        mDialog.show();
     }
 
     @Override
@@ -107,6 +124,6 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
 
     @Override
     public void onPostExecute(GeoJsonMap map) {
-        handleGeoJson(map);
+        handleGeoJson(map, mDialog);
     }
 }

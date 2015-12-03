@@ -9,7 +9,7 @@
 
     <item android:id="@+id/navigate"
         android:title="Navigate"
-        android:icon="@drawable/navigation_walker_3x"
+        android:icon="@drawable/start_navigation"
         app:showAsAction="always"/>
 
 </menu>

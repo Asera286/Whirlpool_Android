@@ -41,7 +41,7 @@ android:layout_height="match_parent" >
         android:layout_height="60dp"
         android:background="@drawable/circle_background"
         android:gravity="center"
-        android:text="Yes"
+        android:text="Go"
         android:textColor="#FFFFFF"
         android:textSize="10dp"
         android:layout_marginRight="13dp"
@@ -75,14 +75,14 @@ android:layout_height="match_parent" >
         android:layout_height="50dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/start_location3x"/>
+        android:src="@drawable/location_start"/>
 
     <LinearLayout
-    android:id="@+id/attribute_list_view"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_alignParentBottom="true">
+        android:id="@+id/attribute_list_view"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true">
     <LinearLayout
         android:background="#8286F8"
         android:orientation="horizontal"
@@ -90,7 +90,7 @@ android:layout_height="match_parent" >
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/edit_event"
-            android:src="@drawable/book_room_3x"
+            android:src="@drawable/book_room"
             android:layout_gravity="center_vertical"
             android:paddingLeft="20dp"
             android:layout_width="50dp"
@@ -108,7 +108,7 @@ android:layout_height="match_parent" >
             android:paddingBottom="10dp"/>
         <ImageView
             android:id="@+id/add_to_favorites"
-            android:src="@drawable/favorite_room_3x"
+            android:src="@drawable/favorite"
             android:layout_width="50dp"
             android:paddingRight="20dp"
             android:layout_gravity="center_vertical"

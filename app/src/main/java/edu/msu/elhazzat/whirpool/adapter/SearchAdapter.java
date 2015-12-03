@@ -44,18 +44,18 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         inflater = LayoutInflater.from(context);
         mBuildingModels = itemList;
 
-        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_default_trans3x);
-        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.benson_road_trans3x);
-        mBuildingMap.put(WIMConstants.BHTC, R.drawable.benton_harbor_tech_center_trans3x);
-        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.edge_water_tech_center_trans3x);
-        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_trans3x);
-        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.harbor_town_trans3x);
-        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.hilltop_150_south_trans3x);
-        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.hilltop_211_north_trans3x);
-        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_trans3x);
-        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_trans3x);
-        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.riverview_trans3x);
-        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.stjoetechcenter_trans3x);
+        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_icon);
+        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.ben_icon);
+        mBuildingMap.put(WIMConstants.BHTC, R.drawable.bhtc_icon);
+        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.etc_icon);
+        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_icon);
+        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.hbt_icon);
+        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.htps_icon);
+        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.htpn_icon);
+        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_icon);
+        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_icon);
+        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.rv_icon);
+        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.sjtc_icon);
     }
 
     @Override

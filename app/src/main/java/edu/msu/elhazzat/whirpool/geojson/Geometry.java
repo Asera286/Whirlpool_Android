@@ -59,11 +59,15 @@ public class Geometry<T> {
 
     public static LatLng getRoomCenter(GeoJsonMapLayer layer, String roomId) {
         for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON) &&
-                    feature.getProperty(GeoJsonConstants.ROOM_TAG).equals(roomId)) {
-
-                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                return polygon.getCentroid();
+            GeoJsonGeometry geometry = feature.getGeoJsonGeometry();
+            if(geometry != null) {
+                String type = geometry.getType();
+                String roomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
+                if(type != null && type.equals(GeoJsonConstants.POLYGON) && roomName != null
+                        && roomName.equals(roomId)) {
+                    GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                    return polygon.getCentroid();
+                }
             }
         }
         return null;

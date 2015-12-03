@@ -2,6 +2,7 @@ package edu.msu.elhazzat.whirpool.geojson;
 
 import com.google.android.gms.maps.GoogleMap;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -58,4 +59,14 @@ public class GeoJsonMap {
         mLayers.get(floor).show(toShow);
     }
 
+    public Collection<GeoJsonMapLayer> getLayers() {
+        return mLayers.values();
+    }
+
+    public GeoJsonMapLayer getLayer(int floor) {
+        if(mLayers.containsKey(floor)) {
+            return mLayers.get(floor);
+        }
+        return null;
+    }
 }

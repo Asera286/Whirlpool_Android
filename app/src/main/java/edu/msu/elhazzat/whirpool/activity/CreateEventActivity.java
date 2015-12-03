@@ -12,14 +12,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -45,16 +41,16 @@ import edu.msu.elhazzat.whirpool.adapter.RoomAdapter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventGetter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventUpdater;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventWriter;
-import edu.msu.elhazzat.whirpool.model.BuildingModel;
 import edu.msu.elhazzat.whirpool.model.EventModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
-import edu.msu.elhazzat.whirpool.rest.AsyncGCSAllRooms;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 
 /**
  * Created by christianwhite on 10/15/15.
  */
 public class CreateEventActivity extends AppCompatActivity {
+
+    private static final String LOG_TAG = CreateEventActivity.class.getSimpleName();
 
     private EventModel mEvent;
     private RoomModel mRoom;
@@ -104,7 +100,6 @@ public class CreateEventActivity extends AppCompatActivity {
         mDescriptionEditText = (EditText) findViewById(R.id.description_text_view);
         mLocationEditText = (EditText) findViewById(R.id.location_text_view);
 
-     //   setUpLocation();
         setUpPickers();
 
         if(mEvent != null) {
@@ -113,64 +108,6 @@ public class CreateEventActivity extends AppCompatActivity {
         else if(mRoom != null) {
             mLocationEditText.setText(mRoom.getRoomName());
         }
-    }
-
-    private void setUpLocation() {
-        mLocationEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mLocationListView.getVisibility() == View.GONE) {
-                    mLocationListView.setVisibility(View.VISIBLE);
-                } else {
-                    mLocationListView.setVisibility(View.GONE);
-                }
-            }
-        });
-
-        mLocationEditText.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-                mLocationAdapter.getFilter().filter(arg0);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
-                                          int arg3) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-            }
-        });
-
-        mLocationListView = (ListView) findViewById(R.id.location_lv);
-        mLocationListView.setVisibility(View.GONE);
-
-        mLocationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RoomModel model = mLocationAdapter.getRoomModel(position);
-                mLocationEditText.setText(model.getRoomName());
-                mLocationListView.setVisibility(View.GONE);
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(mLocationEditText.getWindowToken(), 0);
-                mRoom = model;
-            }
-        });
-
-        new AsyncGCSAllRooms() {
-            public void handleBuildings(List<BuildingModel> buildings) {
-                if(buildings != null) {
-                    for (BuildingModel model : buildings) {
-                        List<RoomModel> rooms = model.getRooms();
-                        mRooms.addAll(rooms);
-                    }
-                    mLocationAdapter = new RoomAdapter(getApplicationContext(), 0, mRooms);
-                    mLocationListView.setAdapter(mLocationAdapter);
-                }
-            }
-        }.execute();
     }
 
     /**
@@ -443,7 +380,6 @@ public class CreateEventActivity extends AppCompatActivity {
             event.setStart(mEditEvent.getStart());
         }
 
-
         if(mEndTime != null) {
 
             DateTime endDateTime = new DateTime(mEndTime.getTime());
@@ -475,6 +411,11 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Confirm user intent to edit currently selected event
+     * @param service
+     * @param event
+     */
     public void editEventDialog(final com.google.api.services.calendar.Calendar
             service, final Event event) {
         new AlertDialog.Builder(this)
@@ -496,6 +437,11 @@ public class CreateEventActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
+    /**
+     * Confirm user intent to add new event
+     * @param service
+     * @param event
+     */
     public void addEventDialog(final com.google.api.services.calendar.Calendar
             service, final Event event) {
         new AlertDialog.Builder(this)
