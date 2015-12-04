@@ -8,14 +8,14 @@
         android:tag="back"
         android:background="#ffffff"
         android:layout_width= "fill_parent"
-        android:layout_height = "100dp"
+        android:layout_height = "match_parent"
         >
         <ImageView
             android:id="@+id/delete1x"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_width="65dp"
-            android:layout_height="100dp"
+            android:layout_height="115dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
             android:src="@drawable/delete_event"/>
@@ -24,14 +24,14 @@
             android:layout_toLeftOf="@id/delete1x"
             android:layout_toStartOf="@id/delete1x"
             android:layout_width="65dp"
-            android:layout_height="100dp"
+            android:layout_height="115dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
             android:src="@drawable/edit_event"/>
         <ImageView
             android:id="@+id/nav1x"
             android:layout_width="65dp"
-            android:layout_height="100dp"
+            android:layout_height="115dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
             android:src="@drawable/navigate"
@@ -43,7 +43,7 @@
             android:background="#ffffff"
             android:orientation = "horizontal"
             android:layout_width="fill_parent"
-            android:layout_height = "100dp"
+            android:layout_height = "115dp"
             android:layout_gravity="center"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
@@ -51,45 +51,67 @@
 
             <ImageView
                 android:id="@+id/room_icon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="120dp"
+                android:layout_height="110dp"
                 android:paddingRight="20dp"
                 android:paddingLeft="10dp"/>
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent">
 
                 <TextView
-                    android:text = "test"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text = "summaryasdfasdfasdfasdfasdf"
                     android:id="@+id/event_summary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
                     android:textColor="@android:color/black"
-                    android:textSize="25sp" />
+                    android:textSize="25sp"
+                    android:layout_below="@+id/event_time_until"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
 
                 <TextView
-                    android:text = "test2"
-                    android:layout_below = "@+id/event_summary"
-                    android:id="@+id/event_start_end"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="30dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:text = "test3"
-                    android:textSize="12sp"
-                    android:paddingTop="5dp"
+                    android:text = "time_until"
+                    android:textSize="13sp"
                     android:paddingRight="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/event_time_until"
-                    android:textColor="#000000"
+                    android:textColor="#B5B5B5"
+                    android:layout_alignParentTop="true"
                     android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true"/>
+                    android:layout_alignParentEnd="true" />
+
+                <TextView
+                 android:ellipsize="end"
+                 android:singleLine="true"
+                 android:text = "location"
+                 android:id="@+id/event_location"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:textColor="@android:color/black"
+                 android:textSize="18sp"
+                    android:layout_marginTop="27dp"
+                    android:layout_alignTop="@+id/event_summary"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:textColor="#B5B5B5"
+                      android:text = "interval"
+                      android:id="@+id/event_start_end"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:paddingBottom="10dp"
+                      android:textSize="13sp"
+                    android:layout_below="@+id/event_location"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
             </RelativeLayout>
         </LinearLayout>
 

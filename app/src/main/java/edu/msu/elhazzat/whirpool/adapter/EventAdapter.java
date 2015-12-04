@@ -46,18 +46,18 @@ public class EventAdapter extends BaseAdapter {
         mContext = context;
         mCalendarListValues = eventModels;
 
-        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_icon);
-        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.ben_icon);
-        mBuildingMap.put(WIMConstants.BHTC, R.drawable.bhtc_icon);
-        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.etc_icon);
-        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_icon);
-        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.hbt_icon);
-        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.htps_icon);
-        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.htpn_icon);
-        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_icon);
-        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_icon);
-        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.rv_icon);
-        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.sjtc_icon);
+        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_icon_large);
+        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.ben_icon_large);
+        mBuildingMap.put(WIMConstants.BHTC, R.drawable.bhtc_icon_large);
+        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.etc_icon_large);
+        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_icon_large);
+        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.hbt_icon_large);
+        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.htps_icon_large);
+        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.htpn_icon_large);
+        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_icon_large);
+        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_icon_large);
+        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.rv_icon_large);
+        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.sjtc_icon_large);
     }
 
     @Override
@@ -136,6 +136,7 @@ public class EventAdapter extends BaseAdapter {
         holder.event_summary.setText(item.getSummary());
 
         if(item.getLocation() != null) {
+            holder.event_location.setText(item.getLocation());
             holder.nav_icon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -207,6 +208,7 @@ public class EventAdapter extends BaseAdapter {
         TextView event_start_end;
         TextView event_summary;
         TextView event_time_until;
+        TextView event_location;
 
         //back
         ImageView nav_icon;
@@ -219,6 +221,7 @@ public class EventAdapter extends BaseAdapter {
             event_start_end = (TextView) view.findViewById(R.id.event_start_end);
             event_summary = (TextView) view.findViewById(R.id.event_summary);
             event_time_until = (TextView) view.findViewById(R.id.event_time_until);
+            event_location = (TextView) view.findViewById(R.id.event_location);
 
             nav_icon = (ImageView) view.findViewById(R.id.nav1x);
             delete_icon = (ImageView) view.findViewById(R.id.delete1x);

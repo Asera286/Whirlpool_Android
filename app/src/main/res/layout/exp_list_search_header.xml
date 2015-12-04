@@ -12,8 +12,8 @@
         android:paddingBottom="10dp"
         android:paddingRight="30dp"
         android:paddingLeft="10dp"
-        android:layout_width="100dp"
-        android:layout_height="100dp" />
+        android:layout_width="120dp"
+        android:layout_height="120dp" />
 
     <TextView
         android:text = "test"

@@ -850,9 +850,9 @@ public class RoomActivity extends AppCompatActivity {
         if (mMap == null) {
             mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mMap = mMapFragment.getMap();
-            mGeoJsonMap.setMap(mMap);
 
             if (mMap != null) {
+                mGeoJsonMap.setMap(mMap);
                 mMap.setMyLocationEnabled(true);
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 

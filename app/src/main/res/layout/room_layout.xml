@@ -14,6 +14,9 @@ android:layout_height="match_parent" >
 
 <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
     android:id="@+id/map"
+    map:cameraTargetLng="42.1111"
+    map:cameraTargetLat="86.4483"
+    map:cameraZoom="13"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:scrollbars="vertical"
