@@ -70,6 +70,8 @@ public class CreateEventActivity extends AppCompatActivity {
     private RoomAdapter mLocationAdapter;
     private ListView mLocationListView;
 
+    private boolean mIgnoreTimeSet;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -243,6 +245,28 @@ public class CreateEventActivity extends AppCompatActivity {
         };
 
         CustomTimePickerDialog dialog = new CustomTimePickerDialog(this, timeListener, hour, minute, false);
+
+        /**
+         * "cancel" still sets new time - remove this behavior
+         */
+
+        // Make the Set button
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                mIgnoreTimeSet = false;
+                ((TimePickerDialog)dialog).onClick(dialog, which);
+            }
+        });
+
+        // Set the Cancel button
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                mIgnoreTimeSet = true;
+                dialog.cancel();
+            }
+        });
+
+
         dialog.show();
     }
 
@@ -257,19 +281,38 @@ public class CreateEventActivity extends AppCompatActivity {
         TimePickerDialog.OnTimeSetListener timeListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                String time = getTime(hourOfDay, minute);
-                mEndTimeTextView.setText(time);
+                if (!mIgnoreTimeSet) {
+                    String time = getTime(hourOfDay, minute);
+                    mEndTimeTextView.setText(time);
 
-                if(mEndTime == null) {
-                    mEndTime = Calendar.getInstance();
+                    if (mEndTime == null) {
+                        mEndTime = Calendar.getInstance();
+                    }
+
+                    mEndTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    mEndTime.set(Calendar.MINUTE, minute);
                 }
-
-                mEndTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                mEndTime.set(Calendar.MINUTE, minute);
             }
         };
 
         CustomTimePickerDialog dialog = new CustomTimePickerDialog(this, timeListener, hour, minute, false);
+
+        // Make the Set button
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                mIgnoreTimeSet = false;
+                ((TimePickerDialog)dialog).onClick(dialog, which);
+            }
+        });
+
+        // Set the Cancel button
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                mIgnoreTimeSet = true;
+                dialog.cancel();
+            }
+        });
+
         dialog.show();
     }
 
@@ -463,6 +506,35 @@ public class CreateEventActivity extends AppCompatActivity {
                     }})
                 .setNegativeButton(android.R.string.no, null).show();
     }
+
+    //TODO: check room available
+    /*private void checkRoomAvailable(String email) {
+        long nowLong = System.currentTimeMillis();
+        Date nowDate = new Date(nowLong);
+        final DateTime now = new DateTime(nowLong);
+        DateTime end = new DateTime(getEndOfDay(nowDate));
+
+        // get free busy information
+        new AsyncCalendarFreeBusyReader(CalendarServiceHolder.getInstance().getService(),
+                email, now, end) {
+            @Override
+            public void handleTimePeriods(List<TimePeriod> timePeriods) {
+                boolean isBusy = false;
+                if(timePeriods != null) {
+                    for (TimePeriod period : timePeriods) {
+                        if (now.getValue() >= period.getStart().getValue() && now.getValue() <=
+                                period.getEnd().getValue()) {
+                            isBusy = true;
+                            break;
+                        }
+                    }
+
+                    mAmenitiesAdapter = new AmenityAdapter(getApplicationContext(), 0, occupancy, isBusy, amenities);
+                    mRoomAttributeListView.setAdapter(mAmenitiesAdapter);
+                }
+            }
+        }.execute();
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

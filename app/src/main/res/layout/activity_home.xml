@@ -177,18 +177,20 @@
 
         <RelativeLayout
             android:id="@+id/profileBox"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:background = "#3870EB"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:padding="8dp" >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#ffffff"
-                android:textSize="20dp"
-                android:layout_centerVertical="true"
-                android:text = "Profile"/>
+            <ImageView
+                android:src="@drawable/whirlpool_logo_banner"
+                android:layout_width="1500dp"
+                android:layout_height="200dp"
+                android:layout_centerInParent="true"/>
         </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
 
         <TextView
             android:text = "Sign out"
@@ -202,6 +204,10 @@
             android:paddingBottom="25dp"
             android:textColor="#000000" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
 
         <ExpandableListView
             android:id="@+id/exp_favorites_list"

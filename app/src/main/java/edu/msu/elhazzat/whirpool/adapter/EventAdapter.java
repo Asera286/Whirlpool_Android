@@ -46,18 +46,18 @@ public class EventAdapter extends BaseAdapter {
         mContext = context;
         mCalendarListValues = eventModels;
 
-        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_icon_large);
-        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.ben_icon_large);
-        mBuildingMap.put(WIMConstants.BHTC, R.drawable.bhtc_icon_large);
-        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.etc_icon_large);
-        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_icon_large);
-        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.hbt_icon_large);
-        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.htps_icon_large);
-        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.htpn_icon_large);
-        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_icon_large);
-        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_icon_large);
-        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.rv_icon_large);
-        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.sjtc_icon_large);
+        mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_icon_clear);
+        mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.ben_icon_clear);
+        mBuildingMap.put(WIMConstants.BHTC, R.drawable.bhtc_icon_clear);
+        mBuildingMap.put(WIMConstants.EDGEWATER, R.drawable.etc_icon_clear);
+        mBuildingMap.put(WIMConstants.GHQ, R.drawable.ghq_icon_clear);
+        mBuildingMap.put(WIMConstants.HARBORTOWN, R.drawable.hbt_icon_clear);
+        mBuildingMap.put(WIMConstants.HILLTOP_150, R.drawable.htps_icon_clear);
+        mBuildingMap.put(WIMConstants.HILLTOP_211, R.drawable.htpn_icon_clear);
+        mBuildingMap.put(WIMConstants.MMC, R.drawable.mmc_icon_clear);
+        mBuildingMap.put(WIMConstants.R_AND_E, R.drawable.rande_icon_clear);
+        mBuildingMap.put(WIMConstants.RIVERVIEW, R.drawable.rv_icon_clear);
+        mBuildingMap.put(WIMConstants.ST_JOE_TECH_CENTER, R.drawable.sjtc_icon_clear);
     }
 
     @Override

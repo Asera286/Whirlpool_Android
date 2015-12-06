@@ -27,25 +27,31 @@ public class RoomNameRegexMapper {
 
     public static String getGeoJsonRoomNameFromMap(String buildingName, String roomName) {
         String patternString = REGEX_MAP.get(buildingName);
-        Pattern pattern = Pattern.compile(patternString);
-        Matcher matcher = pattern.matcher(roomName);
-        String match = null;
-        if(matcher.find()) {
-            return matcher.group(1);
+        if(patternString != null) {
+            Pattern pattern = Pattern.compile(patternString);
+            Matcher matcher = pattern.matcher(roomName);
+            String match = null;
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
         }
         return null;
     }
 
     public static String getBuildingNameFromResource(String resourceName) {
         String[] resourceSplit = resourceName.split("-");
-        String locationName = resourceSplit[2].trim();
-        return locationName;
-
+        if(resourceSplit.length > 1) {
+            return resourceSplit[2].trim();
+        }
+        return null;
     }
 
     public static String getRoomNameFromResource(String resourceName) {
         String[] resourceSplit = resourceName.split("-");
-        String locationName = resourceSplit[3].trim();
-        return locationName;
+        if(resourceSplit.length > 3) {
+            String locationName = resourceSplit[3].trim();
+            return locationName;
+        }
+        return null;
     }
 }

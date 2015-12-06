@@ -21,9 +21,12 @@
         android:layout_below="@+id/my_toolbar"
         android:animateLayoutChanges="true">
         <ExpandableListView
+            android:layout_gravity="center"
+            android:background="#B5B5B5"
             android:id="@+id/exp_list_view"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
+            android:childDivider="#FFFFFF"
             android:animateLayoutChanges="true"/>
     </LinearLayout>
 

@@ -16,6 +16,9 @@ import java.util.List;
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 
+/**
+ * Created by christianwhite on 9/20/15.
+ */
 public class RoomAdapter extends ArrayAdapter<RoomModel> {
     private List<RoomModel> mRoomModelArrayList = new ArrayList<>();
 

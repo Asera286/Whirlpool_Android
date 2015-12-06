@@ -19,6 +19,7 @@ public class RoomModel implements Parcelable {
     private String[] mAmenities;
     private String mResourceName;
 
+
     public RoomModel() {
 
     }

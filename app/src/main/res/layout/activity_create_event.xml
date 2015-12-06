@@ -22,10 +22,15 @@
         android:layout_height = "wrap_content"
         android:paddingBottom="15dp"
         android:paddingTop="15dp"
-        android:paddingLeft = "35dp"
+        android:paddingLeft = "50dp"
         android:background="#ffffff"
         android:hint="Event Title">
     </EditText>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#B5B5B5"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -54,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
-            android:src="@android:drawable/ic_lock_idle_alarm"
+            android:src="@drawable/clock"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:paddingLeft="10dp"
@@ -80,31 +85,58 @@
         android:paddingTop="15dp"
         android:paddingLeft = "90dp"/>
 
-    <EditText
-        android:id="@+id/location_text_view"
-        android:hint="Location"
-        android:textSize = "15dp"
-        android:layout_width ="match_parent"
-        android:layout_height = "wrap_content"
-        android:paddingBottom="15dp"
-        android:paddingTop="15dp"
-        android:paddingLeft = "35dp"/>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#B5B5B5"/>
 
-    <ListView
-        android:background="#ffffff"
-        android:id="@+id/location_lv"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></ListView>
+        android:layout_height="wrap_content">
+        <ImageView
+            android:src="@drawable/location"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:paddingLeft="10dp"
+            android:layout_gravity="center_vertical"/>
+        <EditText
+            android:id="@+id/location_text_view"
+            android:hint="Location"
+            android:textSize = "15dp"
+            android:background="@null"
+            android:layout_width ="match_parent"
+            android:layout_height = "wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:paddingLeft = "35dp"/>
+    </LinearLayout>
 
-    <EditText
-        android:background="#ffffff"
-        android:id="@+id/description_text_view"
-        android:hint="Add Note"
-        android:textSize = "15dp"
-        android:layout_width ="match_parent"
-        android:layout_height = "wrap_content"
-        android:paddingBottom="15dp"
-        android:paddingTop="15dp"
-        android:paddingLeft = "35dp"/>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#B5B5B5"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:src="@drawable/add_note"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:paddingLeft="10dp"
+            android:layout_gravity="center_vertical"/>
+        <EditText
+            android:background="#ffffff"
+            android:id="@+id/description_text_view"
+            android:hint="Add Note"
+            android:textSize = "15dp"
+            android:layout_width ="match_parent"
+            android:layout_height = "wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:paddingLeft = "35dp"/>
+    </LinearLayout>
 
 </LinearLayout>

@@ -99,14 +99,16 @@ public class SearchActivity extends AppCompatActivity {
         // Fetch room data and populate search view
         new AsyncGCSAllRooms() {
             public void handleBuildings(List<BuildingModel> items) {
-                for(BuildingModel model : items) {
-                    if(WIMConstants.WHIRLPOOL_ABBRV_MAP.containsValue(model.getBuildingName())) {
-                        mBuildingModelsFiltered.add(model);
-                        mBuildingModels.add(model);
+                if (items != null) {
+                    for (BuildingModel model : items) {
+                        if (WIMConstants.WHIRLPOOL_ABBRV_MAP.containsValue(model.getBuildingName())) {
+                            mBuildingModelsFiltered.add(model);
+                            mBuildingModels.add(model);
+                        }
                     }
+                    mSearchAdapter = new SearchAdapter(getApplicationContext(), mBuildingModelsFiltered);
+                    mListView.setAdapter(mSearchAdapter);
                 }
-                mSearchAdapter = new SearchAdapter(getApplicationContext(), mBuildingModelsFiltered);
-                mListView.setAdapter(mSearchAdapter);
             }
         }.execute();
     }

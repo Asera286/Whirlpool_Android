@@ -137,7 +137,6 @@ public class GeoJsonMapLayer {
         }
     }
 
-
     /**
      * Removes layer. Will have to be redrawn to be visible again.
      */

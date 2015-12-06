@@ -59,6 +59,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
     private static final String BUNDLE_BUILDING_KEY = "BUILDING_NAME";
     private static final String BUNDLE_ROOM_KEY = "ROOM_NAME";
+    public static final String BUILDING_CAROUSEL_KEY = "BUILDING_CAROUSEL_NAME";
 
     private static final int SWIPE_VIEW_OFFSET = 0;
     private static final int SWIPE_VIEW_DELAY = 500;
@@ -280,7 +281,7 @@ public class HomeActivity extends CalendarServiceActivity implements View.OnClic
 
     private void startRoomActivity(String buildingName) {
         Intent roomIntent = new Intent(this, RoomActivity.class);
-        roomIntent.putExtra("BUILDING_NAME_CARA", buildingName);
+        roomIntent.putExtra(BUILDING_CAROUSEL_KEY, buildingName);
         startActivity(roomIntent);
     }
 
