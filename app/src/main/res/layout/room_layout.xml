@@ -34,7 +34,6 @@ android:layout_height="match_parent" >
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center"
-            android:text="test"
             android:textColor="#000000"
             android:textSize="20sp" />
 
@@ -149,6 +148,6 @@ android:layout_height="match_parent" >
         android:id="@+id/loading_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#ff000000">
+        android:background="#c0000000">
     </RelativeLayout>
 </RelativeLayout>

@@ -1,7 +1,7 @@
 package edu.msu.elhazzat.whirpool.geojson;
 
 import android.graphics.Color;
-import android.util.Log;
+import android.os.AsyncTask;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -9,7 +9,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,54 +82,28 @@ public class GeoJsonMapLayer {
      */
     public void draw(final GoogleMap map, final int fillColor,
                      final int strokeColor, final int strokeWidth) {
-        if(!mIsDrawn && mGeoJson != null) {
-            for (GeoJsonFeature feature : mGeoJson.getGeoJsonFeatures()) {
-                final GeoJsonGeometry jsonGeometry = feature.getGeoJsonGeometry();
-                if (jsonGeometry == null) {
-                    continue;
-                }
-                switch (jsonGeometry.getType()) {
-                    case GeoJsonConstants.POINT:
-                        break;
-                    case GeoJsonConstants.LINESTRING:
-                        GeoJsonPolyline lineString = (GeoJsonPolyline) jsonGeometry.getGeometry();
-                        List<LatLng> latLngList = Geometry.geoJsonCoordinateListToLatLng(lineString.getPoints(), false);
-                        Polyline polyline = map.addPolyline(new PolylineOptions()
-                                .addAll(latLngList).color(strokeColor).width(strokeWidth));
-                        mPolylines.add(polyline);
-                        break;
-                    case GeoJsonConstants.POLYGON:
-                        GeoJsonPolygon poly1 = (GeoJsonPolygon) jsonGeometry.getGeometry();
-                        List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
-                        int color = fillColor;
-                        try {
-                            switch (feature.getProperty("room")) {
-                                case "HW":
-                                    color = Color.WHITE;
-                                    break;
-                                case "WB":
-                                    color = Color.rgb(234, 230, 245);
-                                    break;
-                                case "MB":
-                                    color = Color.rgb(234, 230, 245);
-                                    break;
-                                case "STR":
-                                    color = Color.parseColor("#F2A440");
-                                    break;
-                            }
-                        }
-                        catch(NullPointerException e) {
-                            Log.d(LOG_TAG, e.getMessage());
-                        }
 
-                        Polygon poly2 = map.addPolygon(new PolygonOptions()
-                                .addAll(latLngPoly).fillColor(color).strokeWidth(strokeWidth));
-                        poly1.setGMSPolygon(poly2);
-                        mPolygons.add(poly2);
-                        break;
-                }
-            }
-            mIsDrawn = true;
+        if(!mIsDrawn && mGeoJson != null) {
+            drawOnUiThread(map, fillColor, strokeColor, strokeWidth);
+        }
+        else {
+            show(true);
+        }
+    }
+
+
+    /**
+     * Draws the map using uniform properties.
+     * @param map
+     * @param fillColor
+     * @param strokeColor
+     * @param strokeWidth
+     */
+    public void asyncDraw(final GoogleMap map, final int fillColor,
+                     final int strokeColor, final int strokeWidth) {
+
+        if(!mIsDrawn && mGeoJson != null) {
+            new AsyncDrawPolygon(map, fillColor, strokeColor, strokeWidth).execute();
         }
         else {
             show(true);
@@ -164,11 +137,123 @@ public class GeoJsonMapLayer {
         mIsHidden = !toShow;
     }
 
+
     public void setFloorNum(int floorNum) {
         mFloorNum = floorNum;
     }
 
     public int getFloorNum() {
         return mFloorNum;
+    }
+
+    public void drawOnUiThread(final GoogleMap map, final int fillColor,
+                               final int strokeColor, final int strokeWidth) {
+        for (GeoJsonFeature feature : mGeoJson.getGeoJsonFeatures()) {
+            final GeoJsonGeometry jsonGeometry = feature.getGeoJsonGeometry();
+            if (jsonGeometry == null) {
+                continue;
+            }
+            if (jsonGeometry.getType().equals(GeoJsonConstants.POLYGON)) {
+                GeoJsonPolygon poly1 = (GeoJsonPolygon) jsonGeometry.getGeometry();
+                List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
+                int color = fillColor;
+                try {
+                    switch (feature.getProperty("room")) {
+                        case "HW":
+                            color = Color.WHITE;
+                            break;
+                        case "WB":
+                            color = Color.rgb(234, 230, 245);
+                            break;
+                        case "MB":
+                            color = Color.rgb(234, 230, 245);
+                            break;
+                        case "STR":
+                            color = Color.parseColor("#F2A440");
+                            break;
+                    }
+                } catch (NullPointerException e) {
+
+                }
+
+                Polygon poly2 = map.addPolygon(new PolygonOptions()
+                        .addAll(latLngPoly)
+                        .fillColor(color)
+                        .strokeColor(strokeColor)
+                        .strokeWidth(strokeWidth));
+                mPolygons.add(poly2);
+                poly1.setGMSPolygon(poly2);
+            }
+        }
+    }
+
+    public class PgonPoints {
+        public List<LatLng> mPoints;
+    }
+
+    public class AsyncDrawPolygon extends AsyncTask<Void, PgonPoints, Void> {
+
+
+        private GoogleMap mMap;
+        private int mStrokeColor;
+        private int mStrokeWidth;
+        private int mFillColor;
+        private GeoJsonPolygon mPolygon;
+        private int mColor;
+
+        public AsyncDrawPolygon(GoogleMap map, int fillColor,int strokeColor, int strokeWidth) {
+            mMap = map;
+            mStrokeColor = strokeColor;
+            mStrokeWidth = strokeWidth;
+            mFillColor = fillColor;
+        }
+
+        @Override
+        public Void doInBackground(Void... param) {
+            for (GeoJsonFeature feature : mGeoJson.getGeoJsonFeatures()) {
+                final GeoJsonGeometry jsonGeometry = feature.getGeoJsonGeometry();
+                if (jsonGeometry == null) {
+                    continue;
+                }
+                if (jsonGeometry.getType().equals(GeoJsonConstants.POLYGON)) {
+                    mPolygon = (GeoJsonPolygon) jsonGeometry.getGeometry();
+                    List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(mPolygon.getPoints().get(0), true);
+                    mColor = mFillColor;
+                    try {
+                        switch (feature.getProperty("room")) {
+                            case "HW":
+                                mColor = Color.WHITE;
+                                break;
+                            case "WB":
+                                mColor = Color.rgb(234, 230, 245);
+                                break;
+                            case "MB":
+                                mColor = Color.rgb(234, 230, 245);
+                                break;
+                            case "STR":
+                                mColor = Color.parseColor("#F2A440");
+                                break;
+                        }
+                    } catch (NullPointerException e) {
+
+                    }
+
+                    PgonPoints points = new PgonPoints();
+                    points.mPoints = latLngPoly;
+                    publishProgress(points);
+                }
+            }
+            return null;
+        }
+
+        protected void onProgressUpdate(PgonPoints... points) {
+            Polygon poly2 = mMap.addPolygon(new PolygonOptions()
+                    .addAll(points[0].mPoints)
+                    .fillColor(mColor)
+                    .strokeColor(mStrokeColor)
+                    .strokeWidth(mStrokeWidth));
+            mPolygons.add(poly2);
+            mPolygon.setGMSPolygon(poly2);
+        }
     }
 }

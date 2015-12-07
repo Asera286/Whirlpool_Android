@@ -36,11 +36,17 @@ public class GeoJsonMap {
     }
 
     public void drawLayer(int floor, int fillColor, int strokeColor, int strokeWidth) {
-        if(mCurrentLayer != 0) {
-            mLayers.get(mCurrentLayer).show(false);
+        if(mLayers.containsKey(floor)) {
+            mLayers.get(floor).draw(mMap, fillColor, strokeColor, strokeWidth);
+            mCurrentLayer = floor;
         }
-        mLayers.get(floor).draw(mMap, fillColor, strokeColor, strokeWidth);
-        mCurrentLayer = floor;
+    }
+
+    public void drawLayerAsync(int floor, int fillColor, int strokeColor, int strokeWidth) {
+        if(mLayers.containsKey(floor)) {
+            mLayers.get(floor).asyncDraw(mMap, fillColor, strokeColor, strokeWidth);
+            mCurrentLayer = floor;
+        }
     }
 
     public GeoJsonMapLayer getCurrentLayer() {
@@ -49,14 +55,18 @@ public class GeoJsonMap {
     public void setCurrentLayer(int layer) { mCurrentLayer = layer; }
 
     public void removeLayer(int floor) {
-        mLayers.get(floor).remove();
+        if(mLayers.containsKey(floor)) {
+            mLayers.get(floor).remove();
+        }
     }
 
     public void showLayer(int floor, boolean toShow) {
-        if(toShow) {
-            mCurrentLayer = floor;
+        if(mLayers.containsKey(floor)) {
+            if (toShow) {
+                mCurrentLayer = floor;
+            }
+            mLayers.get(floor).show(toShow);
         }
-        mLayers.get(floor).show(toShow);
     }
 
     public Collection<GeoJsonMapLayer> getLayers() {

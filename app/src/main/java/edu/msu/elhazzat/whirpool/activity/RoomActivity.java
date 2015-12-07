@@ -4,11 +4,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,8 +13,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -75,6 +69,7 @@ import edu.msu.elhazzat.whirpool.rest.AsyncGCSMultiRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncParseGeoJsonGCS;
 import edu.msu.elhazzat.whirpool.routing.MapRoute;
+import edu.msu.elhazzat.whirpool.utils.BitmapUtil;
 import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 import edu.msu.elhazzat.whirpool.utils.MapConstants;
 import edu.msu.elhazzat.whirpool.utils.WIMConstants;
@@ -90,7 +85,7 @@ public class RoomActivity extends AppCompatActivity {
     private static final String ROOM_MODEL_PARSIBLE_KEY = "ROOM_MODEL";
 
     // Marker dimensions
-    private static final int IMAGE_VIEW_MARKER_HEIGHT_DP = 25;
+    private static final int IMAGE_VIEW_MARKER_HEIGHT_DP = 30;
     private static final int IMAGE_VIEW_MARKER_WIDTH_DP = 20;
 
     // animation constants
@@ -157,7 +152,7 @@ public class RoomActivity extends AppCompatActivity {
     private ImageView mGoButton;
     private ImageView mInfoButton;
 
-    private Map<String, GeoJsonFeature> mFeatureMap = new HashMap<>();
+    private TimerTask mAsyncColorOccupiedRoomsTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,16 +203,23 @@ public class RoomActivity extends AppCompatActivity {
             ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(ACTION_BAR_COLOR)));
         }
 
-
         // initialize interactive elements of activity UI
         initFavorites();
         initBookRoom();
         initNavigation();
         initStartLocation();
+
         buildSlideView();
         getLayoutDimensions();
         buildFloorPicker();
+        buildGoButton();
+        buildInfoButton();
+    }
 
+    /**
+     * Build go button - used to draw route during navigation
+     */
+    private void buildGoButton() {
         mGoButton = (ImageView)findViewById(R.id.go_button);
         mGoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,9 +227,13 @@ public class RoomActivity extends AppCompatActivity {
                 drawNavRoute();
             }
         });
-
         mGoButton.setVisibility(View.INVISIBLE);
+    }
 
+    /**
+     * Build info button - used to display floor picker
+     */
+    private void buildInfoButton() {
         mInfoButton = (ImageView)findViewById(R.id.info_button);
         mInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -308,43 +314,11 @@ public class RoomActivity extends AppCompatActivity {
 
     /**
      * Create imageview for "start" location - start in this
-     * context means the starting navigation point
+     * context means navigation point selected during
      */
     private void initStartLocation() {
         mStartLocationImageView = (ImageView) findViewById(R.id.start_location);
         mStartLocationImageView.setVisibility(View.GONE);
-    }
-
-    /**
-     * Create a bitmap from string
-     * @param text
-     * @return
-     */
-    public static BitmapDescriptor getTextMarker(String text) {
-
-        Paint paint = new Paint();
-
-        /* Set text size, color etc. as needed */
-        paint.setTextSize(24);
-
-        int width = (int)paint.measureText(text);
-        int height = (int)paint.getTextSize();
-
-        paint.setTextAlign(Paint.Align.CENTER);
-
-        // Create a transparent bitmap as big as you need
-        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(image);
-
-        // During development the following helps to see the full
-        // drawing area:
-        canvas.drawColor(0x00000000);
-
-        canvas.translate(width / 2f, height);
-        canvas.drawText(text, 0, 0, paint);
-        BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(image);
-        return icon;
     }
 
     /**
@@ -363,24 +337,26 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     /**
-     * Half of the room activity screen is made up of room stats - allow
-     * the user to slide this view done and reveal more of the map
+     * Draw navigation route to elevator or stairs if we are not on the same floor
      */
-    private void buildSlideView() {
+    private void drawNavRouteOnFloorChange() {
+        if (mNavigationOn) {
+            if (mPolyLine != null) {
+                mPolyLine.remove();
+            }
 
-        // Make the slide view height a function of user's phone dimensions
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        float heightdp = displayMetrics.heightPixels / displayMetrics.density;
+            // if navigating between floors, draw the next route
+            if ((mCurrentFloorNum == mEndFloorNum || mCurrentFloorNum == mStartFloorNum)) {
+                MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
+                mPolyLine = mRoute.drawRoute(mNavStartPosition, mStartFloorNum, mNavEndPosition, mEndFloorNum);
+            }
+        }
+    }
 
-        mAttributeLayout = (LinearLayout) findViewById(R.id.attribute_list_view);
-        mAttributeLayout.getLayoutParams().height = (int) (heightdp * ATTRIBUTE_MAX_VIEW_PERCENTAGE);
-
-        mRoomAttributeListView = (ListView) findViewById(R.id.roomInfoList);
-
-        mRoomNameTextView = (TextView) findViewById(R.id.roomNameText);
-        mRoomNameTextView.setText(mRoomName);
-        mRoomNameTextView.setTextColor(Color.WHITE);
-
+    /**
+     * Allow slide view to be swiped up and down
+     */
+    private void setSlideViewOnTouchListener() {
         // Slide action
         mRoomNameTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -411,6 +387,28 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     /**
+     * Half of the room activity screen is made up of room stats - allow
+     * the user to slide this view done and reveal more of the map
+     */
+    private void buildSlideView() {
+
+        // Make the slide view height a function of user's phone dimensions
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float heightdp = displayMetrics.heightPixels / displayMetrics.density;
+
+        mAttributeLayout = (LinearLayout) findViewById(R.id.attribute_list_view);
+        mAttributeLayout.getLayoutParams().height = (int) (heightdp * ATTRIBUTE_MAX_VIEW_PERCENTAGE);
+
+        mRoomAttributeListView = (ListView) findViewById(R.id.roomInfoList);
+
+        mRoomNameTextView = (TextView) findViewById(R.id.roomNameText);
+        mRoomNameTextView.setText(mRoomName);
+        mRoomNameTextView.setTextColor(Color.WHITE);
+
+        setSlideViewOnTouchListener();
+    }
+
+    /**
      * Compute layout dimensions - need to know these before the view actually
      * loads
      */
@@ -425,10 +423,6 @@ public class RoomActivity extends AppCompatActivity {
                 mAttributeLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
-    }
-
-    private void updateRoomOccupancyStatuses() {
-
     }
 
     /**
@@ -476,7 +470,9 @@ public class RoomActivity extends AppCompatActivity {
             mInfoButton.setVisibility(View.GONE);
 
             //remove previously drawn route and the navigation marker
-            if(mPolyLine != null) mPolyLine.remove();
+            if(mPolyLine != null) {
+                mPolyLine.remove();
+            }
         }
     }
 
@@ -549,7 +545,7 @@ public class RoomActivity extends AppCompatActivity {
         // map room names to a floor
         Map<Integer, List<String>> roomNamesMap = new HashMap<>();
         for(RoomModel model : mRooms) {
-            Integer roomNameKey = getInitialFloor(model.getRoomName());
+            Integer roomNameKey = getFloorNumber(model.getRoomName());
             if(roomNamesMap.containsKey(roomNameKey)) {
                 roomNamesMap.get(roomNameKey).add(model.getRoomName());
             }
@@ -569,7 +565,7 @@ public class RoomActivity extends AppCompatActivity {
                         if (roomName != null) {
                             if (roomName.equals(roomNameInMap)) {
                                 GeoJsonPolygon poly = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                                BitmapDescriptor text = RoomActivity.getTextMarker(roomName);
+                                BitmapDescriptor text = BitmapUtil.getTextMarker(roomName);
                                 Marker m = mMap.addMarker(new MarkerOptions()
                                         .position(poly.getCentroid())
                                         .icon(text));
@@ -600,29 +596,15 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TextView tv = (TextView) v;
-                //tv.setTextColor(Color.BLUE);
                 tv.setBackgroundColor(Color.parseColor("#F2A440"));
                 int tmpFloorNum = tv.getText().equals("T") ? mMapTop.get("T")
                         : Integer.parseInt(tv.getText().toString());
 
                 // don't redraw or show if we are currently on this floor
-                if(tmpFloorNum != mCurrentFloorNum) {
-
+                if (tmpFloorNum != mCurrentFloorNum) {
                     unselectLastFloor(tv);
-
                     selectNextFloor(tmpFloorNum);
-
-                    if(mNavigationOn) {
-                        if(mPolyLine != null) {
-                            mPolyLine.remove();
-                        }
-
-                        // if navigating between floors, draw the next route
-                        if((mCurrentFloorNum == mEndFloorNum || mCurrentFloorNum == mStartFloorNum) && mNavigationOn) {
-                            MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
-                            mPolyLine = mRoute.drawRoute(mNavStartPosition, mStartFloorNum, mNavEndPosition, mEndFloorNum);
-                        }
-                    }
+                    drawNavRouteOnFloorChange();
                 }
             }
         });
@@ -632,21 +614,26 @@ public class RoomActivity extends AppCompatActivity {
      * A new floor has been selected
      * @param lastFloor
      */
-    private void unselectLastFloor(TextView lastFloor) {
-        // remove conference/huddle labels from last floor
-        if(mRoomMarkerMap.containsKey(mCurrentFloorNum)) {
-            for (Marker m : mRoomMarkerMap.get(mCurrentFloorNum)) {
-                m.setVisible(false);
-            }
-        }
+    private void unselectLastFloor(final TextView lastFloor) {
+        new Runnable() {
+            public void run() {
+                // remove conference/huddle labels from last floor
+                if(mRoomMarkerMap.containsKey(mCurrentFloorNum)) {
+                    for (Marker m : mRoomMarkerMap.get(mCurrentFloorNum)) {
+                        m.setVisible(false);
+                    }
+                }
 
-        // change unselected floor from blue to black
-        for(int i = 0; i < mScrollViewDirectChild.getChildCount(); i++) {
-            TextView child = (TextView) mScrollViewDirectChild.getChildAt(i);
-            if(!child.getText().toString().equals(lastFloor.getText().toString())) {
-                child.setBackgroundColor(Color.WHITE);
+                // change unselected floor from blue to black
+                for(int i = 0; i < mScrollViewDirectChild.getChildCount(); i++) {
+                    TextView child = (TextView) mScrollViewDirectChild.getChildAt(i);
+                    if(!child.getText().toString().equals(lastFloor.getText().toString())) {
+                        child.setBackgroundColor(Color.WHITE);
+                    }
+                }
             }
-        }
+        }.run();
+
     }
 
     /**
@@ -654,22 +641,27 @@ public class RoomActivity extends AppCompatActivity {
      * picker number
      * @param newFloorNum
      */
-    private void selectNextFloor(int newFloorNum) {
-        // change current floor
-        mCurrentFloorNum = newFloorNum;
+    private void selectNextFloor(final int newFloorNum) {
+        new Runnable() {
+            public void run() {
+                mGeoJsonMap.showLayer(mCurrentFloorNum, false);
 
-        // draw new layer
-        mGeoJsonMap.drawLayer(mCurrentFloorNum,
-                WIMConstants.MAP_DEFAULT_FILL_COLOR,
-                WIMConstants.MAP_DEFAULT_STROKE_COLOR,
-                WIMConstants.MAP_DEFAULT_STROKE_WIDTH);
+                //TODO: add extra space at bottom for + button
+                // change current floor
+                mCurrentFloorNum = newFloorNum;
 
-        // draw conference/huddle labels for selected floor
-        if(mRoomMarkerMap.containsKey(mCurrentFloorNum)) {
-            for (Marker m : mRoomMarkerMap.get(mCurrentFloorNum)) {
-                m.setVisible(true);
+                // draw new layer
+                mGeoJsonMap.showLayer(mCurrentFloorNum, true);
+
+                // draw conference/huddle labels for selected floor
+                if (mRoomMarkerMap.containsKey(mCurrentFloorNum)) {
+                    for (Marker m : mRoomMarkerMap.get(mCurrentFloorNum)) {
+                        m.setVisible(true);
+                    }
+                }
+                mAsyncColorOccupiedRoomsTask.run();
             }
-        }
+        }.run();
     }
 
     /**
@@ -698,24 +690,28 @@ public class RoomActivity extends AppCompatActivity {
         mScrollViewDirectChild.setVisibility(View.INVISIBLE);
 
         new AsyncGCSBuildingInfoReader(mBuildingName) {
-            public void handleBuilding(BuildingModel model) {
+            public void handleBuilding(final BuildingModel model) {
                 if(model != null) {
+                    new Runnable() {
+                        public void run() {
+                            for (int i = model.getFloors() + 1; i >= 1; i--) {
+                                String text = null;
+                                if(model.getFloors() + 1 == i) {
+                                    text = "T";
+                                    mMapTop.put("T", model.getFloors() + 1);
+                                }
+                                else {
+                                    text = Integer.toString(i);
+                                }
+                                TextView floor = createFloorNumberTextView(text);
+                                setOnFloorSelectListener(floor);
 
-                    for (int i = model.getFloors() + 1; i >= 1; i--) {
-                        String text = null;
-                        if(model.getFloors() + 1 == i) {
-                            text = "T";
-                            mMapTop.put("T", model.getFloors() + 1);
+                                mScrollViewDirectChild.addView(floor);
+                            }
                         }
-                        else {
-                            text = Integer.toString(i);
-                        }
-                        TextView floor = createFloorNumberTextView(text);
-                        setOnFloorSelectListener(floor);
-
-                        mScrollViewDirectChild.addView(floor);
-                    }
+                    }.run();
                 }
+
             }
         }.execute();
     }
@@ -725,7 +721,6 @@ public class RoomActivity extends AppCompatActivity {
      */
     private void startNavigation() {
         if(!mNavigationOn) {
-
             mGoButton.setVisibility(View.VISIBLE);
 
             // if the slide view is not collapsed, collapse it
@@ -775,27 +770,18 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void setNavInformationView() {
-        GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
-        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
-                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                if (polygon.contains(mLocationMarkerLatLng)) {
-                    ((TextView)findViewById(R.id.navigation_text)).setText(
-                            new StringBuilder()
-                                    .append("Building ")
-                                    .append(mBuildingName)
-                                    .append(", Floor ")
-                                    .append(mCurrentFloorNum)
-                                    .append(", Room ")
-                                    .append(feature.getProperty("room")).toString()
-                    );
-                }
-            }
+        GeoJsonFeature feature = getContainingFeature(mLocationMarkerLatLng);
+        if(feature != null) {
+            ((TextView) findViewById(R.id.navigation_text)).setText(
+                    new StringBuilder()
+                            .append("Building ")
+                            .append(mBuildingName)
+                            .append(", Floor ")
+                            .append(mCurrentFloorNum)
+                            .append(", Room ")
+                            .append(feature.getProperty("room")).toString()
+            );
         }
-    }
-
-    private void buildFeatureMap() {
-
     }
 
     /**
@@ -803,14 +789,10 @@ public class RoomActivity extends AppCompatActivity {
      * @return
      */
     private LatLng getLocationMarkerCenter() {
-        GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
-        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
-                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                if (polygon.contains(mLocationMarkerLatLng)) {
-                    return polygon.getCentroid();
-                }
-            }
+        GeoJsonFeature feature = getContainingFeature(mLocationMarkerLatLng);
+        if(feature != null) {
+            GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+            return polygon.getCentroid();
         }
         return null;
     }
@@ -836,7 +818,7 @@ public class RoomActivity extends AppCompatActivity {
         DateTime end = new DateTime(getEndOfDay(nowDate));
 
         // get free busy information
-        new AsyncCalendarFreeBusyReader(CalendarServiceHolder.getInstance().getService(),
+      /*  new AsyncCalendarFreeBusyReader(CalendarServiceHolder.getInstance().getService(),
                 email, now, end) {
             @Override
             public void handleTimePeriods(List<TimePeriod> timePeriods) {
@@ -854,7 +836,7 @@ public class RoomActivity extends AppCompatActivity {
                     mRoomAttributeListView.setAdapter(mAmenitiesAdapter);
                 }
             }
-        }.execute();
+        }.execute();*/
     }
 
     /**
@@ -934,7 +916,7 @@ public class RoomActivity extends AppCompatActivity {
                     int initialFloor = MapConstants.INIT_FLOOR;
 
                     if(mRoomName != null) {
-                        initialFloor = getInitialFloor(mRoomName);
+                        initialFloor = getFloorNumber(mRoomName);
                     }
 
                     mGeoJsonMap.setCurrentLayer(initialFloor);
@@ -952,11 +934,37 @@ public class RoomActivity extends AppCompatActivity {
 
     }
 
-    public void colorByOccupiedStatus() {
+    /**
+     * Color rooms based on occupancy status
+     * @param rooms
+     */
+    private void colorRooms(List<RoomModel> rooms) {
+        GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
+        for(RoomModel model : rooms) {
+            for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+                if (model.getRoomName().equals(feature.getProperty(GeoJsonConstants.ROOM_TAG))) {
+                    if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
+                        GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                        Polygon gmsPoly = polygon.getGMSPolygon();
+                        if (model.getOccupancyStatus().equals("N")) {
+                            gmsPoly.setFillColor(Color.GREEN);
+                        }
+                        else if(model.getOccupancyStatus().equals("Y")){
+                            gmsPoly.setFillColor(Color.RED);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    /**
+     * Create timed async task that updates occupancy
+     */
+    public void startOccupiedRoomColorHandler() {
         final Handler handler = new Handler();
         Timer timer = new Timer();
-        TimerTask doAsynchronousTask = new TimerTask() {
+        mAsyncColorOccupiedRoomsTask = new TimerTask() {
             @Override
             public void run() {
                 handler.post(new Runnable() {
@@ -964,24 +972,7 @@ public class RoomActivity extends AppCompatActivity {
                         new AsyncGCSMultiRoomInfoReader(mBuildingName) {
                             public void handleRooms(List<RoomModel> rooms) {
                                 if (rooms != null) {
-                                    GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
-                                    for(RoomModel model : rooms) {
-                                        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-                                            if (model.getRoomName().equals(feature.getProperty("room"))) {
-                                                if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
-                                                    GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                                                    Polygon gmsPoly = polygon.getGMSPolygon();
-
-                                                    if (model.getOccupancyStatus().equals("Y")) {
-                                                        gmsPoly.setFillColor(Color.GREEN);
-                                                    }
-                                                    else if(model.getOccupancyStatus().equals("N")){
-                                                        gmsPoly.setFillColor(Color.RED);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                  colorRooms(rooms);
                                 }
                             }
                         }.execute();
@@ -989,10 +980,12 @@ public class RoomActivity extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(doAsynchronousTask, 0, 1200000);
+
+        // call every two minutes - cron job runs every one minute on backend
+        timer.schedule(mAsyncColorOccupiedRoomsTask, 0, 60000);
     }
 
-    public void buildGoogleMap(ProgressDialog dialog) {
+    public void buildGoogleMap(final ProgressDialog dialog) {
         if (mMap == null) {
             mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mMap = mMapFragment.getMap();
@@ -1000,7 +993,6 @@ public class RoomActivity extends AppCompatActivity {
             if (mMap != null) {
                 mGeoJsonMap.setMap(mMap);
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-
                     public boolean onMarkerClick(Marker marker) {
                         mapListenCallback(marker.getPosition());
                         return true;
@@ -1017,50 +1009,62 @@ public class RoomActivity extends AppCompatActivity {
                 mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
                     @Override
                     public void onMapLoaded() {
-                        GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
-                        mGeoJsonMap.drawLayer(layer.getFloorNum(), WIMConstants.MAP_DEFAULT_FILL_COLOR,
-                                WIMConstants.MAP_DEFAULT_STROKE_COLOR,
-                                WIMConstants.MAP_DEFAULT_STROKE_WIDTH);
-
-                        LatLng center = Geometry.getRoomCenter(layer, mRoomName);
-                        if (center == null) {
-                            roomUnderConstructionDialog();
+                        final GeoJsonMapLayer currentLayer = mGeoJsonMap.getCurrentLayer();
+                        final int currentLayerNum = currentLayer.getFloorNum();
+                        for (GeoJsonMapLayer layer : mGeoJsonMap.getLayers()) {
+                            mGeoJsonMap.drawLayer(layer.getFloorNum(), WIMConstants.MAP_DEFAULT_FILL_COLOR,
+                                    WIMConstants.MAP_DEFAULT_STROKE_COLOR,
+                                    WIMConstants.MAP_DEFAULT_STROKE_WIDTH);
+                            mGeoJsonMap.showLayer(layer.getFloorNum(), true);
                         }
+                        onFirstLoad(currentLayer);
+                        mGeoJsonMap.showLayer(currentLayerNum, true);
 
-                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(center,
-                                WIMConstants.DEFAULT_MAP_CAMERA_ZOOM);
+                        startOccupiedRoomColorHandler();
 
-                        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-                            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
-                                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-
-                                if (polygon.contains(center)) {
-                                    Polygon gmsPoly = polygon.getGMSPolygon();
-                                    gmsPoly.setFillColor(WIMConstants.MAP_DEFAULT_SELECTED_ROOM_COLOR);
-                                }
-                            }
+                        // map has loaded - close animation
+                        if (dialog.isShowing()) {
+                            dialog.dismiss();
                         }
-                        mMap.moveCamera(cameraUpdate);
-                        mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center)
-                                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("location_end",
-                                        IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
-
-                        mNavEndPosition = mEndLocationMarker.getPosition();
+                        findViewById(R.id.loading_overlay).setVisibility(View.GONE);
                     }
                 });
 
-                colorByOccupiedStatus();
-
-                if (dialog.isShowing()) {
-                    dialog.dismiss();
-                    findViewById(R.id.loading_overlay).setVisibility(View.GONE);
-                }
             }
         }
     }
 
+    public void onFirstLoad(final GeoJsonMapLayer firstLayer) {
+        LatLng center = Geometry.getRoomCenter(firstLayer, mRoomName);
+        if (center == null) {
+            roomUnderConstructionDialog();
+        }
 
-    private int getInitialFloor(String roomName) {
+        final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(center,
+                WIMConstants.DEFAULT_MAP_CAMERA_ZOOM);
+
+        GeoJsonFeature feature = getContainingFeature(center);
+        if (feature != null) {
+            GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+            Polygon gmsPoly = polygon.getGMSPolygon();
+            gmsPoly.setFillColor(WIMConstants.MAP_DEFAULT_SELECTED_ROOM_COLOR);
+        }
+
+        mMap.moveCamera(cameraUpdate);
+        mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center)
+                .icon(BitmapDescriptorFactory.fromBitmap(BitmapUtil.resizeMapIcons(getApplicationContext(),
+                        "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
+
+        mNavEndPosition = mEndLocationMarker.getPosition();
+    }
+
+
+    /**
+     * Get floor number - will in most cases be the first number in the string
+     * @param roomName
+     * @return
+     */
+    private int getFloorNumber(String roomName) {
         for (Character ch : roomName.toCharArray()) {
             if (Character.isDigit(ch)) {
                 return Integer.parseInt(Character.toString(ch));
@@ -1069,67 +1073,53 @@ public class RoomActivity extends AppCompatActivity {
         return -1;
     }
 
-
-    private void mapListenCallback(LatLng latLng) {
-        GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
-        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
+    /**
+     * A room has been selected
+     * @param feature
+     */
+    private void handleSelectedRoom(final GeoJsonFeature feature) {
+        new Runnable() {
+            public void run() {
                 GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
-                if (polygon.contains(latLng)) {
 
-                    mEndLocationMarker.remove();
+                // Attach marker to correct map polygon
+                mEndLocationMarker.remove();
 
-                    Polygon gmsPoly = polygon.getGMSPolygon();
-                    int color1 = WIMConstants.MAP_DEFAULT_SELECTED_ROOM_COLOR;
+                LatLng center = polygon.getCentroid();
+                mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center).
+                        icon(BitmapDescriptorFactory.fromBitmap(BitmapUtil.resizeMapIcons(getApplicationContext(),
+                                "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
-                    gmsPoly.setFillColor(color1);
-                    LatLng center1 = polygon.getCentroid();
-
-                    mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center1).
-                            icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("location_end",
-                                    IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
-
-                    if(mPolyLine != null) {
-                        mPolyLine.remove();
-                    }
-
-                    mNavEndPosition = mEndLocationMarker.getPosition();
-
-                    mEndFloorNum = mCurrentFloorNum;
-
-                    String selectedRoomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
-                    mRoomNameTextView.setText(selectedRoomName);
-
-                    inflateRoomAttributes(selectedRoomName, mBuildingName);
-
-
-                } else {
-                    Polygon gmsPoly = polygon.getGMSPolygon();
-                    int color1 = WIMConstants.MAP_DEFAULT_FILL_COLOR;
-
-                    String roomName = feature.getProperty("room");
-                    if(roomName != null) {
-                        switch (feature.getProperty("room")) {
-                            case "HW":
-                                color1 = Color.WHITE;
-                                break;
-                            case "WB":
-                                color1 = Color.rgb(234, 230, 245);
-                                break;
-                            case "MB":
-                                color1 = Color.rgb(234, 230, 245);
-                                break;
-
-                        }
-                    }
-
-                    gmsPoly.setFillColor(color1);
-
+                // route has changed - remove the polygon
+                if(mNavigationOn && mPolyLine != null) {
+                    mPolyLine.remove();
                 }
+
+                mNavEndPosition = mEndLocationMarker.getPosition();
+                mEndFloorNum = mCurrentFloorNum;
+
+                // Update room attributes view
+                String selectedRoomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
+                mRoomNameTextView.setText(selectedRoomName);
+
+                inflateRoomAttributes(selectedRoomName, mBuildingName);
             }
-        }
+        }.run();
     }
 
+
+    /**
+     * Handles on map click events
+     * @param latLng
+     */
+    private void mapListenCallback(LatLng latLng) {
+        GeoJsonFeature feature = getContainingFeature(latLng);
+        handleSelectedRoom(feature);
+    }
+
+    /**
+     * Custom animation class - used to animate slide view
+     */
     public class HeightAnimation extends Animation {
         private final int mOriginalHeight;
         private final View mView;
@@ -1153,6 +1143,25 @@ public class RoomActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Get geojson feature by latlng
+     * @param latLng
+     * @return
+     */
+    private GeoJsonFeature getContainingFeature(LatLng latLng) {
+        GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
+        for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
+            if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
+                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                if (polygon.contains(latLng)) {
+                    return feature;
+                }
+            }
+        }
+        return null;
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -1169,65 +1178,5 @@ public class RoomActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private Bitmap resizeMapIcons(String iconName, int widthDip, int heightDip){
-        int widthPx = (int)dipToPixels(widthDip);
-        int heightPx = (int)dipToPixels(heightDip);
-
-        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),
-                getResources().getIdentifier(iconName, "drawable", getPackageName()));
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, widthPx, heightPx, false);
-        return resizedBitmap;
-    }
-
-    private float dipToPixels(float dipValue) {
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
-    }
-
-    public class FeatureMap {
-        private Map<Integer, Map<String, GeoJsonFeature>> mFeatureMaps = new HashMap<>();
-
-        public FeatureMap(List<RoomModel> models, GeoJsonMap map) {
-            if(models != null) {
-                for(RoomModel model : models) {
-                    int floorNum = getInitialFloor(model.getRoomName());
-                    if(floorNum != -1) {
-                        if(mFeatureMaps.containsKey(floorNum)) {
-                            GeoJsonMapLayer layer = map.getLayer(floorNum);
-                            if(layer != null) {
-                                for(GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-                                    try {
-                                        if (feature.getProperty("room").equals(model.getRoomName())) {
-                                            if(mFeatureMaps.containsKey(floorNum)) {
-                                                mFeatureMaps.get(floorNum).put(model.getRoomName(), feature);
-                                            }
-                                            else {
-                                                Map<String, GeoJsonFeature> featureMap = new HashMap<>();
-                                                featureMap.put(model.getRoomName(), feature);
-                                                mFeatureMaps.put(floorNum, featureMap);
-                                            }
-                                        }
-                                    }catch(NullPointerException e) {
-                                        Log.e(LOG_TAG, e.getMessage());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public GeoJsonFeature getFeature(int floorNum, String roomName) {
-            if(mFeatureMaps.containsKey(floorNum)) {
-                Map<String, GeoJsonFeature> featureMap = mFeatureMaps.get(floorNum);
-                if(featureMap.containsKey(roomName)) {
-                    return featureMap.get(roomName);
-                }
-            }
-        }
-
     }
 }
