@@ -14,7 +14,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -44,6 +43,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -236,11 +237,21 @@ public class RoomActivity extends AppCompatActivity {
             public void onClick(View v) {
                 unselectLastFloor(Integer.toString(mEndFloorNum));
                 selectNextFloor(mEndFloorNum);
-                int distanceInFeet = getLatLngDistance(mNavStartLocation, mNavEndPosition);
-                ((TextView) findViewById(R.id.navigation_text)).setText(Integer.toString(distanceInFeet));
+                setNavDistanceView(mPolyLine.getPoints().get(0), mNavStartLocation);
                 findViewById(R.id.switch_floor_button).setVisibility(View.GONE);
             }
         });
+    }
+
+    /**
+     * Populate nav info view with distance and time to reach destination
+     */
+    private void setNavDistanceView(LatLng start, LatLng end) {
+        int distance = getLatLngDistance(mNavStartLocation, mNavEndPosition);
+        int distanceInFeet = metersToFeet(distance);
+        String minutes = getWalkingTimeInMinutes(distance);
+        ((TextView) findViewById(R.id.navigation_text)).setText(
+                minutes + " (" + Integer.toString(distanceInFeet) + " ft)");
     }
 
     /**
@@ -257,9 +268,9 @@ public class RoomActivity extends AppCompatActivity {
                     ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor "
                             + Integer.toString(mEndFloorNum) + "?");
                     findViewById(R.id.switch_floor_button).setVisibility(View.VISIBLE);
-                } else {
-                    int distanceInFeet = getLatLngDistance(mNavStartLocation, mNavEndPosition);
-                    ((TextView) findViewById(R.id.navigation_text)).setText(Integer.toString(distanceInFeet));
+                }
+                else {
+                    setNavDistanceView(mNavStartLocation, mNavEndPosition);
                 }
 
                 mMap.setOnCameraChangeListener(null);
@@ -644,8 +655,21 @@ public class RoomActivity extends AppCompatActivity {
         locationB.setLatitude(end.latitude);
         locationB.setLongitude(end.longitude);
 
+        return (int)locationA.distanceTo(locationB) ;
+    }
+
+    private int metersToFeet(int meters) {
         final double feetConversion = 3.28084;
-        return (int) (locationA.distanceTo(locationB) * feetConversion);
+        return (int) (meters * feetConversion);
+    }
+
+    private String getWalkingTimeInMinutes(int meters) {
+        final double walkingConvs = 1.4;
+        double seconds = meters / walkingConvs;
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.CEILING);
+        double minutes = seconds / 60;
+        return df.format(minutes) + " Minutes";
     }
 
     /**
