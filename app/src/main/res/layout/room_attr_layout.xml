@@ -19,5 +19,5 @@
         android:src="@drawable/check"
         android:id="@+id/attribute_present_img"
         android:layout_width="60dp"
-        android:layout_height="60dp" />
+        android:layout_height="50dp" />
 </LinearLayout>

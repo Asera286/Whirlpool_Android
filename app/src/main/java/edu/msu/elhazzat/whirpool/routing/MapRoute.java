@@ -62,10 +62,10 @@ public class MapRoute extends Activity {
     //main function to call, requires desired start & end points + their respective floors
     public Polyline drawRoute(LatLng startPoint, int startFloor, LatLng endPoint, int endFloor){
 
-        /*System.out.println("Start POINT: " + startPoint);
+        System.out.println("Start POINT: " + startPoint);
         System.out.println("START FLOOR: " + startFloor);
         System.out.println("End POINT: " + endPoint);
-        System.out.println("End FLOOR: " + endFloor);*/
+        System.out.println("End FLOOR: " + endFloor);
 
         populateNodes();
         populateEdges();
@@ -163,7 +163,7 @@ public class MapRoute extends Activity {
         for (DijkstraVertex vertex : path) {
             line.add(vertex.coords);
         }
-     //   line.add(endPoint);
+        //   line.add(endPoint);
 
         //draw the line
         Polyline pLine = mmap.addPolyline(line);
@@ -179,19 +179,43 @@ public class MapRoute extends Activity {
 
         double distanceFromStart;
         double secondDistance;
+        double thirdDistance;
+
+        LatLng coordinate;
 
         switch(mBuildingName){
             case("GHQ"):
                 switch (mFloorNum){
                     case(1):
-                        return 0;
+                        //node 38 and 37
+
+                        coordinate = mCoordsList.get(38);
+
+                        distanceFromStart = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(37);
+
+                        secondDistance = Math.sqrt((coordinate.latitude - startPoint.latitude)*(coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude)*(coordinate.longitude - startPoint.longitude));
+
+                        if(secondDistance < distanceFromStart)
+                            return  37;
+                        else
+                            return 38;
 
                     case(2):
                         //node 26 and 47
-                        distanceFromStart = Math.sqrt((mCoordsList.get(26).latitude - startPoint.latitude)*(mCoordsList.get(26).latitude - startPoint.latitude) +
-                                (mCoordsList.get(26).longitude - startPoint.longitude)*(mCoordsList.get(26).longitude - startPoint.longitude));
-                        secondDistance = Math.sqrt((mCoordsList.get(47).latitude - startPoint.latitude)*(mCoordsList.get(47).latitude - startPoint.latitude) +
-                                (mCoordsList.get(47).longitude - startPoint.longitude)*(mCoordsList.get(47).longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(26);
+
+                        distanceFromStart = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(47);
+
+                        secondDistance = Math.sqrt((coordinate.latitude - startPoint.latitude)*(coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude)*(coordinate.longitude - startPoint.longitude));
 
                         if(secondDistance < distanceFromStart)
                             return  47;
@@ -200,10 +224,16 @@ public class MapRoute extends Activity {
 
                     case(3):
                         //node 28 and 7
-                        distanceFromStart = Math.sqrt((mCoordsList.get(28).latitude - startPoint.latitude)*(mCoordsList.get(28).latitude - startPoint.latitude) +
-                                (mCoordsList.get(28).longitude - startPoint.longitude)*(mCoordsList.get(28).longitude - startPoint.longitude));
-                        secondDistance = Math.sqrt((mCoordsList.get(7).latitude - startPoint.latitude)*(mCoordsList.get(7).latitude - startPoint.latitude) +
-                                (mCoordsList.get(7).longitude - startPoint.longitude)*(mCoordsList.get(7).longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(28);
+
+                        distanceFromStart = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(7);
+
+                        secondDistance = Math.sqrt((coordinate.latitude - startPoint.latitude)*(coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude)*(coordinate.longitude - startPoint.longitude));
 
                         if(secondDistance < distanceFromStart)
                             return  7;
@@ -211,16 +241,98 @@ public class MapRoute extends Activity {
                             return 28;
 
                     case(4):
-                        //node 26 and 47
-                        distanceFromStart = Math.sqrt((mCoordsList.get(26).latitude - startPoint.latitude)*(mCoordsList.get(26).latitude - startPoint.latitude) +
-                                (mCoordsList.get(26).longitude - startPoint.longitude)*(mCoordsList.get(26).longitude - startPoint.longitude));
-                        secondDistance = Math.sqrt((mCoordsList.get(7).latitude - startPoint.latitude)*(mCoordsList.get(7).latitude - startPoint.latitude) +
-                                (mCoordsList.get(7).longitude - startPoint.longitude)*(mCoordsList.get(7).longitude - startPoint.longitude));
+                        //node 26 and 7
+
+                        coordinate = mCoordsList.get(26);
+
+                        distanceFromStart = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(7);
+
+                        secondDistance = Math.sqrt((coordinate.latitude - startPoint.latitude)*(coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude)*(coordinate.longitude - startPoint.longitude));
 
                         if(secondDistance < distanceFromStart)
                             return  7;
                         else
                             return 26;
+                }
+                break;
+
+            case("RV"):
+                switch(mFloorNum){
+                    case(1):
+                        //nodes 28 98 173
+
+                        coordinate = mCoordsList.get(28);
+
+                        distanceFromStart = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(98);
+
+                        secondDistance = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(173);
+
+                        thirdDistance = Math.sqrt((coordinate.latitude - startPoint.latitude)*(coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude)*(coordinate.longitude - startPoint.longitude));
+
+                        if(distanceFromStart < secondDistance && distanceFromStart < thirdDistance)
+                            return 28;
+
+                        else if(secondDistance < distanceFromStart && secondDistance < thirdDistance)
+                            return 98;
+
+                        else
+                            return 173;
+
+                    case(2):
+                        //nodes 26 107 151
+
+                        coordinate = mCoordsList.get(26);
+
+                        distanceFromStart = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(107);
+
+                        secondDistance = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(151);
+
+                        thirdDistance = Math.sqrt((coordinate.latitude - startPoint.latitude)*(coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude)*(coordinate.longitude - startPoint.longitude));
+
+                        if(distanceFromStart < secondDistance && distanceFromStart < thirdDistance)
+                            return 26;
+
+                        else if(secondDistance < distanceFromStart && secondDistance < thirdDistance)
+                            return 107;
+
+                        else
+                            return 151;
+
+                    case(3):
+                        //nodes 7 and 96
+
+                        coordinate = mCoordsList.get(7);
+
+                        distanceFromStart = Math.sqrt((coordinate.latitude - startPoint.latitude) * (coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude) * (coordinate.longitude - startPoint.longitude));
+
+                        coordinate = mCoordsList.get(96);
+
+                        secondDistance = Math.sqrt((coordinate.latitude - startPoint.latitude)*(coordinate.latitude - startPoint.latitude) +
+                                (coordinate.longitude - startPoint.longitude)*(coordinate.longitude - startPoint.longitude));
+
+                        if(distanceFromStart < secondDistance)
+                            return 7;
+                        else
+                            return  96;
                 }
                 break;
         }
@@ -238,7 +350,7 @@ public class MapRoute extends Activity {
             case("GHQ"):
                 switch(mFloorNum){
                     case(1):
-                        mInStream = mContext.getResources().openRawResource(R.raw.ghq_nw_f2_nav);
+                        mInStream = mContext.getResources().openRawResource(R.raw.ghq_nw_f1_nav);
                         break;
                     case(2):
                         mInStream = mContext.getResources().openRawResource(R.raw.ghq_nw_f2_nav);
@@ -248,6 +360,20 @@ public class MapRoute extends Activity {
                         break;
                     case(4):
                         mInStream = mContext.getResources().openRawResource(R.raw.ghq_nw_f4_nav);
+                        break;
+                }
+                break;
+
+            case("RV"):
+                switch (mFloorNum){
+                    case(1):
+                        mInStream = mContext.getResources().openRawResource(R.raw.rv_f1_nav);
+                        break;
+                    case(2):
+                        mInStream = mContext.getResources().openRawResource(R.raw.rv_f2_nav);
+                        break;
+                    case(3):
+                        mInStream = mContext.getResources().openRawResource(R.raw.rv_f3_nav);
                         break;
                 }
                 break;

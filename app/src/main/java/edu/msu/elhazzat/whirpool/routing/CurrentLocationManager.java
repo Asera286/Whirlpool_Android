@@ -18,7 +18,6 @@ public abstract class CurrentLocationManager {
 
     public abstract void handleLocationUpdate(Location location);
 
-
     private Context mContext;
     private LocationManager mLocationManager;
     private String mProvider;
@@ -50,7 +49,7 @@ public abstract class CurrentLocationManager {
         mLocationManager.requestLocationUpdates(mProvider, 0, 0, mLocationListener);
     }
 
-   /* public Location getCurrentLocation() {
+     public Location getCurrentLocation() {
         return mLocationManager.getLastKnownLocation(mProvider);
-    }*/
+    }
 }

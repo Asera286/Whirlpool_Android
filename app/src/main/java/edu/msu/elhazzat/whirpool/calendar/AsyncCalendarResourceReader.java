@@ -33,6 +33,7 @@ import edu.msu.elhazzat.whirpool.model.RoomModel;
  */
 public abstract class AsyncCalendarResourceReader extends AsyncTask<Void, Void, Void> {
 
+    //TODO: guard agains null event when pressing + button
     private static final String LOG_TAG = AsyncCalendarResourceReader.class.getSimpleName();
     private List<RoomModel> mRoomModels = new ArrayList<>();
 

@@ -4,8 +4,10 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -13,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,13 +43,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.TimePeriod;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -54,7 +54,6 @@ import java.util.TimerTask;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.AmenityAdapter;
-import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarFreeBusyReader;
 import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonConstants;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonFeature;
@@ -70,7 +69,6 @@ import edu.msu.elhazzat.whirpool.rest.AsyncGCSRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncParseGeoJsonGCS;
 import edu.msu.elhazzat.whirpool.routing.MapRoute;
 import edu.msu.elhazzat.whirpool.utils.BitmapUtil;
-import edu.msu.elhazzat.whirpool.utils.CalendarServiceHolder;
 import edu.msu.elhazzat.whirpool.utils.MapConstants;
 import edu.msu.elhazzat.whirpool.utils.WIMConstants;
 
@@ -86,14 +84,15 @@ public class RoomActivity extends AppCompatActivity {
 
     // Marker dimensions
     private static final int IMAGE_VIEW_MARKER_HEIGHT_DP = 30;
-    private static final int IMAGE_VIEW_MARKER_WIDTH_DP = 20;
+    private static final int IMAGE_VIEW_MARKER_WIDTH_DP = 21;
+    private static final int IMAGE_VIEW_ROOM_ICON_HEIGHT_DP = 12;
+    private static final int IMAGE_VIEW_ROOM_ICON_WIDTH_DP = 12;
 
     // animation constants
     private static final long SLIDE_DOWN_ANIM_DURATION = 250;
     private static final long SLIDE_UP_ANIM_DURATION = 400;
     private static final float THRESHOLD_SLIDE_DOWN_PRECENTAGE = .70f;
     private static final float THRESHOLD_SLIDE_UP_PERCENTAGE = .30f;
-    private static final float ATTRIBUTE_MAX_VIEW_PERCENTAGE = .95f;
 
     private static final String ACTION_BAR_COLOR =  "#8286F8";
 
@@ -142,6 +141,7 @@ public class RoomActivity extends AppCompatActivity {
     private List<RoomModel> mRooms = new ArrayList<>();
 
     private Map<Integer, List<Marker>> mRoomMarkerMap = new HashMap<>();
+    private Map<Integer, List<Marker>> mFacilityTypeMarkerMap = new HashMap<>();
 
     private RoomModel mCurrentRoom;
 
@@ -153,6 +153,8 @@ public class RoomActivity extends AppCompatActivity {
     private ImageView mInfoButton;
 
     private TimerTask mAsyncColorOccupiedRoomsTask;
+
+    private Marker mFixedNavIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,7 +208,7 @@ public class RoomActivity extends AppCompatActivity {
         // initialize interactive elements of activity UI
         initFavorites();
         initBookRoom();
-        initNavigation();
+        buildSwitchFloorOnNavButton();
         initStartLocation();
 
         buildSlideView();
@@ -214,6 +216,47 @@ public class RoomActivity extends AppCompatActivity {
         buildFloorPicker();
         buildGoButton();
         buildInfoButton();
+    }
+
+    private void buildSwitchFloorOnNavButton() {
+        TextView v = (TextView) findViewById(R.id.switch_floor_button);
+        v.setVisibility(View.INVISIBLE);
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //compute and display distance
+            }
+        });
+    }
+    private int getLatLngDistance(LatLng start, LatLng end) {
+        Location locationA = new Location("point A");
+
+        locationA.setLatitude(start.latitude);
+        locationA.setLongitude(start.longitude);
+
+        Location locationB = new Location("point B");
+
+        locationB.setLatitude(end.latitude);
+        locationB.setLongitude(end.longitude);
+
+        final double feetConversion = 3.28084;
+        return (int) (locationA.distanceTo(locationB) * feetConversion);
+    }
+
+    private void fixStartNavIcon(boolean toFix) {
+        if(toFix) {
+            findViewById(R.id.start_location).setVisibility(View.INVISIBLE);
+            Bitmap image = BitmapUtil.resizeMapIcons(this, "location_start", IMAGE_VIEW_MARKER_WIDTH_DP,
+                    IMAGE_VIEW_MARKER_HEIGHT_DP);
+
+            mFixedNavIcon = mMap.addMarker(new MarkerOptions()
+                    .position(mLocationMarkerLatLng)
+                    .icon(BitmapDescriptorFactory.fromBitmap(image)));
+            mFixedNavIcon.setVisible(true);
+        }
+        else {
+            findViewById(R.id.start_location).setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -224,8 +267,20 @@ public class RoomActivity extends AppCompatActivity {
         mGoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                findViewById(R.id.nav_info_layout).setBackgroundColor(Color.parseColor("#F2A440"));
+                if (mCurrentFloorNum != mEndFloorNum) {
+                    ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor "
+                            + Integer.toString(mEndFloorNum) + "?");
+                } else {
+                    int distanceInFeet = getLatLngDistance(mLocationMarkerLatLng, mNavEndPosition);
+                    ((TextView) findViewById(R.id.navigation_text)).setText(Integer.toString(distanceInFeet));
+                }
+                mMap.setOnCameraChangeListener(null);
+                findViewById(R.id.switch_floor_button).setVisibility(View.VISIBLE);
+                fixStartNavIcon(true);
                 drawNavRoute();
             }
+
         });
         mGoButton.setVisibility(View.INVISIBLE);
     }
@@ -294,23 +349,6 @@ public class RoomActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Add ability to start navigation
-     */
-    private void initNavigation() {
-        TextView startNavigation = (TextView)findViewById(R.id.start_navigation);
-        startNavigation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mNavigationOn) {
-                    drawNavRoute();
-                }
-            }
-        });
-
-        findViewById(R.id.nav_info_layout).setVisibility(View.GONE);
-        startNavigation.setVisibility(View.GONE);
-    }
 
     /**
      * Create imageview for "start" location - start in this
@@ -348,7 +386,9 @@ public class RoomActivity extends AppCompatActivity {
             // if navigating between floors, draw the next route
             if ((mCurrentFloorNum == mEndFloorNum || mCurrentFloorNum == mStartFloorNum)) {
                 MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
-                mPolyLine = mRoute.drawRoute(mNavStartPosition, mStartFloorNum, mNavEndPosition, mEndFloorNum);
+                if(mNavStartPosition != null && mNavEndPosition != null) {
+                    mPolyLine = mRoute.drawRoute(mNavStartPosition, mStartFloorNum, mNavEndPosition, mEndFloorNum);
+                }
             }
         }
     }
@@ -397,7 +437,7 @@ public class RoomActivity extends AppCompatActivity {
         float heightdp = displayMetrics.heightPixels / displayMetrics.density;
 
         mAttributeLayout = (LinearLayout) findViewById(R.id.attribute_list_view);
-        mAttributeLayout.getLayoutParams().height = (int) (heightdp * ATTRIBUTE_MAX_VIEW_PERCENTAGE);
+    /*    mAttributeLayout.getLayoutParams().height = (int) (heightdp * ATTRIBUTE_MAX_VIEW_PERCENTAGE);*/
 
         mRoomAttributeListView = (ListView) findViewById(R.id.roomInfoList);
 
@@ -429,11 +469,26 @@ public class RoomActivity extends AppCompatActivity {
      * Lock slide down view while animating
      * @param timeInMilli
      */
-    private void dispatchAnimationLock(long timeInMilli) {
+    private void dispatchAnimationLock(long timeInMilli, final boolean showButtons) {
+        if(!showButtons) {
+            mInfoButton.setVisibility(View.INVISIBLE);
+            if(mGoButton.isShown()) {
+                mGoButton.setVisibility(View.INVISIBLE);
+            }
+        }
         mAnimationInEffect = true;
         Runnable runnable = new Runnable() {
             public void run() {
                 mAnimationInEffect = false;
+
+                if(showButtons) {
+                    mInfoButton.setVisibility(View.VISIBLE);
+                }
+
+                if(mNavigationOn && showButtons) {
+                    mGoButton.setVisibility(View.VISIBLE);
+                }
+
             }
         };
         Handler handler = new Handler();
@@ -462,12 +517,11 @@ public class RoomActivity extends AppCompatActivity {
             LinearLayout view = (LinearLayout) findViewById(R.id.attribute_list_view);
             HeightAnimation heightAnim = new HeightAnimation(view, view.getHeight(), mViewMaxHeight);
             heightAnim.setDuration(SLIDE_DOWN_ANIM_DURATION);
-            dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION);
+            dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION, false);
             view.startAnimation(heightAnim);
 
             mCollapsed = false;
             mScrollViewDirectChild.setVisibility(View.GONE);
-            mInfoButton.setVisibility(View.GONE);
 
             //remove previously drawn route and the navigation marker
             if(mPolyLine != null) {
@@ -486,7 +540,7 @@ public class RoomActivity extends AppCompatActivity {
             LinearLayout view = (LinearLayout) findViewById(R.id.attribute_list_view);
             HeightAnimation heightAnim = new HeightAnimation(view, mViewCurrentHeight, mViewMaxHeight);
             heightAnim.setDuration(SLIDE_UP_ANIM_DURATION);
-            dispatchAnimationLock(SLIDE_UP_ANIM_DURATION);
+            dispatchAnimationLock(SLIDE_UP_ANIM_DURATION, false);
             view.startAnimation(heightAnim);
         }
     }
@@ -511,12 +565,10 @@ public class RoomActivity extends AppCompatActivity {
             LinearLayout view = (LinearLayout) findViewById(R.id.attribute_list_view);
             HeightAnimation heightAnim = new HeightAnimation(view, view.getHeight(), mViewMinHeight);
             heightAnim.setDuration(SLIDE_DOWN_ANIM_DURATION);
-            dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION);
+            dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION, true);
             view.startAnimation(heightAnim);
 
             mCollapsed = true;
-
-            mInfoButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -566,6 +618,7 @@ public class RoomActivity extends AppCompatActivity {
                             if (roomName.equals(roomNameInMap)) {
                                 GeoJsonPolygon poly = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
                                 BitmapDescriptor text = BitmapUtil.getTextMarker(roomName);
+
                                 Marker m = mMap.addMarker(new MarkerOptions()
                                         .position(poly.getCentroid())
                                         .icon(text));
@@ -581,6 +634,58 @@ public class RoomActivity extends AppCompatActivity {
                         }
                     }
 
+                }
+            }
+        }
+    }
+
+    private void addImages() {
+        Iterator<GeoJsonMapLayer> iter = mGeoJsonMap.getLayers().iterator();
+        while(iter.hasNext()) {
+            GeoJsonMapLayer next = iter.next();
+            for(GeoJsonFeature feature : next.getGeoJson().getGeoJsonFeatures()) {
+                try {
+                    GeoJsonPolygon poly = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+                    String roomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
+                    Bitmap image = null;
+                    switch (roomName) {
+                        case "WB":
+                            image = BitmapUtil.resizeMapIcons(this, "wb_icon", IMAGE_VIEW_ROOM_ICON_WIDTH_DP,
+                                    IMAGE_VIEW_ROOM_ICON_HEIGHT_DP);
+                            break;
+                        case "MB":
+                            image = BitmapUtil.resizeMapIcons(this, "mb_icon",IMAGE_VIEW_ROOM_ICON_WIDTH_DP,
+                                    IMAGE_VIEW_ROOM_ICON_HEIGHT_DP);
+                            break;
+                        case "STR":
+                            image = BitmapUtil.resizeMapIcons(this, "stairs_icon",IMAGE_VIEW_ROOM_ICON_WIDTH_DP,
+                                    IMAGE_VIEW_ROOM_ICON_HEIGHT_DP);
+                            break;
+                        case "ELV":
+                            image = BitmapUtil.resizeMapIcons(this, "elevator_icon", IMAGE_VIEW_ROOM_ICON_WIDTH_DP,
+                                    IMAGE_VIEW_ROOM_ICON_HEIGHT_DP);
+
+                    }
+
+                    if (image != null) {
+                        Marker bmMarker = mMap.addMarker(new MarkerOptions()
+                                .position(poly.getCentroid())
+                                .icon(BitmapDescriptorFactory.fromBitmap(image)));
+                        bmMarker.setVisible(false);
+                        if (mRoomMarkerMap.containsKey(next.getFloorNum())) {
+                            mRoomMarkerMap.get(next.getFloorNum()).add(bmMarker);
+                        } else {
+                            List<Marker> markers = new ArrayList<>();
+                            markers.add(bmMarker);
+                            mRoomMarkerMap.put(next.getFloorNum(), markers);
+                        }
+                    }
+                }
+                catch (NullPointerException e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                }
+                catch(ClassCastException e) {
+                    Log.e(LOG_TAG, e.getMessage());
                 }
             }
         }
@@ -721,8 +826,6 @@ public class RoomActivity extends AppCompatActivity {
      */
     private void startNavigation() {
         if(!mNavigationOn) {
-            mGoButton.setVisibility(View.VISIBLE);
-
             // if the slide view is not collapsed, collapse it
             if (!mCollapsed) {
                 mViewCurrentHeight = mViewMinHeight;
@@ -730,10 +833,13 @@ public class RoomActivity extends AppCompatActivity {
                 LinearLayout view = (LinearLayout) findViewById(R.id.attribute_list_view);
                 HeightAnimation heightAnim = new HeightAnimation(view, view.getHeight(), mViewMinHeight);
                 heightAnim.setDuration(SLIDE_DOWN_ANIM_DURATION);
-                dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION);
+                dispatchAnimationLock(SLIDE_DOWN_ANIM_DURATION, true);
                 view.startAnimation(heightAnim);
 
                 mCollapsed = true;
+            }
+            else {
+                mGoButton.setVisibility(View.VISIBLE);
             }
 
             mStartLocationImageView.setVisibility(View.VISIBLE);
@@ -761,11 +867,14 @@ public class RoomActivity extends AppCompatActivity {
 
             if(mPolyLine != null) mPolyLine.remove();
 
-            findViewById(R.id.start_navigation).setVisibility(View.GONE);
             findViewById(R.id.nav_info_layout).setVisibility(View.GONE);
-            mGoButton.setVisibility(View.INVISIBLE);
             mMap.setOnCameraChangeListener(null);
 
+            mGoButton.setVisibility(View.INVISIBLE);
+
+            if(mFixedNavIcon.isVisible()) {
+                setVisible(false);
+            }
         }
     }
 
@@ -774,11 +883,11 @@ public class RoomActivity extends AppCompatActivity {
         if(feature != null) {
             ((TextView) findViewById(R.id.navigation_text)).setText(
                     new StringBuilder()
-                            .append("Building ")
+                            .append("Building: ")
                             .append(mBuildingName)
-                            .append(", Floor ")
+                            .append(", Floor: ")
                             .append(mCurrentFloorNum)
-                            .append(", Room ")
+                            .append(", Room: ")
                             .append(feature.getProperty("room")).toString()
             );
         }
@@ -797,48 +906,6 @@ public class RoomActivity extends AppCompatActivity {
         return null;
     }
 
-    private Date getEndOfDay(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
-        return calendar.getTime();
-    }
-
-    /**
-     * Determine if a room is available
-     * @param email
-     */
-    private void setRoomAvailable(final String[] amenities, final int occupancy, String email) {
-        long nowLong = System.currentTimeMillis();
-        Date nowDate = new Date(nowLong);
-        final DateTime now = new DateTime(nowLong);
-        DateTime end = new DateTime(getEndOfDay(nowDate));
-
-        // get free busy information
-      /*  new AsyncCalendarFreeBusyReader(CalendarServiceHolder.getInstance().getService(),
-                email, now, end) {
-            @Override
-            public void handleTimePeriods(List<TimePeriod> timePeriods) {
-                boolean isBusy = false;
-                if(timePeriods != null) {
-                    for (TimePeriod period : timePeriods) {
-                        if (now.getValue() >= period.getStart().getValue() && now.getValue() <=
-                                period.getEnd().getValue()) {
-                            isBusy = true;
-                            break;
-                        }
-                    }
-
-                    mAmenitiesAdapter = new AmenityAdapter(getApplicationContext(), 0, occupancy, isBusy, amenities);
-                    mRoomAttributeListView.setAdapter(mAmenitiesAdapter);
-                }
-            }
-        }.execute();*/
-    }
-
     /**
      * Pull room data on clicking a particular room - populate room attribute list view
      * @param roomName
@@ -851,7 +918,8 @@ public class RoomActivity extends AppCompatActivity {
                 if (room != null) {
                     String[] amenities = room.getAmenities();
                     int occupancy = room.getCapacity();
-                    setRoomAvailable(amenities, occupancy, room.getEmail());
+                    mAmenitiesAdapter = new AmenityAdapter(getApplicationContext(), 0, occupancy, amenities);
+                    mRoomAttributeListView.setAdapter(mAmenitiesAdapter);
                     mCurrentRoom = room;
                     if(room.getRoomType() != null && room.getRoomType().equals("C")) {
                         mBookRoomImageView.setVisibility(View.VISIBLE);
@@ -928,6 +996,7 @@ public class RoomActivity extends AppCompatActivity {
 
                     buildGoogleMap(dialog);
                     getRooms();
+                    addImages();
                 }
             }
         }.execute();
@@ -1015,7 +1084,7 @@ public class RoomActivity extends AppCompatActivity {
                             mGeoJsonMap.drawLayer(layer.getFloorNum(), WIMConstants.MAP_DEFAULT_FILL_COLOR,
                                     WIMConstants.MAP_DEFAULT_STROKE_COLOR,
                                     WIMConstants.MAP_DEFAULT_STROKE_WIDTH);
-                            mGeoJsonMap.showLayer(layer.getFloorNum(), true);
+                            mGeoJsonMap.showLayer(layer.getFloorNum(), false);
                         }
                         onFirstLoad(currentLayer);
                         mGeoJsonMap.showLayer(currentLayerNum, true);
@@ -1029,7 +1098,6 @@ public class RoomActivity extends AppCompatActivity {
                         findViewById(R.id.loading_overlay).setVisibility(View.GONE);
                     }
                 });
-
             }
         }
     }
@@ -1078,35 +1146,33 @@ public class RoomActivity extends AppCompatActivity {
      * @param feature
      */
     private void handleSelectedRoom(final GeoJsonFeature feature) {
-        new Runnable() {
-            public void run() {
-                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
+        if(feature != null) {
+            GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
 
-                // Attach marker to correct map polygon
-                mEndLocationMarker.remove();
+            // Attach marker to correct map polygon
+            mEndLocationMarker.remove();
 
-                LatLng center = polygon.getCentroid();
-                mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center).
-                        icon(BitmapDescriptorFactory.fromBitmap(BitmapUtil.resizeMapIcons(getApplicationContext(),
-                                "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
+            LatLng center = polygon.getCentroid();
+            mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center).
+                    icon(BitmapDescriptorFactory.fromBitmap(BitmapUtil.resizeMapIcons(getApplicationContext(),
+                            "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
-                // route has changed - remove the polygon
-                if(mNavigationOn && mPolyLine != null) {
-                    mPolyLine.remove();
-                }
-
-                mNavEndPosition = mEndLocationMarker.getPosition();
-                mEndFloorNum = mCurrentFloorNum;
-
-                // Update room attributes view
-                String selectedRoomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
-                mRoomNameTextView.setText(selectedRoomName);
-
-                inflateRoomAttributes(selectedRoomName, mBuildingName);
+            // route has changed - remove the polygon
+            if (mNavigationOn && mPolyLine != null) {
+                mPolyLine.remove();
             }
-        }.run();
-    }
 
+            mNavEndPosition = mEndLocationMarker.getPosition();
+            mEndFloorNum = mCurrentFloorNum;
+
+            // Update room attributes view
+            String selectedRoomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
+            mRoomNameTextView.setText(selectedRoomName);
+
+            inflateRoomAttributes(selectedRoomName, mBuildingName);
+        }
+
+    }
 
     /**
      * Handles on map click events

@@ -91,7 +91,6 @@ public class GeoJsonMapLayer {
         }
     }
 
-
     /**
      * Draws the map using uniform properties.
      * @param map
@@ -163,13 +162,10 @@ public class GeoJsonMapLayer {
                             color = Color.WHITE;
                             break;
                         case "WB":
-                            color = Color.rgb(234, 230, 245);
-                            break;
                         case "MB":
-                            color = Color.rgb(234, 230, 245);
-                            break;
                         case "STR":
-                            color = Color.parseColor("#F2A440");
+                        case "ELV":
+                            color = Color.rgb(234, 230, 245);
                             break;
                     }
                 } catch (NullPointerException e) {
