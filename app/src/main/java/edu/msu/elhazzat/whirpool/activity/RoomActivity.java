@@ -216,6 +216,8 @@ public class RoomActivity extends AppCompatActivity {
         buildFloorPicker();
         buildGoButton();
         buildInfoButton();
+
+        findViewById(R.id.nav_info_layout).setVisibility(View.GONE);
     }
 
     private void buildSwitchFloorOnNavButton() {
@@ -224,7 +226,7 @@ public class RoomActivity extends AppCompatActivity {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //compute and display distance
+                selectNextFloor(mEndFloorNum);
             }
         });
     }
@@ -275,6 +277,7 @@ public class RoomActivity extends AppCompatActivity {
                     int distanceInFeet = getLatLngDistance(mLocationMarkerLatLng, mNavEndPosition);
                     ((TextView) findViewById(R.id.navigation_text)).setText(Integer.toString(distanceInFeet));
                 }
+                mNavStartPosition = mLocationMarkerLatLng;
                 mMap.setOnCameraChangeListener(null);
                 findViewById(R.id.switch_floor_button).setVisibility(View.VISIBLE);
                 fixStartNavIcon(true);
@@ -709,7 +712,6 @@ public class RoomActivity extends AppCompatActivity {
                 if (tmpFloorNum != mCurrentFloorNum) {
                     unselectLastFloor(tv);
                     selectNextFloor(tmpFloorNum);
-                    drawNavRouteOnFloorChange();
                 }
             }
         });
@@ -765,6 +767,8 @@ public class RoomActivity extends AppCompatActivity {
                     }
                 }
                 mAsyncColorOccupiedRoomsTask.run();
+
+                drawNavRouteOnFloorChange();
             }
         }.run();
     }
@@ -868,12 +872,11 @@ public class RoomActivity extends AppCompatActivity {
             if(mPolyLine != null) mPolyLine.remove();
 
             findViewById(R.id.nav_info_layout).setVisibility(View.GONE);
-            mMap.setOnCameraChangeListener(null);
 
             mGoButton.setVisibility(View.INVISIBLE);
 
-            if(mFixedNavIcon.isVisible()) {
-                setVisible(false);
+            if(mFixedNavIcon != null) {
+                mFixedNavIcon.remove();
             }
         }
     }
@@ -1124,6 +1127,7 @@ public class RoomActivity extends AppCompatActivity {
                         "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
         mNavEndPosition = mEndLocationMarker.getPosition();
+
     }
 
 
