@@ -8,23 +8,27 @@ import java.util.regex.Pattern;
 /**
  * Created by christianwhite on 11/5/15.
  */
+
+/*************************************************************************
+ * Map resource names to building/room names -
+ * This application pulls "resourse" data from google to identify building
+ * room emails/resource names - we need to extract the building
+ * abbreviation and simplified room names from this content
+ *************************************************************************/
 public class RoomNameRegexMapper {
     public static final Map<String, String> REGEX_MAP = new HashMap<>();
     static {
+        // used to remove nick names from room names pull
         REGEX_MAP.put(WIMConstants.RIVERVIEW, "([ABC]\\d{3}-\\d{2}$|[ABC]\\d{3})");
         REGEX_MAP.put(WIMConstants.GHQ, "(N\\d{3}-\\d{2}$|N\\d{3})");
-     /*   REGEX_MAP.put(WIMConstants.BENSON_ROAD, );
-        REGEX_MAP.put(WIMConstants.EDGEWATER, );
-        REGEX_MAP.put(WIMConstants.BHTC, );
-        REGEX_MAP.put(WIMConstants.GHQ, );
-        REGEX_MAP.put(WIMConstants.HARBORTOWN, );
-        REGEX_MAP.put(WIMConstants.HILLTOP_150, );
-        REGEX_MAP.put(WIMConstants.HILLTOP_211, );
-        REGEX_MAP.put(WIMConstants.MMC, );
-        REGEX_MAP.put(WIMConstants.ST_JOE_TECH_CENTER, );
-        REGEX_MAP.put(WIMConstants.R_AND_E, )*/
     }
 
+    /**
+     * fix room name extracted from resource
+     * @param buildingName
+     * @param roomName
+     * @return
+     */
     public static String getGeoJsonRoomNameFromMap(String buildingName, String roomName) {
         String patternString = REGEX_MAP.get(buildingName);
         if(patternString != null) {
@@ -38,6 +42,11 @@ public class RoomNameRegexMapper {
         return null;
     }
 
+    /**
+     * pull building name from resource
+     * @param resourceName
+     * @return
+     */
     public static String getBuildingNameFromResource(String resourceName) {
         String[] resourceSplit = resourceName.split("-");
         if(resourceSplit.length > 1) {
@@ -46,6 +55,11 @@ public class RoomNameRegexMapper {
         return null;
     }
 
+    /**
+     * pull room name from resource
+     * @param resourceName
+     * @return
+     */
     public static String getRoomNameFromResource(String resourceName) {
         String[] resourceSplit = resourceName.split("-");
         if(resourceSplit.length > 3) {

@@ -35,6 +35,11 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
 
     public abstract void handleGeoJson(GeoJsonMap map, ProgressDialog dialog);
 
+    private static final String COUNT_KEY = "count";
+    private static final String FLOORS_KEY = "floors";
+    private static final String FLOOR_NUM_KEY = "floor_num";
+    private static final String GEOJSON_KEY = "geojson";
+
     private ProgressDialog mDialog = null;
 
     public static final String GET_PARAM = "building_name=";
@@ -60,11 +65,14 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
     @Override
     public GeoJsonMap doInBackground(Void... params) {
         try {
+            // build get request
             String tmpUrl = GCSRestConstants.GCS_BLOGSTORE_BASE_URL + GET_PARAM + mBuildingName;
             URL url = new URL(tmpUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             int responseCode = conn.getResponseCode();
+
+            // get json response
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 BufferedReader reader = new BufferedReader(new
                         InputStreamReader(conn.getInputStream()));
@@ -79,19 +87,23 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
                 String responseString = responseBuilder.toString();
                 JSONObject jsonObj = new JSONObject(responseString);
 
-                int count = jsonObj.getInt("count");
+                int count = jsonObj.getInt(COUNT_KEY);
                 if(count == 0) {
                     return null;
                 }
 
-                JSONArray floors = jsonObj.getJSONArray("floors");
+                // parse geojson for each floor
+                JSONArray floors = jsonObj.getJSONArray(FLOORS_KEY);
                 for(int i = 0; i < count; i++) {
                     JSONObject floor = floors.getJSONObject(i);
-                    int floorNum = floor.getInt("floor_num");
-                  //  String win = floor.getString("wing");
-                    String geoJsonStr = floor.getString("geojson");
+                    int floorNum = floor.getInt(FLOOR_NUM_KEY);
+
+                    String geoJsonStr = floor.getString(GEOJSON_KEY);
+
+                    // build geojson object
                     GeoJson floorGeoJson = readGeoJson(geoJsonStr);
                     GeoJsonMapLayer layer = new GeoJsonMapLayer(floorGeoJson);
+
                     layer.setFloorNum(floorNum);
                     map.addLayer(floorNum, layer);
                 }
@@ -112,6 +124,11 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
         return null;
     }
 
+    /**
+     * parse / serialize geosjon response
+     * @param geoJson
+     * @return
+     */
     public GeoJson readGeoJson(String geoJson) {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(GeoJsonGeometry.class,

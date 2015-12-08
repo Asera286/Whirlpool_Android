@@ -25,7 +25,16 @@ public abstract class AsyncGCSBuildingInfoReader extends AsyncTask<Void, Void, B
 
     public abstract void handleBuilding(BuildingModel building);
 
+    // get param
     public static final String GET_PARAM_BUILDING = "building_name=";
+
+    // json response key
+    private static final String SUCCESS_KEY = "success";
+    private static final String BUILDING_INFO_KEY = "building_info";
+    private static final String NUM_WINGS_INFO = "num_wings";
+    private static final String NUM_FLOORS_INFO = "num_floors";
+    private static final String BUILDING_NAME_KEY = "building_name";
+
     public String mBuildingName;
 
     public AsyncGCSBuildingInfoReader(String buildingName) {
@@ -36,16 +45,20 @@ public abstract class AsyncGCSBuildingInfoReader extends AsyncTask<Void, Void, B
     public BuildingModel doInBackground(Void... params) {
         try {
 
+            // build get request url
             StringBuilder builder = new StringBuilder()
                     .append(GCSRestConstants.GCS_BUILDING_BASE_URL)
                     .append(GET_PARAM_BUILDING)
                     .append(mBuildingName);
 
+            // send/acquire response
             String tmpUrl = builder.toString();
             URL url = new URL(tmpUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             int responseCode = conn.getResponseCode();
+
+            // read response into building models
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 BufferedReader reader = new BufferedReader(new
                         InputStreamReader(conn.getInputStream()));
@@ -57,14 +70,14 @@ public abstract class AsyncGCSBuildingInfoReader extends AsyncTask<Void, Void, B
 
                 JSONObject buildingJson = new JSONObject(responseBuilder.toString());
 
-                if(!buildingJson.getBoolean("success")) {
+                if(!buildingJson.getBoolean(SUCCESS_KEY)) {
                     return null;
                 }
 
-                JSONObject buildingInfoJson = buildingJson.getJSONObject("building_info");
-                int wings = buildingInfoJson.getInt("num_wings");
-                int floors = buildingInfoJson.getInt("num_floors");
-                String name = buildingInfoJson.getString("building_name");
+                JSONObject buildingInfoJson = buildingJson.getJSONObject(BUILDING_INFO_KEY);
+                int wings = buildingInfoJson.getInt(NUM_WINGS_INFO);
+                int floors = buildingInfoJson.getInt(NUM_FLOORS_INFO);
+                String name = buildingInfoJson.getString(BUILDING_NAME_KEY);
 
                 return  new BuildingModel(name, floors, wings);
             }

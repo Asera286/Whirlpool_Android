@@ -28,6 +28,8 @@ public abstract class AsyncGCSRoomInfoReader extends AsyncTask<Void, Void, RoomM
 
     public static final String GET_PARAM_BUILDING = "building_name=";
     public static final String GET_PARAM_ROOM = "room_name=";
+    private static final String AMENITIES_KEY = "amenities";
+
     public String mBuildingName;
     public String mRoomName;
 
@@ -65,25 +67,25 @@ public abstract class AsyncGCSRoomInfoReader extends AsyncTask<Void, Void, RoomM
 
                 JSONObject roomJson = new JSONObject(responseBuilder.toString());
 
-                if(!roomJson.getBoolean("success")) {
+                if(!roomJson.getBoolean(GCSRestConstants.SUCCESS_KEY)) {
                     return null;
                 }
 
-                JSONArray amenitiesJson = roomJson.getJSONArray("amenities");
+                JSONArray amenitiesJson = roomJson.getJSONArray(AMENITIES_KEY);
                 String[] amenities = new String[amenitiesJson.length()];
                 for(int i = 0; i < amenities.length; i++) {
                     amenities[i] = amenitiesJson.getString(i);
                 }
-                JSONArray rooms = roomJson.getJSONArray("rooms");
+                JSONArray rooms = roomJson.getJSONArray(GCSRestConstants.ROOMS_KEY);
 
                 if(rooms.length() > 0) {
                     JSONObject roomObj = (JSONObject) rooms.get(0);
-                    String occupancyStatus = roomObj.getString("occupancy_status");
-                    int capacity = roomObj.getInt("capacity");
-                    String extension = roomObj.getString("extension");
-                    String roomType = roomObj.getString("room_type");
-                    String email = roomObj.getString("email");
-                    String resourceName = roomObj.getString("resource_name");
+                    String occupancyStatus = roomObj.getString(GCSRestConstants.OCC_STATUS_KEY);
+                    int capacity = roomObj.getInt(GCSRestConstants.CAPACITY_KEY);
+                    String extension = roomObj.getString(GCSRestConstants.EXT_KEY);
+                    String roomType = roomObj.getString(GCSRestConstants.ROOM_TYPE_KEY);
+                    String email = roomObj.getString(GCSRestConstants.EMAIL_KEY);
+                    String resourceName = roomObj.getString(GCSRestConstants.RESOURCE_NAME_KEY);
 
                     RoomModel model = new RoomModel(mRoomName, mBuildingName, extension, roomType,
                             capacity, occupancyStatus, amenities, email, resourceName);

@@ -15,6 +15,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
  * Created by christianwhite on 12/5/15.
  */
 public class BitmapUtil {
+    /**
+     * Create bitmap image from resource
+     *
+     * @param context
+     * @param iconName
+     * @param widthDip
+     * @param heightDip
+     * @return
+     */
     public static Bitmap resizeMapIcons(Context context, String iconName,
                                          int widthDip, int heightDip){
         int widthPx = (int)dipToPixels(context, widthDip);
@@ -58,7 +67,13 @@ public class BitmapUtil {
         return icon;
     }
 
-
+    /**
+     * Convert density pixel value to pixel for accurate scaling on different
+     * screen densities
+     * @param context
+     * @param dipValue
+     * @return
+     */
     public static float dipToPixels(Context context, float dipValue) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
