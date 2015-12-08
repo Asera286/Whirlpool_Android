@@ -237,8 +237,9 @@ public class RoomActivity extends AppCompatActivity {
             public void onClick(View v) {
                 unselectLastFloor(Integer.toString(mEndFloorNum));
                 selectNextFloor(mEndFloorNum);
-                setNavDistanceView(mPolyLine.getPoints().get(0), mNavStartLocation);
+                setNavDistanceView(mNavEndPosition, mNavStartLocation);
                 findViewById(R.id.switch_floor_button).setVisibility(View.GONE);
+                setCurrentFloorColor();
             }
         });
     }
@@ -268,8 +269,7 @@ public class RoomActivity extends AppCompatActivity {
                     ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor "
                             + Integer.toString(mEndFloorNum) + "?");
                     findViewById(R.id.switch_floor_button).setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     setNavDistanceView(mNavStartLocation, mNavEndPosition);
                 }
 
@@ -363,6 +363,16 @@ public class RoomActivity extends AppCompatActivity {
      * Build floor picker and set on click listener - used to select between building
      * floors
      ************************************************************************************/
+
+    private void setCurrentFloorColor() {
+        final int color = Color.parseColor("#F2A440");
+        for(int i = 0; i < mScrollViewDirectChild.getChildCount(); i++) {
+            TextView v = (TextView) mScrollViewDirectChild.getChildAt(i);
+            if(v.getText().equals(Integer.toString(mCurrentFloorNum))) {
+                v.setBackgroundColor(color);
+            }
+        }
+    }
 
     /**
      * On clicking a floor number select and draw
@@ -846,6 +856,8 @@ public class RoomActivity extends AppCompatActivity {
                         "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
         mNavEndPosition = mEndLocationMarker.getPosition();
+
+        setCurrentFloorColor();
     }
 
     /**
