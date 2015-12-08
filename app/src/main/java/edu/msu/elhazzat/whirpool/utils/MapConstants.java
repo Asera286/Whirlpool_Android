@@ -1,5 +1,7 @@
 package edu.msu.elhazzat.whirpool.utils;
 
+import android.graphics.Color;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.HashMap;
@@ -9,12 +11,15 @@ import java.util.Map;
  * Created by christianwhite on 11/30/15.
  */
 public class MapConstants {
-    public static final int DEFAULT_SELECTED_ROOM_COLOR = -7748364;
     public static final int DEFAULT_CAMERA_ZOOM_LEVEL = 19;
-    public static final int DEFAULT_BUILDILNG_ZOOM_LEVEL = 18;
-    public static final int DEFAULT_FILL_COLOR = -1556;
-    public static final int DEFAULT_STROKE_COLOR = -4868683;
+    public static final int DEFAULT_BUILDING_ZOOM_LEVEL = 18;
     public static final int DEFAULT_STROKE_WIDTH = 1;
+
+    public static final int DEFAULT_SELECTED_ROOM_COLOR = Color.parseColor("#89C4F4");
+    public static final int DEFAULT_OCCUPIED_COLOR = Color.parseColor("#D35400");
+    public static final int DEFAULT_UNOCCUPIED_COLOR = Color.parseColor("#1BBC9B");
+    public static final int DEFAULT_FILL_COLOR = Color.parseColor("#FFF9EC");
+    public static final int DEFAULT_STROKE_COLOR = Color.parseColor("#6C7A89");
 
     // Building constants
     public static final String HALLWAY = "HW";

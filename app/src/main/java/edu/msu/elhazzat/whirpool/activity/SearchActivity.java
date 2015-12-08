@@ -44,6 +44,8 @@ public class SearchActivity extends AppCompatActivity {
     private ExpandableListView mListView;
     private SearchAdapter mSearchAdapter;
 
+    private boolean mDataLoaded = false;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
@@ -108,6 +110,7 @@ public class SearchActivity extends AppCompatActivity {
                     }
                     mSearchAdapter = new SearchAdapter(getApplicationContext(), mBuildingModelsFiltered);
                     mListView.setAdapter(mSearchAdapter);
+                    mDataLoaded = true;
                 }
             }
         }.execute();
@@ -183,13 +186,17 @@ public class SearchActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                doSearch(query);
+                if(mDataLoaded) {
+                    doSearch(query);
+                }
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String query) {
-                doSearch(query);
+                if(mDataLoaded) {
+                    doSearch(query);
+                }
                 return false;
             }
         });

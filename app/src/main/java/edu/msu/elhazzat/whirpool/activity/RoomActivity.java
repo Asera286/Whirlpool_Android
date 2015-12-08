@@ -571,7 +571,10 @@ public class RoomActivity extends AppCompatActivity {
      * Adjust navigation interface
      */
     private void startNavigation() {
-        if(!mNavigationOn) {
+        if(!mNavigationOn && mEndLocationImageView == null) {
+            Toast.makeText(this, "Please select a destination.", Toast.LENGTH_LONG).show();
+        }
+        else if(!mNavigationOn) {
             navigationStarted();
         }
         else {
@@ -869,10 +872,13 @@ public class RoomActivity extends AppCompatActivity {
      * select default coordinates/floor/zoom level for selected building
      */
     private void selectDefaultConfiguration() {
+        animateSlideDown();
+        findViewById(R.id.add_to_favorites).setVisibility(View.INVISIBLE);
         LatLng center = MapConstants.DEFAULT_COORD_MAP.get(mBuildingName);
         final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(center,
-                MapConstants.DEFAULT_BUILDILNG_ZOOM_LEVEL);
+                MapConstants.DEFAULT_BUILDING_ZOOM_LEVEL);
         mMap.moveCamera(cameraUpdate);
+        mRoomNameTextView.setText(mBuildingName);
     }
 
     /**
@@ -881,16 +887,20 @@ public class RoomActivity extends AppCompatActivity {
      */
     private void handleSelectedRoom(final GeoJsonFeature feature) {
         if(feature != null) {
+            findViewById(R.id.add_to_favorites).setVisibility(View.VISIBLE);
             GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
 
             // Attach marker to correct map polygon
-            mEndLocationMarker.remove();
+            if(mEndLocationMarker != null) {
+                mEndLocationMarker.remove();
+            }
 
             LatLng center = polygon.getCentroid();
             mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center).
                     icon(BitmapDescriptorFactory.fromBitmap(BitmapUtil.resizeMapIcons(getApplicationContext(),
                             "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
+            polygon.getGMSPolygon().setFillColor(MapConstants.DEFAULT_SELECTED_ROOM_COLOR);
             // route has changed - remove the polygon
             if (mNavigationOn && mPolyLine != null) {
                 mPolyLine.remove();
@@ -916,9 +926,9 @@ public class RoomActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             public void run() {
                 if (model.getOccupancyStatus().equals("N")) {
-                    gmsPoly.setFillColor(Color.GREEN);
+                    gmsPoly.setFillColor(MapConstants.DEFAULT_UNOCCUPIED_COLOR);
                 } else if (model.getOccupancyStatus().equals("Y")) {
-                    gmsPoly.setFillColor(Color.RED);
+                    gmsPoly.setFillColor(MapConstants.DEFAULT_OCCUPIED_COLOR);
                 }
             }
         });
@@ -1400,21 +1410,4 @@ public class RoomActivity extends AppCompatActivity {
                     }
                 }).show();
     }
-
-    /**
-     * Room is not available on map - show dialog and return to home page
-     */
-    public void roomUnderConstructionDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Room")
-                .setMessage("Room not available.")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
-                        startActivity(homeIntent);
-                    }
-                }).show();
-    }
-
 }
