@@ -71,6 +71,13 @@ public class GeoJsonPolygon extends Geometry<List<List<List<Double>>>> {
         return (crossings % 2 == 1);
     }
 
+    /**
+     * Ray cast algorithm for checking contains method
+     * @param point
+     * @param a
+     * @param b
+     * @return
+     */
     public boolean rayCrossesSegment(LatLng point, LatLng a,LatLng b) {
         double px = point.longitude,
                 py = point.latitude,

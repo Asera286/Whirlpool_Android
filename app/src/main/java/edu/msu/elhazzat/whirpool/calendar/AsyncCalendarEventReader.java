@@ -50,16 +50,18 @@ public abstract class AsyncCalendarEventReader extends AsyncTask<Void, Void, Lis
     }
 
     private List<Event> getCalendarEvents() throws IOException {
-        try {
-            Events events = mCalendarService.events().list("primary")
-                    .setTimeMin(mTime)
-                    .setTimeMax(getEndOfDay(new Date(mTime.getValue())))
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
-                    .execute();
-            return events.getItems();
-        }catch(UserRecoverableAuthIOException e) {
-           handleUserRecoverableAuthIOException(e);
+        if(mCalendarService != null) {
+            try {
+                Events events = mCalendarService.events().list("primary")
+                        .setTimeMin(mTime)
+                        .setTimeMax(getEndOfDay(new Date(mTime.getValue())))
+                        .setOrderBy("startTime")
+                        .setSingleEvents(true)
+                        .execute();
+                return events.getItems();
+            } catch (UserRecoverableAuthIOException e) {
+                handleUserRecoverableAuthIOException(e);
+            }
         }
         return null;
     }

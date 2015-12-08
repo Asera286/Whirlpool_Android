@@ -111,7 +111,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    // Getting All Contacts
+    // Getting All rooms
     public List<RoomModel> getAllRelevantRooms() {
         List<RoomModel> roomList = new ArrayList<RoomModel>();
 
@@ -136,7 +136,7 @@ public class RelevantRoomDbHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
 
-        // return contact list
+        // return room list
         return roomList;
     }
 

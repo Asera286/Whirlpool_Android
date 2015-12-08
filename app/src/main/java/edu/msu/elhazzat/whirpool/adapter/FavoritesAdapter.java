@@ -13,6 +13,8 @@ import java.util.List;
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 
+
+
 /**
  * Created by christianwhite on 11/12/15.
  */
@@ -20,9 +22,7 @@ public class FavoritesAdapter extends BaseExpandableListAdapter {
 
     private static final class ViewHolder {
         TextView roomLabel;
-
         TextView favoritesLabel;
-       // ImageView favoritesImg;
     }
 
     private List<RoomModel> mRoomModels = new ArrayList<>();

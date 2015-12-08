@@ -31,14 +31,15 @@ public abstract class AsyncCalendarEventGetter extends AsyncTask<Void, Void, Eve
 
     @Override
     public Event doInBackground(Void... params) {
-        try {
-            Calendar.Events.Get getter = mService.events().get("primary", mEventId);
-            Event event = getter.execute();
-            return event;
+        if(mService != null) {
+            try {
+                Calendar.Events.Get getter = mService.events().get("primary", mEventId);
+                Event event = getter.execute();
+                return event;
 
-        }
-        catch(IOException e) {
-            Log.e(LOG_TAG, "Error :", e);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error :", e);
+            }
         }
         return null;
     }

@@ -11,6 +11,10 @@ import android.widget.TextView;
 
 import edu.msu.elhazzat.whirpool.R;
 
+/**********************************************************************
+ * Used by room activity to display room amenities and capacity
+ **********************************************************************/
+
 /**
  * Created by christianwhite on 11/15/15.
  */
@@ -18,6 +22,7 @@ public class AmenityAdapter extends ArrayAdapter<String> {
     private String[] mAmenitites;
     private int mCapacity;
 
+    // There two type of items - the capacity and a list of amenities
     private static final int TYPE_ITEM1 = 0;
     private static final int TYPE_ITEM2 = 1;
 
@@ -32,9 +37,13 @@ public class AmenityAdapter extends ArrayAdapter<String> {
         private ImageView imageView;
     }
 
+    /**
+     * Determine the type of view holder to use based on index
+     * @param position
+     * @return
+     */
     @Override
     public int getItemViewType(int position) {
-
         if (position == 0) {
             return TYPE_ITEM1;
         }

@@ -24,8 +24,23 @@ import edu.msu.elhazzat.whirpool.model.RoomModel;
 /**
  * Created by christianwhite on 11/12/15.
  */
+
+/************************************************************************************
+ * Pull all room data for a given building from backend
+ ************************************************************************************/
 public abstract class AsyncGCSAllRooms extends AsyncTask<Void, Void, List<BuildingModel>> {
     public static final String LOG_TAG = AsyncGCSBuildingInfoReader.class.getSimpleName();
+
+    // response json keys
+    private static final String BUILDING_NAME_KEY = "building_name";
+    private static final String ROOMS_KEY = "rooms";
+    private static final String ROOM_NAME_KEY = "room_name";
+    private static final String OCC_STATUS_KEY = "occupancy_status";
+    private static final String CAPACITY_KEY = "capacity";
+    private static final String EXT_KEY = "extension";
+    private static final String ROOM_TYPE_KEY = "room_type";
+    private static final String EMAIL_KEY = "email";
+    private static final String RESOURCE_NAME_KEY = "resource_name";
 
     public abstract void handleBuildings(List<BuildingModel> buildings);
 
@@ -33,39 +48,45 @@ public abstract class AsyncGCSAllRooms extends AsyncTask<Void, Void, List<Buildi
     public List<BuildingModel> doInBackground(Void... params) {
         try {
 
-            StringBuilder builder = new StringBuilder()
-                    .append(GCSRestConstants.GCS_ROOM_BASE_URL);
-
-            String tmpUrl = builder.toString();
+            // build https connection
+            String tmpUrl = GCSRestConstants.GCS_ROOM_BASE_URL;
             URL url = new URL(tmpUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             int responseCode = conn.getResponseCode();
+
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 BufferedReader reader = new BufferedReader(new
                         InputStreamReader(conn.getInputStream()));
                 String line = null;
                 StringBuilder responseBuilder = new StringBuilder();
+
+                // read returned data
                 while((line = reader.readLine()) != null) {
                     responseBuilder.append(line);
                 }
 
+                // prepare room model response
                 List<BuildingModel> buildingModels = new ArrayList<>();
                 JSONArray roomsJson = new JSONArray(responseBuilder.toString());
+
                 for(int i = 0; i < roomsJson.length(); i++) {
                     JSONObject building = roomsJson.getJSONObject(i);
-                    JSONArray rooms = building.getJSONArray("rooms");
+                    JSONArray rooms = building.getJSONArray(ROOMS_KEY);
+
                     List<RoomModel> roomModels = new ArrayList<>();
-                    String buildingAbbrv = building.getString("building_name");
+                    String buildingAbbrv = building.getString(BUILDING_NAME_KEY);
+
                     for(int k = 0; k < rooms.length(); k++) {
                         JSONObject roomObj = (JSONObject) rooms.get(k);
-                        String roomName = roomObj.getString("room_name");
-                        String occupancyStatus = roomObj.getString("occupancy_status");
-                        int capacity = roomObj.getInt("capacity");
-                        String extension = roomObj.getString("extension");
-                        String roomType = roomObj.getString("room_type");
-                        String email = roomObj.getString("email");
-                        String resourceName = roomObj.getString("resource_name");
+
+                        String roomName = roomObj.getString(ROOM_NAME_KEY);
+                        String occupancyStatus = roomObj.getString(OCC_STATUS_KEY);
+                        int capacity = roomObj.getInt(CAPACITY_KEY);
+                        String extension = roomObj.getString(EXT_KEY);
+                        String roomType = roomObj.getString(ROOM_TYPE_KEY);
+                        String email = roomObj.getString(EMAIL_KEY);
+                        String resourceName = roomObj.getString(RESOURCE_NAME_KEY);
 
                         RoomModel model = new RoomModel(roomName, buildingAbbrv, extension, roomType,
                                 capacity, occupancyStatus, null, email, resourceName);

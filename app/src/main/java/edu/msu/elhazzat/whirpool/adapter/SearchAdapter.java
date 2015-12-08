@@ -20,6 +20,11 @@ import edu.msu.elhazzat.whirpool.model.BuildingModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.utils.WIMConstants;
 
+/***************************************************************************
+ * Customized adapter for searching/filtering rooms by building in
+ * search activity
+ ***************************************************************************/
+
 /**
  * Created by christianwhite on 11/11/15.
  */
@@ -44,6 +49,7 @@ public class SearchAdapter extends BaseExpandableListAdapter {
         inflater = LayoutInflater.from(context);
         mBuildingModels = itemList;
 
+        // dynamically get building image for listview headers
         mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_icon);
         mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.ben_icon);
         mBuildingMap.put(WIMConstants.BHTC, R.drawable.bhtc_icon);

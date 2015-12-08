@@ -26,12 +26,13 @@ public abstract class AsyncCalendarEventDeleter extends AsyncTask<Void, Void, Vo
 
     @Override
     public Void doInBackground(Void... params) {
-        try {
-            Calendar.Events.Delete delete = mService.events().delete("primary", mEventId);
-            delete.execute();
-        }
-        catch(IOException e) {
-            Log.e(LOG_TAG, "Error :", e);
+        if(mService != null) {
+            try {
+                Calendar.Events.Delete delete = mService.events().delete("primary", mEventId);
+                delete.execute();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error :", e);
+            }
         }
         return null;
     }

@@ -46,6 +46,7 @@ public class EventAdapter extends BaseAdapter {
         mContext = context;
         mCalendarListValues = eventModels;
 
+        // Need to dynamically grab image based on building name
         mBuildingMap.put(WIMConstants.WHIRLPOOL_DEFAULT, R.drawable.whirlpool_icon_clear);
         mBuildingMap.put(WIMConstants.BENSON_ROAD, R.drawable.ben_icon_clear);
         mBuildingMap.put(WIMConstants.BHTC, R.drawable.bhtc_icon_clear);

@@ -27,14 +27,14 @@ public abstract class AsyncCalendarEventWriter extends AsyncTask<Void, Void, Boo
 
     @Override
     public Boolean doInBackground(Void... params) {
-        try {
-            mService.events().insert("primary", mEvent).execute();
-            return true;
+        if(mService != null) {
+            try {
+                mService.events().insert("primary", mEvent).execute();
+                return true;
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error :", e);
+            }
         }
-        catch(IOException e) {
-            Log.e(LOG_TAG, "Error :", e);
-        }
-
         return false;
     }
 

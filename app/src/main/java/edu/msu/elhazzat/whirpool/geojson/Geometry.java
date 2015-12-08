@@ -8,6 +8,12 @@ import java.util.List;
 /**
  * Created by christianwhite on 10/13/15.
  */
+
+/******************************************************************************
+ * Basic abstraction of geojson geometry - consists of a list of points
+ * where the dimensions of the points list varies depending on the geometry
+ * type
+ *****************************************************************************/
 public class Geometry<T> {
     protected T mPoints;
     public T getPoints() {

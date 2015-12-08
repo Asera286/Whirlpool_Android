@@ -28,12 +28,14 @@ public abstract class AsyncCalendarEventUpdater extends AsyncTask<Void, Void, Ev
 
     @Override
     public Event doInBackground(Void... params) {
-        try {
-            Calendar.Events.Update updater = mService.events().update("primary", mEventId, mUpdatedEvent);
-            return updater.execute();
-        }
-        catch(IOException e) {
-            Log.e(LOG_TAG, "Error :", e);
+        if(mService != null) {
+            try {
+                Calendar.Events.Update updater = mService.events()
+                        .update("primary", mEventId, mUpdatedEvent);
+                return updater.execute();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error :", e);
+            }
         }
         return null;
     }

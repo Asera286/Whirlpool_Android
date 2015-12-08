@@ -16,6 +16,10 @@ import java.util.List;
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 
+/************************************************************
+ *  Used to display listview of room model objects
+ ************************************************************/
+
 /**
  * Created by christianwhite on 9/20/15.
  */

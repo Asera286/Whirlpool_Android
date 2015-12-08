@@ -1,13 +1,17 @@
 package edu.msu.elhazzat.whirpool.model;
 
+/**
+ * Created by Stephanie on 9/29/2015.
+ */
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.api.client.util.DateTime;
 
-/**
- * Created by Stephanie on 9/29/2015.
- */
+/************************************************************************************
+ * Abstraction of calendar event
+ ************************************************************************************/
 public class EventModel implements Parcelable {
 
     private String mStartTime;
@@ -31,6 +35,10 @@ public class EventModel implements Parcelable {
         mEndTime = endTime;
     }
 
+    /**
+     * Allow for passing in bundle
+     * @param in
+     */
     public EventModel(Parcel in){
         String[] data = new String[6];
 

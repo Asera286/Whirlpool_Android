@@ -49,34 +49,35 @@ public abstract class AsyncCalendarFreeBusyReader extends AsyncTask<Void, Void, 
 
     @Override
     protected List<TimePeriod> doInBackground(Void... params) {
-        try {
-            Calendar.Freebusy freebusy = mCalendarService.freebusy();
-            FreeBusyRequest request = new FreeBusyRequest();
+        if(mCalendarService != null) {
+            try {
+                Calendar.Freebusy freebusy = mCalendarService.freebusy();
+                FreeBusyRequest request = new FreeBusyRequest();
 
-            List<FreeBusyRequestItem> items = new ArrayList<>();
-            FreeBusyRequestItem emailItem = new FreeBusyRequestItem();
-            emailItem.setId(mEmail);
-            items.add(emailItem);
+                List<FreeBusyRequestItem> items = new ArrayList<>();
+                FreeBusyRequestItem emailItem = new FreeBusyRequestItem();
+                emailItem.setId(mEmail);
+                items.add(emailItem);
 
-            request.setTimeMin(mTimeMin);
-            request.setTimeMax(mTimeMax);
-            request.setItems(items);
+                request.setTimeMin(mTimeMin);
+                request.setTimeMax(mTimeMax);
+                request.setItems(items);
 
-            Calendar.Freebusy.Query query =  freebusy.query(request);
+                Calendar.Freebusy.Query query = freebusy.query(request);
 
-            FreeBusyResponse response = query.execute();
-            Map<String, FreeBusyCalendar> responseItems =  response.getCalendars();
-            Iterator it = responseItems.entrySet().iterator();
-            while(it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
-                FreeBusyCalendar calendar = (FreeBusyCalendar) pair.getValue();
-                return calendar.getBusy();
+                FreeBusyResponse response = query.execute();
+                Map<String, FreeBusyCalendar> responseItems = response.getCalendars();
+                Iterator it = responseItems.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    FreeBusyCalendar calendar = (FreeBusyCalendar) pair.getValue();
+                    return calendar.getBusy();
+                }
+            } catch (UserRecoverableAuthIOException e) {
+                Log.e(LOG_TAG, "Error :", e);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error :", e);
             }
-        }catch(UserRecoverableAuthIOException e) {
-            Log.e(LOG_TAG, "Error :", e);
-        }
-        catch(IOException e) {
-            Log.e(LOG_TAG, "Error :", e);
         }
         return null;
     }

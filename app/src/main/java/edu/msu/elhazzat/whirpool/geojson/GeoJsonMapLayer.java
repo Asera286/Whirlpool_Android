@@ -13,6 +13,8 @@ import com.google.android.gms.maps.model.Polyline;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.msu.elhazzat.whirpool.utils.MapConstants;
+
 /**
  * Created by christianwhite on 10/8/15.
  */
@@ -147,6 +149,7 @@ public class GeoJsonMapLayer {
 
     public void drawOnUiThread(final GoogleMap map, final int fillColor,
                                final int strokeColor, final int strokeWidth) {
+
         for (GeoJsonFeature feature : mGeoJson.getGeoJsonFeatures()) {
             final GeoJsonGeometry jsonGeometry = feature.getGeoJsonGeometry();
             if (jsonGeometry == null) {
@@ -157,14 +160,14 @@ public class GeoJsonMapLayer {
                 List<LatLng> latLngPoly = Geometry.geoJsonCoordinateListToLatLng(poly1.getPoints().get(0), true);
                 int color = fillColor;
                 try {
-                    switch (feature.getProperty("room")) {
-                        case "HW":
+                    switch (feature.getProperty(GeoJsonConstants.ROOM_TAG)) {
+                        case MapConstants.HALLWAY:
                             color = Color.WHITE;
                             break;
-                        case "WB":
-                        case "MB":
-                        case "STR":
-                        case "ELV":
+                        case MapConstants.WOMENS_BATHROOM:
+                        case MapConstants.MENS_BATHROOM:
+                        case MapConstants.STAIRS:
+                        case MapConstants.ELEVATOR:
                             color = Color.rgb(234, 230, 245);
                             break;
                     }

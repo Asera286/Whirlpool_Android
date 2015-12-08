@@ -7,6 +7,10 @@ import android.os.Parcelable;
 /**
  * Created by Asera on 10/9/2015.
  */
+
+/************************************************************************************
+ * Abstraction of map room
+ ************************************************************************************/
 public class RoomModel implements Parcelable {
 
     private String mBuildingName = null;

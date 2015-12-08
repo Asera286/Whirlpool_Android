@@ -9,14 +9,14 @@ import java.util.HashMap;
  * Created by christianwhite on 10/8/15.
  */
 
-/**
+/****************************************************************************
  * A "geo json map" will represent multiple geojson layers
- */
+ ****************************************************************************/
 public class GeoJsonMap {
 
-    private GoogleMap mMap;
-    public HashMap<Integer, GeoJsonMapLayer> mLayers = new HashMap<>();
-    private int mCurrentLayer;
+    private GoogleMap mMap; // map context to draw layers on
+    public HashMap<Integer, GeoJsonMapLayer> mLayers = new HashMap<>(); // floor -> map
+    private int mCurrentLayer; // currently drawn map layer
 
     public GeoJsonMap(GoogleMap map) {
         mMap = map;
@@ -35,16 +35,18 @@ public class GeoJsonMap {
         mLayers.put(floor, layer);
     }
 
+    /**
+     * Call draw on select map layer if the index exists
+     * @param floor
+     * @param fillColor
+     * @param strokeColor
+     * @param strokeWidth
+     */
     public void drawLayer(int floor, int fillColor, int strokeColor, int strokeWidth) {
         if(mLayers.containsKey(floor)) {
             mLayers.get(floor).draw(mMap, fillColor, strokeColor, strokeWidth);
-            mCurrentLayer = floor;
-        }
-    }
 
-    public void drawLayerAsync(int floor, int fillColor, int strokeColor, int strokeWidth) {
-        if(mLayers.containsKey(floor)) {
-            mLayers.get(floor).asyncDraw(mMap, fillColor, strokeColor, strokeWidth);
+            // change current layer
             mCurrentLayer = floor;
         }
     }
@@ -60,6 +62,11 @@ public class GeoJsonMap {
         }
     }
 
+    /**
+     * Layer is already drawn - toggle visibility if the floor exists
+     * @param floor
+     * @param toShow
+     */
     public void showLayer(int floor, boolean toShow) {
         if(mLayers.containsKey(floor)) {
             if (toShow) {

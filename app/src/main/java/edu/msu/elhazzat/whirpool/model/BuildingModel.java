@@ -6,6 +6,10 @@ import java.util.List;
 /**
  * Created by christianwhite on 11/11/15.
  */
+
+/************************************************************************************
+ * Abstraction of map building
+ ************************************************************************************/
 public class BuildingModel {
     private int mFloors;
     private int mWings;

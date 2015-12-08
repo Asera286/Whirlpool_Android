@@ -9,13 +9,17 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
+/*****************************************************************
+ * GeoJson object built using serializer
+ *****************************************************************/
 public class GeoJson {
     @SerializedName("name")
-    private String mGeoJsonName;
+    private String mGeoJsonName;    //name of collection
 
     @SerializedName("type")
-    private String mGeoJsonType;
+    private String mGeoJsonType;    //type of collection
 
+    // feature consists of geometry and a map of properties (room name etc.)
     @SerializedName("features")
     private List<GeoJsonFeature> mGeoJsonFeatures = new ArrayList<GeoJsonFeature>();
 
