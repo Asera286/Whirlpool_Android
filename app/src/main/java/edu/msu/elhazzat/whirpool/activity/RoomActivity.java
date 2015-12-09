@@ -972,6 +972,28 @@ public class RoomActivity extends AppCompatActivity {
                             "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
             polygon.getGMSPolygon().setFillColor(MapConstants.DEFAULT_SELECTED_ROOM_COLOR);
+
+            for(GeoJsonFeature f : mGeoJsonMap.getCurrentLayer().getGeoJson().getGeoJsonFeatures()) {
+                GeoJsonPolygon poly1 = (GeoJsonPolygon) f.getGeoJsonGeometry().getGeometry();
+                int color = MapConstants.DEFAULT_FILL_COLOR;
+                try {
+                    switch (feature.getProperty(GeoJsonConstants.ROOM_TAG)) {
+                        case MapConstants.HALLWAY:
+                            color = Color.WHITE;
+                            break;
+                        case MapConstants.WOMENS_BATHROOM:
+                        case MapConstants.MENS_BATHROOM:
+                        case MapConstants.STAIRS:
+                        case MapConstants.ELEVATOR:
+                            color = Color.rgb(234, 230, 245);;
+                            break;
+                    }
+                } catch (NullPointerException e) {
+
+                }
+
+                poly1.getGMSPolygon().setFillColor(color);
+            }
             // route has changed - remove the polygon
             if (mNavigationOn && mPolyLine != null) {
                 mPolyLine.remove();
@@ -1014,7 +1036,6 @@ public class RoomActivity extends AppCompatActivity {
                 GeoJsonMapLayer layer = mGeoJsonMap.getCurrentLayer();
                 for(RoomModel model : rooms) {
                     for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
-
                         if (model.getRoomName().equals(feature.getProperty(GeoJsonConstants.ROOM_TAG))) {
                             if (feature.getGeoJsonGeometry().getType().equals(GeoJsonConstants.POLYGON)) {
 

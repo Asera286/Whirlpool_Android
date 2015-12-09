@@ -20,6 +20,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -47,6 +49,7 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
     public static final String GET_PARAM = "building_name=";
     public String mBuildingName;
     private Context mContext;
+    private GeoJsonMap mMap = new GeoJsonMap();
 
     public AsyncParseGeoJsonGCS(Context context, String buildingName) {
         mBuildingName = buildingName;
@@ -105,22 +108,41 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
                 }
 
                 // parse geojson for each floor
-                JSONArray floors = jsonObj.getJSONArray(FLOORS_KEY);
+                final JSONArray floors = jsonObj.getJSONArray(FLOORS_KEY);
+                List<Thread> t = new ArrayList<>();
                 for(int i = 0; i < count; i++) {
-                    JSONObject floor = floors.getJSONObject(i);
-                    int floorNum = floor.getInt(FLOOR_NUM_KEY);
+                    final int index = i;
+                    t.add(new Thread() {
+                        public void run() {
+                            try {
+                                JSONObject floor = floors.getJSONObject(index);
+                                int floorNum = floor.getInt(FLOOR_NUM_KEY);
 
-                    String geoJsonStr = floor.getString(GEOJSON_KEY);
+                                String geoJsonStr = floor.getString(GEOJSON_KEY);
 
-                    // build geojson object
-                    GeoJson floorGeoJson = readGeoJson(geoJsonStr);
-                    GeoJsonMapLayer layer = new GeoJsonMapLayer(floorGeoJson);
+                                // build geojson object
+                                GeoJson floorGeoJson = readGeoJson(geoJsonStr);
+                                GeoJsonMapLayer layer = new GeoJsonMapLayer(floorGeoJson);
 
-                    layer.setFloorNum(floorNum);
-                    map.addLayer(floorNum, layer);
+                                layer.setFloorNum(floorNum);
+
+                                addLayerToMap(floorNum, layer);
+
+                            } catch (JSONException e) {
+                                Log.e(LOG_TAG, "Error :", e);
+                            }
+                        }
+                    });
                 }
 
-                return map;
+                for(int i = 0; i < t.size(); i++) {
+                    t.get(i).start();
+                }
+
+                for(int k = 0; k < t.size(); k++) {
+                    t.get(k).join();
+                }
+                return mMap;
             }
         }
         catch(ProtocolException e) {
@@ -132,6 +154,10 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
         catch(IOException e) {
             Log.e(LOG_TAG, "Error :", e);
         }
+        catch(InterruptedException e) {
+            Log.e(LOG_TAG, "Error :", e);
+        }
+
 
         return null;
     }
@@ -150,6 +176,9 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
         return gson.fromJson(geoJson, GeoJson.class);
     }
 
+    public void addLayerToMap(final int floorNum, final GeoJsonMapLayer layer) {
+        mMap.addLayer(floorNum, layer);
+    }
 
     @Override
     public void onPostExecute(GeoJsonMap map) {
