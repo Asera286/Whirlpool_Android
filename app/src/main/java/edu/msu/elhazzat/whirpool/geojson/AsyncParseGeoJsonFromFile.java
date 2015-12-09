@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -59,7 +60,7 @@ public abstract class AsyncParseGeoJsonFromFile extends AsyncTask<Void, Void, Ge
     @Override
     public GeoJsonMap doInBackground(Void... params) {
         try {
-            FileInputStream fis = mContext.openFileInput(mFileName);
+            FileInputStream fis = new FileInputStream(new File(mFileName));
 
             BufferedReader reader = new BufferedReader(new
                     InputStreamReader(fis));
@@ -69,6 +70,8 @@ public abstract class AsyncParseGeoJsonFromFile extends AsyncTask<Void, Void, Ge
             while((line = reader.readLine()) != null) {
                 responseBuilder.append(line);
             }
+
+            fis.close();
 
             GeoJsonMap map = new GeoJsonMap();
 

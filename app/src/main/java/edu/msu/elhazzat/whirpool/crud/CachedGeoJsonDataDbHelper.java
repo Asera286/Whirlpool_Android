@@ -14,7 +14,7 @@ public class CachedGeoJsonDataDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
 
     // Database Name
-    public static final String DATABASE_NAME = "WhirlpoolCacheDB3.db";
+    public static final String DATABASE_NAME = "WhirlpoolCacheDB5.db";
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String TIME_STAMP_TYPE = " INTEGER";
@@ -73,11 +73,7 @@ public class CachedGeoJsonDataDbHelper extends SQLiteOpenHelper {
                 new String[]{buildingName}, null, null, null, null);
 
         if(cursor.moveToFirst()) {
-            String anotherTest = "test1";
-            int test = cursor.getInt(cursor.getColumnIndex(LAST_UPDATE));
-            String tester = "test";
-            String testing = SQL_CREATE_ENTRIES;
-            return test;
+            return cursor.getInt(cursor.getColumnIndex(LAST_UPDATE));
         }
 
         return null;
