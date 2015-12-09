@@ -1,6 +1,6 @@
 # Whirlpool_Android
 
-Note on running the application on Xcode:
+Note on running the application on Android Studio:
 
 1. Clone the repository
 
