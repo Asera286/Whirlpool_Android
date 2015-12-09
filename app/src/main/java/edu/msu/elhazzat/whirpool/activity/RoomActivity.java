@@ -163,13 +163,14 @@ public class RoomActivity extends AppCompatActivity {
     private boolean mDirectRouteExists = true;
     private boolean mThreeStageRoute = false;
 
+    private GeoJsonPolygon mCurrentSelectedPoly;
+    private int mLastFillColor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.room_layout);
 
-        //TODO: Check if room exists
-        //TODO: Add default building coordinates
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Get room/building information if a calendar event or favorite room
@@ -370,7 +371,6 @@ public class RoomActivity extends AppCompatActivity {
         });
     }
 
-
     /**
      * Create imageview for "start" location - start in this
      * context means navigation point selected during
@@ -447,10 +447,10 @@ public class RoomActivity extends AppCompatActivity {
      * @param newFloorNum
      */
     private void selectNextFloor(final int newFloorNum) {
-        if(newFloorNum != mEndFloorNum) {
+        if(mEndLocationMarker != null && newFloorNum != mEndFloorNum) {
             mEndLocationMarker.setVisible(false);
         }
-        else {
+        else if(mEndLocationMarker != null) {
             mEndLocationMarker.setVisible(true);
         }
 
@@ -722,7 +722,6 @@ public class RoomActivity extends AppCompatActivity {
      * Adapters
      ***************************************************************************************/
 
-
     /**
      * Pull room data on clicking a particular room - populate room attribute list view
      * @param roomName
@@ -837,7 +836,7 @@ public class RoomActivity extends AppCompatActivity {
                 mMap = mMapFragment.getMap();
             }
             catch(NullPointerException e) {
-
+                Log.e(LOG_TAG, e.getMessage());
             }
 
             if (mMap != null) {
@@ -971,29 +970,15 @@ public class RoomActivity extends AppCompatActivity {
                     icon(BitmapDescriptorFactory.fromBitmap(BitmapUtil.resizeMapIcons(getApplicationContext(),
                             "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
+
+            int lastFillTmp = polygon.getGMSPolygon().getFillColor();
             polygon.getGMSPolygon().setFillColor(MapConstants.DEFAULT_SELECTED_ROOM_COLOR);
-
-            for(GeoJsonFeature f : mGeoJsonMap.getCurrentLayer().getGeoJson().getGeoJsonFeatures()) {
-                GeoJsonPolygon poly1 = (GeoJsonPolygon) f.getGeoJsonGeometry().getGeometry();
-                int color = MapConstants.DEFAULT_FILL_COLOR;
-                try {
-                    switch (feature.getProperty(GeoJsonConstants.ROOM_TAG)) {
-                        case MapConstants.HALLWAY:
-                            color = Color.WHITE;
-                            break;
-                        case MapConstants.WOMENS_BATHROOM:
-                        case MapConstants.MENS_BATHROOM:
-                        case MapConstants.STAIRS:
-                        case MapConstants.ELEVATOR:
-                            color = Color.rgb(234, 230, 245);;
-                            break;
-                    }
-                } catch (NullPointerException e) {
-
-                }
-
-                poly1.getGMSPolygon().setFillColor(color);
+            if(mCurrentSelectedPoly != null) {
+                mCurrentSelectedPoly.getGMSPolygon().setFillColor(mLastFillColor);
             }
+            mLastFillColor = lastFillTmp;
+            mCurrentSelectedPoly = polygon;
+
             // route has changed - remove the polygon
             if (mNavigationOn && mPolyLine != null) {
                 mPolyLine.remove();

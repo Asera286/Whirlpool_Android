@@ -35,7 +35,7 @@ public class MapConstants {
     public static final Map<String, LatLng> DEFAULT_COORD_MAP = new HashMap<>();
 
     static {
-        DEFAULT_COORD_MAP.put("RV", new LatLng(42.1122928978815,-86.4693121212619));
+        DEFAULT_COORD_MAP.put("RV", new LatLng(42.1124108364658,-86.4691314947496));
         DEFAULT_COORD_MAP.put("GHQ",new LatLng(42.1495124220138,-86.4429421190094));
     }
 

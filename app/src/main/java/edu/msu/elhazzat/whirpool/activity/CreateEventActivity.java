@@ -216,7 +216,7 @@ public class CreateEventActivity extends AppCompatActivity {
      */
     private String getTime(int hourOfDay, int minute) {
         Calendar c = Calendar.getInstance();
-        c.set(0,0,0, hourOfDay, minute);
+        c.set(0, 0, 0, hourOfDay, minute);
         SimpleDateFormat formatDate = new SimpleDateFormat("hh:mm a");
         return  formatDate.format(c.getTime());
     }
@@ -254,7 +254,7 @@ public class CreateEventActivity extends AppCompatActivity {
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 mIgnoreTimeSet = false;
-                ((TimePickerDialog)dialog).onClick(dialog, which);
+                ((TimePickerDialog) dialog).onClick(dialog, which);
             }
         });
 
@@ -301,7 +301,7 @@ public class CreateEventActivity extends AppCompatActivity {
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 mIgnoreTimeSet = false;
-                ((TimePickerDialog)dialog).onClick(dialog, which);
+                ((TimePickerDialog) dialog).onClick(dialog, which);
             }
         });
 
@@ -442,13 +442,14 @@ public class CreateEventActivity extends AppCompatActivity {
      */
     private void addEvent() {
         Event event = createEvent();
-
+        if(badEventNotification(event)) {
+            Toast.makeText(this, "Start and end date must be specified", Toast.LENGTH_LONG).show();
+        }
         com.google.api.services.calendar.Calendar service = CalendarServiceHolder.getInstance().getService();
 
         if(mEvent != null) {
            editEventDialog(service, event);
         }
-
         else {
            addEventDialog(service, event);
         }
@@ -507,34 +508,17 @@ public class CreateEventActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.no, null).show();
     }
 
-    //TODO: check room available
-    /*private void checkRoomAvailable(String email) {
-        long nowLong = System.currentTimeMillis();
-        Date nowDate = new Date(nowLong);
-        final DateTime now = new DateTime(nowLong);
-        DateTime end = new DateTime(getEndOfDay(nowDate));
-
-        // get free busy information
-        new AsyncCalendarFreeBusyReader(CalendarServiceHolder.getInstance().getService(),
-                email, now, end) {
-            @Override
-            public void handleTimePeriods(List<TimePeriod> timePeriods) {
-                boolean isBusy = false;
-                if(timePeriods != null) {
-                    for (TimePeriod period : timePeriods) {
-                        if (now.getValue() >= period.getStart().getValue() && now.getValue() <=
-                                period.getEnd().getValue()) {
-                            isBusy = true;
-                            break;
-                        }
-                    }
-
-                    mAmenitiesAdapter = new AmenityAdapter(getApplicationContext(), 0, occupancy, isBusy, amenities);
-                    mRoomAttributeListView.setAdapter(mAmenitiesAdapter);
-                }
-            }
-        }.execute();
-    }*/
+    /**
+     * Confirm user intent to add new event
+     * @param service
+     * @param event
+     */
+    public boolean badEventNotification(Event event) {
+        if(event.getStart() == null || event.getEnd() == null) {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
