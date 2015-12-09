@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -37,7 +36,6 @@ import java.util.Date;
 import java.util.List;
 
 import edu.msu.elhazzat.whirpool.R;
-import edu.msu.elhazzat.whirpool.adapter.RoomAdapter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventGetter;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventUpdater;
 import edu.msu.elhazzat.whirpool.calendar.AsyncCalendarEventWriter;
@@ -65,10 +63,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private Calendar mBeginTime;
     private Calendar mEndTime;
-
-    private List<RoomModel> mRooms = new ArrayList<>();
-    private RoomAdapter mLocationAdapter;
-    private ListView mLocationListView;
 
     private boolean mIgnoreTimeSet;
 
@@ -420,6 +414,10 @@ public class CreateEventActivity extends AppCompatActivity {
             event.setStart(startEventDateTime);
         }
         else {
+            if(mEditEvent == null) {
+                Toast.makeText(this, "Start and end date must be specified", Toast.LENGTH_LONG).show();
+                return null;
+            }
             event.setStart(mEditEvent.getStart());
         }
 
@@ -431,6 +429,10 @@ public class CreateEventActivity extends AppCompatActivity {
             event.setEnd(endEventDateTime);
         }
         else {
+            if(mEditEvent == null) {
+                Toast.makeText(this, "Start and end date must be specified", Toast.LENGTH_LONG).show();
+                return null;
+            }
             event.setEnd(mEditEvent.getEnd());
         }
 
@@ -442,16 +444,14 @@ public class CreateEventActivity extends AppCompatActivity {
      */
     private void addEvent() {
         Event event = createEvent();
-        if(badEventNotification(event)) {
-            Toast.makeText(this, "Start and end date must be specified", Toast.LENGTH_LONG).show();
-        }
-        com.google.api.services.calendar.Calendar service = CalendarServiceHolder.getInstance().getService();
+        if(event != null) {
+            com.google.api.services.calendar.Calendar service = CalendarServiceHolder.getInstance().getService();
 
-        if(mEvent != null) {
-           editEventDialog(service, event);
-        }
-        else {
-           addEventDialog(service, event);
+            if (mEvent != null) {
+                editEventDialog(service, event);
+            } else {
+                addEventDialog(service, event);
+            }
         }
     }
 
@@ -506,18 +506,6 @@ public class CreateEventActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Event updated", Toast.LENGTH_SHORT).show();
                     }})
                 .setNegativeButton(android.R.string.no, null).show();
-    }
-
-    /**
-     * Confirm user intent to add new event
-     * @param service
-     * @param event
-     */
-    public boolean badEventNotification(Event event) {
-        if(event.getStart() == null || event.getEnd() == null) {
-            return false;
-        }
-        return true;
     }
 
     @Override

@@ -11,8 +11,8 @@ import java.util.Map;
  * Created by christianwhite on 11/30/15.
  */
 public class MapConstants {
-    public static final int DEFAULT_CAMERA_ZOOM_LEVEL = 19;
-    public static final int DEFAULT_BUILDING_ZOOM_LEVEL = 18;
+    public static final float DEFAULT_CAMERA_ZOOM_LEVEL = 19;
+    public static final float DEFAULT_BUILDING_ZOOM_LEVEL = 18.5f;
     public static final int DEFAULT_STROKE_WIDTH = 1;
 
     public static final int DEFAULT_SELECTED_ROOM_COLOR = Color.parseColor("#89C4F4");
@@ -35,7 +35,7 @@ public class MapConstants {
     public static final Map<String, LatLng> DEFAULT_COORD_MAP = new HashMap<>();
 
     static {
-        DEFAULT_COORD_MAP.put("RV", new LatLng(42.1124108364658,-86.4691314947496));
+        DEFAULT_COORD_MAP.put("RV", new LatLng(42.1124711728183,-86.4681740900058));
         DEFAULT_COORD_MAP.put("GHQ",new LatLng(42.1495124220138,-86.4429421190094));
     }
 

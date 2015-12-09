@@ -166,6 +166,8 @@ public class RoomActivity extends AppCompatActivity {
     private GeoJsonPolygon mCurrentSelectedPoly;
     private int mLastFillColor;
 
+    private boolean mBlockNavigation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -284,8 +286,16 @@ public class RoomActivity extends AppCompatActivity {
                 findViewById(R.id.nav_info_layout).setBackgroundColor(Color.parseColor("#F2A440"));
 
                 mMap.setOnCameraChangeListener(null);
-                fixStartNavIcon(true);
-                drawNavRoute();
+                try {
+                    fixStartNavIcon(true);
+                    drawNavRoute();
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                    return;
+                } catch (NullPointerException e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                    return;
+                }
 
                 if (mCurrentFloorNum != mEndFloorNum && (mCurrentFloorNum == 1 || mDirectRouteExists)) {
                     ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor "
@@ -393,6 +403,12 @@ public class RoomActivity extends AppCompatActivity {
             if(v.getText().equals(Integer.toString(mCurrentFloorNum))) {
                 v.setBackgroundColor(color);
             }
+            if(v.getText().equals("T") && !mBlockNavigation) {
+                mBlockNavigation = true;
+            }
+            else if(mBlockNavigation) {
+                mBlockNavigation = false;
+            }
         }
     }
 
@@ -484,7 +500,8 @@ public class RoomActivity extends AppCompatActivity {
             mPolyLine.remove();
         }
 
-        if(mNavigationOn) {
+        if((mNavigationOn && mFixedNavIcon != null) && (mCurrentFloorNum == mStartFloorNum
+                || mEndFloorNum == mCurrentFloorNum)) {
             drawNavRouteOnFloorChange();
         }
     }
@@ -588,6 +605,7 @@ public class RoomActivity extends AppCompatActivity {
 
         if(mFixedNavIcon != null) {
             mFixedNavIcon.remove();
+            mFixedNavIcon = null;
         }
 
         findViewById(R.id.nav_info_layout).setBackgroundColor(Color.parseColor("#B5B5B5"));
@@ -598,6 +616,11 @@ public class RoomActivity extends AppCompatActivity {
      * Adjust navigation interface
      */
     private void startNavigation() {
+        if(mBlockNavigation) {
+            Toast.makeText(this, "Current floor is not valid - please select another.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if(!mNavigationOn && mEndLocationMarker == null) {
             Toast.makeText(this, "Please select a destination.", Toast.LENGTH_LONG).show();
         }
@@ -956,7 +979,7 @@ public class RoomActivity extends AppCompatActivity {
      * @param feature
      */
     private void handleSelectedRoom(final GeoJsonFeature feature) {
-        if(feature != null) {
+        if(feature != null && !mNavigationOn) {
             findViewById(R.id.add_to_favorites).setVisibility(View.VISIBLE);
             GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
 
