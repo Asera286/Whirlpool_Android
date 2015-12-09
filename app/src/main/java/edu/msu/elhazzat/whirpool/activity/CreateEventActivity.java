@@ -65,9 +65,6 @@ public class CreateEventActivity extends AppCompatActivity {
     private Calendar mEndTime;
 
     private boolean mIgnoreTimeSet;
-    private boolean mDateSelected;
-    private boolean mStartTimeSelected;
-    private boolean mEndTimeSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,8 +193,6 @@ public class CreateEventActivity extends AppCompatActivity {
                 mEndTime.set(Calendar.YEAR, year);
                 mEndTime.set(Calendar.MONTH, monthOfYear);
                 mEndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                mDateSelected = true;
             }
         };
 
@@ -255,7 +250,6 @@ public class CreateEventActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 mIgnoreTimeSet = false;
                 ((TimePickerDialog) dialog).onClick(dialog, which);
-                mEndTimeSelected = true;
             }
         });
 
@@ -304,7 +298,6 @@ public class CreateEventActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 mIgnoreTimeSet = false;
                 ((TimePickerDialog) dialog).onClick(dialog, which);
-                mEndTimeSelected = true;
             }
         });
 
@@ -380,7 +373,11 @@ public class CreateEventActivity extends AppCompatActivity {
      * @return
      */
     private Event createEvent() {
-        if(!mDateSelected || !mStartTimeSelected || !mEndTimeSelected) {
+        String bText = mBeginTimeTextView.getText().toString();
+        String eText = mEndTimeTextView.getText().toString();
+        String dText = mDateTextView.getText().toString();
+
+        if(bText.equals("Start") || eText.equals("End") || dText.equals("Date")) {
             Toast.makeText(this, "Start and end date must be specified", Toast.LENGTH_LONG).show();
             return null;
         }
