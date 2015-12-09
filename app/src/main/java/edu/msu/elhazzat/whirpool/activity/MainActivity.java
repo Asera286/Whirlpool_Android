@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
@@ -15,6 +16,9 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.msu.elhazzat.whirpool.R;
 
@@ -95,13 +99,25 @@ public class MainActivity extends FragmentActivity implements
      */
     @Override
     public void onConnected(Bundle bundle) {
-        Intent homeIntent = new Intent(this, HomeActivity.class);
-        SharedPreferences myPrefs = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor e = myPrefs.edit();
-        e.putString(PREF_FILE_ACCOUNT_NAME_KEY,  Plus.AccountApi.getAccountName(mGoogleApiClient));
-        e.commit();
-        //homeIntent.putExtra("accountName", Plus.AccountApi.getAccountName(mGoogleApiClient));
-        startActivity(homeIntent);
+        // ensure that email address is from whirlpool domain
+        String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+
+        Pattern pattern = Pattern.compile("\\S+?@whirlpool\\.com");
+        Matcher matcher = pattern.matcher(email);
+
+        if (matcher.matches()) {
+            Intent homeIntent = new Intent(this, HomeActivity.class);
+            SharedPreferences myPrefs = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor e = myPrefs.edit();
+            e.putString(PREF_FILE_ACCOUNT_NAME_KEY,  Plus.AccountApi.getAccountName(mGoogleApiClient));
+            e.commit();
+            startActivity(homeIntent);
+        }
+        else {
+            Toast.makeText(this, "Whirlpool email required.", Toast.LENGTH_LONG).show();
+            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override

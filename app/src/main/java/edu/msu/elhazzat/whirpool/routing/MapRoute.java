@@ -49,6 +49,13 @@ public class MapRoute extends Activity {
     private boolean mElevatorStart = false;
     private boolean mElevatorEnd = false;
 
+    private boolean mDirectRoute = true;
+    private int mEndFloor;
+    private LatLng mEndPoint;
+    private LatLng mStartPoint;
+
+    private boolean mThreeStageRoute = false;
+
 
     //constructor
     public MapRoute(Context context, GoogleMap map, String buildingName, int currentFloorNum) {
@@ -62,40 +69,55 @@ public class MapRoute extends Activity {
     //main function to call, requires desired start & end points + their respective floors
     public Polyline drawRoute(LatLng startPoint, int startFloor, LatLng endPoint, int endFloor){
 
-        System.out.println("Start POINT: " + startPoint);
+        mEndFloor = endFloor;
+        mEndPoint = endPoint;
+        mStartPoint = startPoint;
+
+       /* System.out.println("Start POINT: " + startPoint);
         System.out.println("START FLOOR: " + startFloor);
         System.out.println("End POINT: " + endPoint);
         System.out.println("End FLOOR: " + endFloor);
+        System.out.println("Current FLOOR: " + mFloorNum);*/
 
         populateNodes();
         populateEdges();
 
         //handles navigation between floors
         //elevator will ALWAYS be the one closest to the user's start point
-        if(startFloor != endFloor){
+        if(startFloor != endFloor || mFloorNum != endFloor){
 
-            //user's map is currently on the starting floor, end point becomes elevator
-            if(startFloor == mFloorNum){
-                mEndPointIndex = getElevatorIndex(startPoint);
-                mElevatorEnd = true;
+            if(!mThreeStageRoute) {
+                //user's map is currently on the starting floor, end point becomes elevator
+                if (startFloor == mFloorNum) {
+                    if (startFloor == 1)
+                        mEndPointIndex = getElevatorIndex(endPoint);
+                    else
+                        mEndPointIndex = getElevatorIndex(startPoint);
+                    mElevatorEnd = true;
+                }
+
+                //user's map is currently on the ending floor, start point becomes elevator
+                else if (endFloor == mFloorNum) {
+                    mStartPointIndex = getElevatorIndex(startPoint);
+                    mElevatorStart = true;
+                } else if (endFloor != mFloorNum) {
+                    mEndPointIndex = getElevatorIndex(endPoint);
+                    mStartPointIndex = getElevatorIndex(startPoint);
+                    mElevatorStart = true;
+                    mElevatorEnd = true;
+                }
             }
-
-            //user's map is currently on the ending floor, start point becomes elevator
-            else if(endFloor == mFloorNum){
-                mStartPointIndex = getElevatorIndex(startPoint);
+            else{
+                mStartPointIndex = getElevatorIndex(endPoint);
                 mElevatorStart = true;
             }
 
-            //user does not have a start or end point currently on this floor, so no route will be shown
-            else
-                mShowRoute = false;
 
         }
 
         //determine which node is closest to end point coordinates
         //actual end point will be that node, except when map is not on the end point's floor
         if(!mElevatorEnd){
-
             for (int i = 0; i < mCoordsList.size(); i++) {
 
                 mLatDifference = Math.abs(mCoordsList.get(i).latitude - endPoint.latitude);
@@ -142,7 +164,6 @@ public class MapRoute extends Activity {
 
         }
 
-
         //set up the graph
         DijkstraGraph graph = new DijkstraGraph(mNodes, mEdges);
         DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph);
@@ -152,6 +173,36 @@ public class MapRoute extends Activity {
 
         //get path to end node
         LinkedList<DijkstraVertex> path = dijkstra.getPath(mNodes.get(mEndPointIndex));
+
+        if(path == null){
+            if(endFloor == startFloor && !mThreeStageRoute)
+                mEndPointIndex = getElevatorIndex(startPoint);
+            else if(endFloor == mFloorNum){
+                mStartPointIndex = getElevatorIndex(endPoint);
+            }
+            else
+                mEndPointIndex = getElevatorIndex(endPoint);
+
+            //make sure start and end point are not the same
+            if(mStartPointIndex == mEndPointIndex) {
+
+                if(mStartPointIndex + 1 < mCoordsList.size())
+                    mStartPointIndex += 1;
+
+                else
+                    mStartPointIndex -= 1;
+
+            }
+
+            //starting node
+            dijkstra.execute(mNodes.get(mStartPointIndex));
+
+            //get path to end node
+            path = dijkstra.getPath(mNodes.get(mEndPointIndex));
+
+            mDirectRoute = false;
+
+        }
 
         //set up the line
         PolylineOptions line = new PolylineOptions().width(5).color(Color.BLUE);
@@ -163,7 +214,7 @@ public class MapRoute extends Activity {
         for (DijkstraVertex vertex : path) {
             line.add(vertex.coords);
         }
-        //   line.add(endPoint);
+     //   line.add(endPoint);
 
         //draw the line
         Polyline pLine = mmap.addPolyline(line);
@@ -432,5 +483,54 @@ public class MapRoute extends Activity {
         }
 
     }
+
+    public boolean checkDirectRoute(){
+
+        if(mElevatorEnd && !mElevatorStart && mFloorNum != 1){
+
+            mFloorNum = mEndFloor;
+            mCoordsList = new ArrayList<>();
+            mRawEdges = new ArrayList<>();
+
+            populateNodes();
+            populateEdges();
+
+            mStartPointIndex = getElevatorIndex(mStartPoint);
+
+            for (int i = 0; i < mCoordsList.size(); i++) {
+
+                mLatDifference = Math.abs(mCoordsList.get(i).latitude - mEndPoint.latitude);
+                mLonDifference = Math.abs(mCoordsList.get(i).longitude - mEndPoint.longitude);
+
+                if (Math.sqrt(mLatDifference*mLatDifference + mLonDifference*mLonDifference) < mLeastDifference) {
+                    mLeastDifference = mLatDifference + mLonDifference;
+                    mEndPointIndex = i;
+                }
+
+            }
+
+            //set up the graph
+            DijkstraGraph graph = new DijkstraGraph(mNodes, mEdges);
+            DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph);
+
+            //starting node
+            dijkstra.execute(mNodes.get(mStartPointIndex));
+
+            //get path to end node
+            LinkedList<DijkstraVertex> path = dijkstra.getPath(mNodes.get(mEndPointIndex));
+
+            if(path == null)
+                mDirectRoute = false;
+
+        }
+
+        return mDirectRoute;
+    }
+
+    public void thirdStageRoute(){
+        mThreeStageRoute = true;
+    }
+
+
 
 }

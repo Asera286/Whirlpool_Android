@@ -44,6 +44,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 
+import java.io.File;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -56,7 +57,9 @@ import java.util.TimerTask;
 
 import edu.msu.elhazzat.whirpool.R;
 import edu.msu.elhazzat.whirpool.adapter.AmenityAdapter;
+import edu.msu.elhazzat.whirpool.crud.CachedGeoJsonDataDbHelper;
 import edu.msu.elhazzat.whirpool.crud.RelevantRoomDbHelper;
+import edu.msu.elhazzat.whirpool.geojson.AsyncParseGeoJsonFromFile;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonConstants;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonFeature;
 import edu.msu.elhazzat.whirpool.geojson.GeoJsonMap;
@@ -66,6 +69,7 @@ import edu.msu.elhazzat.whirpool.geojson.Geometry;
 import edu.msu.elhazzat.whirpool.model.BuildingModel;
 import edu.msu.elhazzat.whirpool.model.RoomModel;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSBuildingInfoReader;
+import edu.msu.elhazzat.whirpool.rest.AsyncGCSGeoJsonTimestamp;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSMultiRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncGCSRoomInfoReader;
 import edu.msu.elhazzat.whirpool.rest.AsyncParseGeoJsonGCS;
@@ -156,6 +160,9 @@ public class RoomActivity extends AppCompatActivity {
 
     private Marker mFixedNavIcon;
 
+    private boolean mDirectRouteExists = true;
+    private boolean mThreeStageRoute = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,7 +191,7 @@ public class RoomActivity extends AppCompatActivity {
                     buildingUnderConstructionDialog();
                 }
                 else {
-                    buildMap();
+                    loadMapData();
                     inflateRoomAttributes(mRoomName, mBuildingName);
                 }
             }
@@ -233,11 +240,23 @@ public class RoomActivity extends AppCompatActivity {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                unselectLastFloor(Integer.toString(mEndFloorNum));
-                selectNextFloor(mEndFloorNum);
-                setNavDistanceView(mNavEndPosition, mNavStartLocation);
-                findViewById(R.id.switch_floor_button).setVisibility(View.GONE);
-                setCurrentFloorColor();
+                if (mDirectRouteExists) {
+                    unselectLastFloor(Integer.toString(mEndFloorNum));
+                    selectNextFloor(mEndFloorNum);
+                    setNavDistanceView(mNavEndPosition, mNavStartLocation);
+                    findViewById(R.id.switch_floor_button).setVisibility(View.GONE);
+                    setCurrentFloorColor();
+                    mThreeStageRoute = false;
+
+                } else {
+                    unselectLastFloor(Integer.toString(1));
+                    selectNextFloor(1);
+                    setCurrentFloorColor();
+                    mThreeStageRoute = true;
+
+                    ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor "
+                            + Integer.toString(mEndFloorNum) + "?");
+                }
             }
         });
     }
@@ -246,7 +265,7 @@ public class RoomActivity extends AppCompatActivity {
      * Populate nav info view with distance and time to reach destination
      */
     private void setNavDistanceView(LatLng start, LatLng end) {
-        int distance = getLatLngDistance(mNavStartLocation, mNavEndPosition);
+        int distance = getLatLngDistance(start, end);
         int distanceInFeet = metersToFeet(distance);
         String minutes = getWalkingTimeInMinutes(distance);
         ((TextView) findViewById(R.id.navigation_text)).setText(
@@ -263,17 +282,22 @@ public class RoomActivity extends AppCompatActivity {
             public void onClick(View v) {
                 findViewById(R.id.nav_info_layout).setBackgroundColor(Color.parseColor("#F2A440"));
 
-                if (mCurrentFloorNum != mEndFloorNum) {
-                    ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor "
-                            + Integer.toString(mEndFloorNum) + "?");
-                    findViewById(R.id.switch_floor_button).setVisibility(View.VISIBLE);
-                } else {
-                    setNavDistanceView(mNavStartLocation, mNavEndPosition);
-                }
-
                 mMap.setOnCameraChangeListener(null);
                 fixStartNavIcon(true);
                 drawNavRoute();
+
+                if (mCurrentFloorNum != mEndFloorNum && (mCurrentFloorNum == 1 || mDirectRouteExists)) {
+                    ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor "
+                            + Integer.toString(mEndFloorNum) + "?");
+                    findViewById(R.id.switch_floor_button).setVisibility(View.VISIBLE);
+                } else if (!mDirectRouteExists) {
+                    ((TextView) findViewById(R.id.navigation_text)).setText("Are you on floor 1?");
+                    findViewById(R.id.switch_floor_button).setVisibility(View.VISIBLE);
+                }
+                //else if(mCurrentFloorNum == mEndFloorNum){
+                else if (mDirectRouteExists && mCurrentFloorNum == mEndFloorNum) {
+                    setNavDistanceView(mNavStartLocation, mNavEndPosition);
+                }
 
                 mGoButton.setVisibility(View.INVISIBLE);
             }
@@ -522,7 +546,7 @@ public class RoomActivity extends AppCompatActivity {
     private void navigationStarted() {
         // if the slide view is not collapsed, collapse it
         if (!mCollapsed) {
-           animateSlideDown();
+            animateSlideDown();
         }
         else {
             mGoButton.setVisibility(View.VISIBLE);
@@ -565,13 +589,16 @@ public class RoomActivity extends AppCompatActivity {
         if(mFixedNavIcon != null) {
             mFixedNavIcon.remove();
         }
+
+        findViewById(R.id.nav_info_layout).setBackgroundColor(Color.parseColor("#B5B5B5"));
+        ((TextView)findViewById(R.id.navigation_text)).setText(null);
     }
 
     /**
      * Adjust navigation interface
      */
     private void startNavigation() {
-        if(!mNavigationOn && mEndLocationImageView == null) {
+        if(!mNavigationOn && mEndLocationMarker == null) {
             Toast.makeText(this, "Please select a destination.", Toast.LENGTH_LONG).show();
         }
         else if(!mNavigationOn) {
@@ -609,7 +636,10 @@ public class RoomActivity extends AppCompatActivity {
         }
         mStartFloorNum = mCurrentFloorNum;
         MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
+        if(mThreeStageRoute)
+            mRoute.thirdStageRoute();
         mPolyLine = mRoute.drawRoute(mNavStartLocation, mStartFloorNum, mNavEndPosition, mEndFloorNum);
+        mDirectRouteExists = mRoute.checkDirectRoute();
     }
 
     /**
@@ -622,9 +652,12 @@ public class RoomActivity extends AppCompatActivity {
             }
 
             // if navigating between floors, draw the next route
-            if ((mCurrentFloorNum == mEndFloorNum || mCurrentFloorNum == mStartFloorNum)) {
-                MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
+            MapRoute mRoute = new MapRoute(getApplicationContext(), mMap, mBuildingName, mCurrentFloorNum);
+            if(mThreeStageRoute)
+                mRoute.thirdStageRoute();
+            if(mNavStartLocation != null && mNavEndPosition != null) {
                 mPolyLine = mRoute.drawRoute(mNavStartLocation, mStartFloorNum, mNavEndPosition, mEndFloorNum);
+                mDirectRouteExists = mRoute.checkDirectRoute();
             }
         }
     }
@@ -724,39 +757,77 @@ public class RoomActivity extends AppCompatActivity {
      * Initialze the google map, geojson and draw layers
      *******************************************************************************************/
 
-    /**
-     * Build map
-     */
-    private void buildMap() {
-
+    private void pullMapDataGCS(final String fileName) {
         // Acquire the map data
         new AsyncParseGeoJsonGCS(this, mBuildingName) {
             public void handleGeoJson(GeoJsonMap map, ProgressDialog dialog) {
                 if(map != null) {
-
-                    // set the map
-                    mGeoJsonMap = map;
-
-                    //set the inital floor based on the searched room
-                    int initialFloor = MapConstants.DEFAULT_FLOOR;
-
-                    if(mRoomName != null) {
-                        initialFloor = getFloorNumber(mRoomName);
-                    }
-
-                    mGeoJsonMap.setCurrentLayer(initialFloor);
-
-                    // floors set for navigation
-                    mCurrentFloorNum = initialFloor;
-                    mEndFloorNum = initialFloor;
-                    mStartFloorNum = initialFloor;
-
-                    buildGoogleMap(dialog);
-                    setAndDrawRoomLabels();
-                    addImages();
+                    constructMap(map, dialog);
                 }
             }
         }.execute();
+    }
+
+    private void pullMapDataLocalCache(String fileName) {
+        // Acquire the map data
+        new AsyncParseGeoJsonFromFile(this, fileName) {
+            public void handleGeoJson(GeoJsonMap map, ProgressDialog dialog) {
+                if(map != null) {
+                    constructMap(map, dialog);
+                }
+            }
+        }.execute();
+    }
+
+    private void loadMapData() {
+        final CachedGeoJsonDataDbHelper helper = new CachedGeoJsonDataDbHelper(getApplicationContext());
+        final Integer timestamp = helper.getTimestamp(mBuildingName);
+
+        new AsyncGCSGeoJsonTimestamp(mBuildingName) {
+            public void handleTimestamp(Integer time) {
+
+                File path = getFilesDir();
+                String basePathJson = mBuildingName + ".json";
+                File file = new File(path, basePathJson);
+
+                // no data exists in our local storage
+                if(timestamp == null) {
+                    helper.addCacheInformation(mBuildingName, time);
+                    pullMapDataGCS(file.getPath());
+                }
+                else if(timestamp < time) {
+                    helper.updateCache(mBuildingName, time);
+                    pullMapDataGCS(file.getPath());
+                }
+                else {
+                    pullMapDataLocalCache(file.getPath());
+                }
+            }
+        }.execute();
+
+    }
+
+    public void constructMap(GeoJsonMap map, ProgressDialog dialog) {
+        // set the map
+        mGeoJsonMap = map;
+
+        //set the inital floor based on the searched room
+        int initialFloor = MapConstants.DEFAULT_FLOOR;
+
+        if(mRoomName != null) {
+            initialFloor = getFloorNumber(mRoomName);
+        }
+
+        mGeoJsonMap.setCurrentLayer(initialFloor);
+
+        // floors set for navigation
+        mCurrentFloorNum = initialFloor;
+        mEndFloorNum = initialFloor;
+        mStartFloorNum = initialFloor;
+
+        buildGoogleMap(dialog);
+        setAndDrawRoomLabels();
+        addImages();
     }
 
     public void buildGoogleMap(final ProgressDialog dialog) {
@@ -827,7 +898,7 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles on map click events
+     *  on map click events
      * @param latLng
      */
     private void mapListenCallback(LatLng latLng) {

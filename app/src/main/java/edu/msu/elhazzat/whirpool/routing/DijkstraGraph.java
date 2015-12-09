@@ -3,7 +3,9 @@ package edu.msu.elhazzat.whirpool.routing;
 import java.util.List;
 
 /**
- * Created by Stephanie on 10/13/2015.
+ * Original author:
+ * Vogella
+ * http://www.vogella.com/tutorials/JavaAlgorithmsDijkstra/article.html
  */
 public class DijkstraGraph {
 

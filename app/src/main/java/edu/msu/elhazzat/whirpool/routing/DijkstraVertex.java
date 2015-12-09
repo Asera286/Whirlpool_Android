@@ -3,7 +3,10 @@ package edu.msu.elhazzat.whirpool.routing;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
- * Created by Stephanie on 10/13/2015.
+ * Original author:
+ * Vogella
+ * http://www.vogella.com/tutorials/JavaAlgorithmsDijkstra/article.html
+ * Code partially modified from source
  */
 public class DijkstraVertex {
 

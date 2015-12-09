@@ -13,8 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -66,7 +68,7 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
     public GeoJsonMap doInBackground(Void... params) {
         try {
             // build get request
-            String tmpUrl = GCSRestConstants.GCS_BLOGSTORE_BASE_URL + GET_PARAM + mBuildingName;
+            String tmpUrl = GCSRestConstants.GCS_BLOBSTORE_BASE_URL + GET_PARAM + mBuildingName;
             URL url = new URL(tmpUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -85,6 +87,16 @@ public abstract class AsyncParseGeoJsonGCS extends AsyncTask<Void, Void, GeoJson
                 GeoJsonMap map = new GeoJsonMap();
 
                 String responseString = responseBuilder.toString();
+
+                FileOutputStream fOut = mContext.openFileOutput(
+                        mBuildingName + ".json", Context.MODE_PRIVATE);
+
+                OutputStreamWriter osw = new OutputStreamWriter(fOut);
+
+                // Write the string to the file
+                osw.write(responseString);
+                osw.close();
+
                 JSONObject jsonObj = new JSONObject(responseString);
 
                 int count = jsonObj.getInt(COUNT_KEY);
