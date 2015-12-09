@@ -9,12 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Original author:
- * Vogella
- * http://www.vogella.com/tutorials/JavaAlgorithmsDijkstra/article.html
- * Code partially modified from source
- */
 public class DijkstraAlgorithm {
 
     private final List<DijkstraVertex> nodes;

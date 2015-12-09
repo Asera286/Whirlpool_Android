@@ -283,6 +283,10 @@ public class RoomActivity extends AppCompatActivity {
         mGoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mNavigationOn && mBlockNavigation) {
+                    Toast.makeText(getApplicationContext(), "Cannot navigate from here - " +
+                            "please select a valid floor.", Toast.LENGTH_LONG);
+                }
                 findViewById(R.id.nav_info_layout).setBackgroundColor(Color.parseColor("#F2A440"));
 
                 mMap.setOnCameraChangeListener(null);
@@ -403,12 +407,6 @@ public class RoomActivity extends AppCompatActivity {
             if(v.getText().equals(Integer.toString(mCurrentFloorNum))) {
                 v.setBackgroundColor(color);
             }
-            if(v.getText().equals("T") && !mBlockNavigation) {
-                mBlockNavigation = true;
-            }
-            else if(mBlockNavigation) {
-                mBlockNavigation = false;
-            }
         }
     }
 
@@ -425,6 +423,13 @@ public class RoomActivity extends AppCompatActivity {
                 tv.setBackgroundColor(Color.parseColor("#F2A440"));
                 int tmpFloorNum = tv.getText().equals("T") ? mMapTop.get("T")
                         : Integer.parseInt(tv.getText().toString());
+
+                if(tv.getText().equals("T") && !mBlockNavigation) {
+                    mBlockNavigation = true;
+                }
+                else if(mBlockNavigation) {
+                    mBlockNavigation = false;
+                }
 
                 // don't redraw or show if we are currently on this floor
                 if (tmpFloorNum != mCurrentFloorNum) {
@@ -779,6 +784,10 @@ public class RoomActivity extends AppCompatActivity {
      * Initialze the google map, geojson and draw layers
      *******************************************************************************************/
 
+    /**
+     * read file from network and write to local storage
+     * @param fileName
+     */
     private void pullMapDataGCS(final String fileName) {
         // Acquire the map data
         new AsyncParseGeoJsonGCS(this, mBuildingName) {
@@ -790,6 +799,10 @@ public class RoomActivity extends AppCompatActivity {
         }.execute();
     }
 
+    /**
+     * read geojson from internal file system
+     * @param fileName
+     */
     private void pullMapDataLocalCache(String fileName) {
         // Acquire the map data
         new AsyncParseGeoJsonFromFile(this, fileName) {
@@ -801,10 +814,17 @@ public class RoomActivity extends AppCompatActivity {
         }.execute();
     }
 
+    /**
+     * Load map data and draw map
+     */
     private void loadMapData() {
         final CachedGeoJsonDataDbHelper helper = new CachedGeoJsonDataDbHelper(getApplicationContext());
         final Integer timestamp = helper.getTimestamp(mBuildingName);
 
+        /**
+         * Get a timestamp from remote server - if the geojson has been updated (timestamp
+         * is greater than local timestamp - download - else read local cache
+         */
         new AsyncGCSGeoJsonTimestamp(mBuildingName) {
             public void handleTimestamp(Integer time) {
 
@@ -829,6 +849,11 @@ public class RoomActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * initialize map variables, draw bitmap labels etc.
+     * @param map
+     * @param dialog
+     */
     public void constructMap(GeoJsonMap map, ProgressDialog dialog) {
         // set the map
         mGeoJsonMap = map;
@@ -852,6 +877,10 @@ public class RoomActivity extends AppCompatActivity {
         addImages();
     }
 
+    /**
+     * Get map context to draw geojson
+     * @param dialog
+     */
     public void buildGoogleMap(final ProgressDialog dialog) {
         if (mMap == null) {
             try {
@@ -895,12 +924,14 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     /**
-     * Execute on map loaded
+     * Execute on map loaded - configure inital map appearance
      * @param dialog
      */
     private void mapLoadedCallback(ProgressDialog dialog) {
         final GeoJsonMapLayer currentLayer = mGeoJsonMap.getCurrentLayer();
         final int currentLayerNum = currentLayer.getFloorNum();
+
+        // prepare map layers
         for (GeoJsonMapLayer layer : mGeoJsonMap.getLayers()) {
             mGeoJsonMap.drawLayer(layer.getFloorNum(), MapConstants.DEFAULT_FILL_COLOR,
                     MapConstants.DEFAULT_STROKE_COLOR,
@@ -910,6 +941,7 @@ public class RoomActivity extends AppCompatActivity {
         onFirstLoad(currentLayer);
         mGeoJsonMap.showLayer(currentLayerNum, true);
 
+        // pull room occupany statuses - color in polygons
         startOccupiedRoomColorHandler();
 
         // map has loaded - close animation
@@ -935,10 +967,13 @@ public class RoomActivity extends AppCompatActivity {
     public void onFirstLoad(final GeoJsonMapLayer firstLayer) {
         LatLng center = Geometry.getRoomCenter(firstLayer, mRoomName);
 
+        // carousel was clicked or room was not found - render building without
+        // selected room
         if (center == null) {
             selectDefaultConfiguration();
         }
 
+        // room was selected - zoom to room, add marker
         else {
             final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(center,
                     MapConstants.DEFAULT_CAMERA_ZOOM_LEVEL);
@@ -979,6 +1014,8 @@ public class RoomActivity extends AppCompatActivity {
      * @param feature
      */
     private void handleSelectedRoom(final GeoJsonFeature feature) {
+
+        // don't allow new end destination selection during navigation
         if(feature != null && !mNavigationOn) {
             findViewById(R.id.add_to_favorites).setVisibility(View.VISIBLE);
             GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeoJsonGeometry().getGeometry();
@@ -988,12 +1025,14 @@ public class RoomActivity extends AppCompatActivity {
                 mEndLocationMarker.remove();
             }
 
+            // place marker on selected location
             LatLng center = polygon.getCentroid();
             mEndLocationMarker = mMap.addMarker(new MarkerOptions().position(center).
                     icon(BitmapDescriptorFactory.fromBitmap(BitmapUtil.resizeMapIcons(getApplicationContext(),
                             "location_end", IMAGE_VIEW_MARKER_WIDTH_DP, IMAGE_VIEW_MARKER_HEIGHT_DP))));
 
 
+            // need to keep track of previous color when new poly is selected...
             int lastFillTmp = polygon.getGMSPolygon().getFillColor();
             polygon.getGMSPolygon().setFillColor(MapConstants.DEFAULT_SELECTED_ROOM_COLOR);
             if(mCurrentSelectedPoly != null) {
@@ -1014,6 +1053,7 @@ public class RoomActivity extends AppCompatActivity {
             String selectedRoomName = feature.getProperty(GeoJsonConstants.ROOM_TAG);
             mRoomNameTextView.setText(selectedRoomName);
 
+            // fetch and display room data
             inflateRoomAttributes(selectedRoomName, mBuildingName);
         }
     }
@@ -1316,7 +1356,7 @@ public class RoomActivity extends AppCompatActivity {
                     mInfoButton.setVisibility(View.VISIBLE);
                 }
 
-                if(mNavigationOn && showButtons) {
+                if(mNavigationOn && mFixedNavIcon == null && showButtons) {
                     mGoButton.setVisibility(View.VISIBLE);
                 }
 

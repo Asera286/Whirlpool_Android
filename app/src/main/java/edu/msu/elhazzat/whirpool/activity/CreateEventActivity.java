@@ -65,6 +65,9 @@ public class CreateEventActivity extends AppCompatActivity {
     private Calendar mEndTime;
 
     private boolean mIgnoreTimeSet;
+    private boolean mDateSelected;
+    private boolean mStartTimeSelected;
+    private boolean mEndTimeSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,6 +196,8 @@ public class CreateEventActivity extends AppCompatActivity {
                 mEndTime.set(Calendar.YEAR, year);
                 mEndTime.set(Calendar.MONTH, monthOfYear);
                 mEndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                mDateSelected = true;
             }
         };
 
@@ -235,6 +240,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
                 mBeginTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 mBeginTime.set(Calendar.MINUTE, minute);
+
             }
         };
 
@@ -249,6 +255,7 @@ public class CreateEventActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 mIgnoreTimeSet = false;
                 ((TimePickerDialog) dialog).onClick(dialog, which);
+                mEndTimeSelected = true;
             }
         });
 
@@ -286,6 +293,7 @@ public class CreateEventActivity extends AppCompatActivity {
                     mEndTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                     mEndTime.set(Calendar.MINUTE, minute);
                 }
+
             }
         };
 
@@ -296,6 +304,7 @@ public class CreateEventActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 mIgnoreTimeSet = false;
                 ((TimePickerDialog) dialog).onClick(dialog, which);
+                mEndTimeSelected = true;
             }
         });
 
@@ -371,6 +380,11 @@ public class CreateEventActivity extends AppCompatActivity {
      * @return
      */
     private Event createEvent() {
+        if(!mDateSelected || !mStartTimeSelected || !mEndTimeSelected) {
+            Toast.makeText(this, "Start and end date must be specified", Toast.LENGTH_LONG).show();
+            return null;
+        }
+
         Event event = new Event();
 
         // Room parsible has been passed in
@@ -429,10 +443,6 @@ public class CreateEventActivity extends AppCompatActivity {
             event.setEnd(endEventDateTime);
         }
         else {
-            if(mEditEvent == null) {
-                Toast.makeText(this, "Start and end date must be specified", Toast.LENGTH_LONG).show();
-                return null;
-            }
             event.setEnd(mEditEvent.getEnd());
         }
 

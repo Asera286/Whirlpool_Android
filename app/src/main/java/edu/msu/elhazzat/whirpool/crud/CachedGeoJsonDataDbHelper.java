@@ -9,6 +9,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * Created by christianwhite on 12/8/15.
  */
+
+/************************************************************************************
+ * Store timestamp/building name - use to determine if geojson should
+ * be pulled from internal storage or if a network request should be made
+ ************************************************************************************/
 public class CachedGeoJsonDataDbHelper extends SQLiteOpenHelper {
     // Database Version
     public static final int DATABASE_VERSION = 1;

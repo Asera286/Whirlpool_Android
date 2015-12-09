@@ -45,7 +45,6 @@
 
         <activity
             android:name=".activity.RoomActivity"
-            android:hardwareAccelerated="true"
             android:parentActivityName=".activity.HomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

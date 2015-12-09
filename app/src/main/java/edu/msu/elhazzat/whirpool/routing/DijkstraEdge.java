@@ -1,11 +1,5 @@
 package edu.msu.elhazzat.whirpool.routing;
 
-/**
- * Original author:
- * Vogella
- * http://www.vogella.com/tutorials/JavaAlgorithmsDijkstra/article.html
- * Code partially modified from source
- */
 public class DijkstraEdge {
 
     private final String id;

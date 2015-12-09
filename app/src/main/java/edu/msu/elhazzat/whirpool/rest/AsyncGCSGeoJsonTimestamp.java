@@ -18,6 +18,10 @@ import javax.net.ssl.HttpsURLConnection;
 /**
  * Created by christianwhite on 12/8/15.
  */
+
+/************************************************************************************
+ * Pull timestamp - most recent edit on geojson file for given building
+ ************************************************************************************/
 abstract public class AsyncGCSGeoJsonTimestamp extends AsyncTask<Void, Void, Integer> {
     public static final String LOG_TAG = AsyncGCSBuildingInfoReader.class.getSimpleName();
 

@@ -63,6 +63,12 @@ public class Geometry<T> {
         return latLngCoordinates;
     }
 
+    /**
+     * Find "center" point of polygon
+     * @param layer
+     * @param roomId
+     * @return
+     */
     public static LatLng getRoomCenter(GeoJsonMapLayer layer, String roomId) {
         for (GeoJsonFeature feature : layer.getGeoJson().getGeoJsonFeatures()) {
             GeoJsonGeometry geometry = feature.getGeoJsonGeometry();

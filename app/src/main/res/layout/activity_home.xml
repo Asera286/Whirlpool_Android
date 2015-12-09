@@ -177,13 +177,13 @@
 
         <RelativeLayout
             android:id="@+id/profileBox"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:padding="8dp" >
             <ImageView
                 android:src="@drawable/whirlpool_logo_banner"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"/>
         </RelativeLayout>
 

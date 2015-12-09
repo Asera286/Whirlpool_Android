@@ -2,11 +2,6 @@ package edu.msu.elhazzat.whirpool.routing;
 
 import java.util.List;
 
-/**
- * Original author:
- * Vogella
- * http://www.vogella.com/tutorials/JavaAlgorithmsDijkstra/article.html
- */
 public class DijkstraGraph {
 
     private final List<DijkstraVertex> vertexes;

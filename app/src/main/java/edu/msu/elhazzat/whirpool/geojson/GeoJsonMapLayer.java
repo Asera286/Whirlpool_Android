@@ -18,6 +18,11 @@ import edu.msu.elhazzat.whirpool.utils.MapConstants;
 /**
  * Created by christianwhite on 10/8/15.
  */
+
+/************************************************************************************
+ * Map layer - a building consists of multiple floors - each floor will
+ * be represented by a "map layer" - stores geojson for that floor and gms polygons
+ ************************************************************************************/
 public class GeoJsonMapLayer {
 
     private static final String LOG_TAG = GeoJsonMapLayer.class.getSimpleName();
@@ -73,7 +78,6 @@ public class GeoJsonMapLayer {
             marker.setVisible(false);
         }
     }
-
 
     /**
      * Draws the map using uniform properties.

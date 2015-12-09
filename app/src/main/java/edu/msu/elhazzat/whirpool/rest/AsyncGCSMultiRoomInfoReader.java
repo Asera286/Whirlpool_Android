@@ -27,6 +27,10 @@ import edu.msu.elhazzat.whirpool.model.RoomModel;
 /**
  * Created by christianwhite on 11/5/15.
  */
+
+/************************************************************************************
+ * Pull all room data for a given building from backend
+ ************************************************************************************/
 public abstract class AsyncGCSMultiRoomInfoReader extends AsyncTask<Void, Void, List<RoomModel>> {
     public static final String LOG_TAG = AsyncGCSRoomInfoReader.class.getSimpleName();
 

@@ -20,6 +20,10 @@ import edu.msu.elhazzat.whirpool.model.BuildingModel;
 /**
  * Created by christianwhite on 11/11/15.
  */
+
+/************************************************************************************
+ * Pull all building data for a given building from backend
+ ************************************************************************************/
 public abstract class AsyncGCSBuildingInfoReader extends AsyncTask<Void, Void, BuildingModel> {
     public static final String LOG_TAG = AsyncGCSBuildingInfoReader.class.getSimpleName();
 
